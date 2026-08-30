@@ -111,8 +111,20 @@ export const Route = createFileRoute("/api/timeline")({
           const milestone = new Timeline({
             title,
             description: description || "",
-            date: date || (memoryDate ? new Date(memoryDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : ""),
-            memoryDate: memoryDate || (date && !isNaN(Date.parse(date)) ? new Date(date).toISOString().split("T")[0] : undefined),
+            date:
+              date ||
+              (memoryDate
+                ? new Date(memoryDate).toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })
+                : ""),
+            memoryDate:
+              memoryDate ||
+              (date && !isNaN(Date.parse(date))
+                ? new Date(date).toISOString().split("T")[0]
+                : undefined),
             location: location || "",
             imageFileId,
             videoFileId,

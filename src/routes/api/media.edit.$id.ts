@@ -31,7 +31,7 @@ export const Route = createFileRoute("/api/media/edit/$id")({
           const updatedItem = await MediaItem.findByIdAndUpdate(
             id,
             { $set: updateData },
-            { new: true }
+            { new: true },
           );
 
           if (!updatedItem) {

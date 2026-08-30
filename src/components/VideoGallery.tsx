@@ -404,7 +404,9 @@ export function VideoGallery({ limit }: { limit?: number }) {
 
             <form onSubmit={handleUrlSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">Video URL</label>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Video URL
+                </label>
                 <input
                   type="text"
                   value={inputUrl}
@@ -416,18 +418,26 @@ export function VideoGallery({ limit }: { limit?: number }) {
 
               {inputUrl.trim() && isVidUrl(inputUrl) && (
                 <div className="space-y-2">
-                  <span className="block text-xs font-semibold text-muted-foreground text-center">Preview:</span>
+                  <span className="block text-xs font-semibold text-muted-foreground text-center">
+                    Preview:
+                  </span>
                   <video
                     src={inputUrl}
                     controls
                     className="max-h-36 rounded-xl aspect-video mx-auto border border-border bg-black/40"
-                    onError={() => toast.error("Could not load video stream. Confirm URL matches a direct video file.")}
+                    onError={() =>
+                      toast.error(
+                        "Could not load video stream. Confirm URL matches a direct video file.",
+                      )
+                    }
                   />
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">Title</label>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Title
+                </label>
                 <input
                   type="text"
                   value={urlTitle}
@@ -438,7 +448,9 @@ export function VideoGallery({ limit }: { limit?: number }) {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">Description (optional)</label>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Description (optional)
+                </label>
                 <input
                   type="text"
                   value={urlDescription}
@@ -450,7 +462,9 @@ export function VideoGallery({ limit }: { limit?: number }) {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-muted-foreground mb-1">Duration (e.g. 0:30)</label>
+                  <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                    Duration (e.g. 0:30)
+                  </label>
                   <input
                     type="text"
                     value={urlDuration}
@@ -459,7 +473,9 @@ export function VideoGallery({ limit }: { limit?: number }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-muted-foreground mb-1">Date</label>
+                  <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                    Date
+                  </label>
                   <input
                     type="date"
                     value={urlDate}
@@ -494,7 +510,9 @@ export function VideoGallery({ limit }: { limit?: number }) {
             </form>
 
             {urlStatus === "failed" && (
-              <p className="text-xs text-red-500 text-center font-medium">✕ Please enter a valid URL.</p>
+              <p className="text-xs text-red-500 text-center font-medium">
+                ✕ Please enter a valid URL.
+              </p>
             )}
           </div>
         </div>
@@ -523,13 +541,15 @@ export function VideoGallery({ limit }: { limit?: number }) {
                   {v.duration}
                 </span>
               </button>
-              
+
               <div className="flex flex-col gap-1 p-4 flex-1 justify-between">
                 <div className="min-w-0">
                   <h3 className="truncate text-sm font-semibold">{v.title}</h3>
-                  <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">{v.description}</p>
+                  <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
+                    {v.description}
+                  </p>
                 </div>
-                
+
                 <div className="flex justify-between items-center mt-3 pt-2 border-t border-border/10">
                   {/* Inline Date display or Editor */}
                   {editingId === v._id ? (

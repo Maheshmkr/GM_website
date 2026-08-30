@@ -46,7 +46,11 @@ export const Route = createFileRoute("/api/timeline/$id")({
           if (date) {
             milestone.date = date;
           } else if (memoryDate) {
-            milestone.date = new Date(memoryDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+            milestone.date = new Date(memoryDate).toLocaleDateString("en-GB", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            });
           }
           if (memoryDate) {
             milestone.memoryDate = memoryDate;

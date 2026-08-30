@@ -62,11 +62,14 @@ export const Route = createFileRoute("/api/media/url")({
           if (isNonDirect) {
             let errorMsg = "This URL cannot be played directly.";
             if (type === "song") {
-              errorMsg = "This URL cannot be played directly as an audio file. Please use a direct audio URL.";
+              errorMsg =
+                "This URL cannot be played directly as an audio file. Please use a direct audio URL.";
             } else if (type === "video") {
-              errorMsg = "This URL cannot be played directly as a video file. Please use a direct video URL.";
+              errorMsg =
+                "This URL cannot be played directly as a video file. Please use a direct video URL.";
             } else if (type === "image") {
-              errorMsg = "This URL cannot be rendered directly as an image. Please use a direct image URL.";
+              errorMsg =
+                "This URL cannot be rendered directly as an image. Please use a direct image URL.";
             }
             return new Response(JSON.stringify({ error: errorMsg }), {
               status: 400,

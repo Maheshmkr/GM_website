@@ -2,11 +2,7 @@
 import mongoose from "mongoose";
 
 const MONGODB_URI = process.env.MONGODB_URI;
-const MONGODB_DB = process.env.MONGODB_DB;
-
-if (!MONGODB_URI) {
-  throw new Error("Please define the MONGODB_URI environment variable inside .env");
-}
+const MONGODB_DB = process.env.MONGODB_DB || "gm-website";
 
 let cached = (global as any).mongoose;
 
@@ -15,6 +11,12 @@ if (!cached) {
 }
 
 export async function dbConnect() {
+  if (!MONGODB_URI) {
+    throw new Error(
+      "MONGODB_URI is not configured. Add it in Vercel → Project → Settings → Environment Variables.",
+    );
+  }
+
   if (cached.conn) {
     return cached.conn;
   }
@@ -22,14 +24,15 @@ export async function dbConnect() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
-      dbName: MONGODB_DB || "gm-website",
+      dbName: MONGODB_DB,
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI!, opts).then((m) => {
+    cached.promise = mongoose.connect(MONGODB_URI, opts).then((m) => {
       console.log("Connected to MongoDB successfully");
       return m;
     });
   }
+
   try {
     cached.conn = await cached.promise;
   } catch (e) {

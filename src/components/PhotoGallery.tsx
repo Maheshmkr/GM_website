@@ -1,6 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMemo, useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Heart, X, Loader2, Camera, Trash2, Link as LinkIcon, Edit3, Save } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Heart,
+  X,
+  Loader2,
+  Camera,
+  Trash2,
+  Link as LinkIcon,
+  Edit3,
+  Save,
+} from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { photoCategories, type Photo } from "@/data/site";
@@ -29,7 +40,9 @@ export function PhotoGallery() {
   const [urlTitle, setUrlTitle] = useState("");
   const [urlCategory, setUrlCategory] = useState("Favorites");
   const [urlDate, setUrlDate] = useState(new Date().toISOString().split("T")[0]);
-  const [urlStatus, setUrlStatus] = useState<"idle" | "previewing" | "saving" | "success" | "failed">("idle");
+  const [urlStatus, setUrlStatus] = useState<
+    "idle" | "previewing" | "saving" | "success" | "failed"
+  >("idle");
 
   // Inline Date Editor state
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -168,7 +181,7 @@ export function PhotoGallery() {
 
       setUrlStatus("success");
       toast.success("Image URL added successfully!");
-      
+
       // Reset form
       setInputUrl("");
       setUrlTitle("");
@@ -237,13 +250,13 @@ export function PhotoGallery() {
               "rounded-full px-4 py-2 text-sm transition-all",
               filter === c
                 ? "btn-love font-semibold"
-                : "glass text-muted-foreground hover:text-foreground"
+                : "glass text-muted-foreground hover:text-foreground",
             )}
           >
             {c}
           </button>
         ))}
-        
+
         <div className="flex gap-2 ml-4">
           <button
             onClick={() => {
@@ -406,7 +419,9 @@ export function PhotoGallery() {
 
             <form onSubmit={handleUrlSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">Image URL</label>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Image URL
+                </label>
                 <input
                   type="text"
                   value={inputUrl}
@@ -418,18 +433,24 @@ export function PhotoGallery() {
 
               {inputUrl.trim() && isImgUrl(inputUrl) && (
                 <div className="space-y-2">
-                  <span className="block text-xs font-semibold text-muted-foreground text-center">Preview:</span>
+                  <span className="block text-xs font-semibold text-muted-foreground text-center">
+                    Preview:
+                  </span>
                   <img
                     src={inputUrl}
                     alt="Pasted preview"
                     className="max-h-36 rounded-xl object-contain mx-auto border border-border bg-black/40"
-                    onError={() => toast.error("Could not render image preview. Check CORS or URL path.")}
+                    onError={() =>
+                      toast.error("Could not render image preview. Check CORS or URL path.")
+                    }
                   />
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">Title</label>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Title
+                </label>
                 <input
                   type="text"
                   value={urlTitle}
@@ -441,7 +462,9 @@ export function PhotoGallery() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-muted-foreground mb-1">Category</label>
+                  <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                    Category
+                  </label>
                   <select
                     value={urlCategory}
                     onChange={(e) => setUrlCategory(e.target.value)}
@@ -455,7 +478,9 @@ export function PhotoGallery() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-muted-foreground mb-1">Date</label>
+                  <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                    Date
+                  </label>
                   <input
                     type="date"
                     value={urlDate}
@@ -490,7 +515,9 @@ export function PhotoGallery() {
             </form>
 
             {urlStatus === "failed" && (
-              <p className="text-xs text-red-500 text-center font-medium">✕ Please enter a valid URL.</p>
+              <p className="text-xs text-red-500 text-center font-medium">
+                ✕ Please enter a valid URL.
+              </p>
             )}
           </div>
         </div>
@@ -513,13 +540,16 @@ export function PhotoGallery() {
                   className="w-full object-cover transition-transform duration-700 group-hover:scale-[1.06]"
                 />
                 <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/85 via-background/10 to-transparent opacity-80 transition-opacity group-hover:opacity-100" />
-                
+
                 <figcaption className="absolute inset-x-0 bottom-0 p-5 pr-14">
                   <p className="text-sm font-semibold truncate">{p.caption}</p>
-                  
+
                   {/* Inline Date Display & Editor */}
                   {editingId === p._id ? (
-                    <div className="mt-1 flex items-center gap-1.5 pointer-events-auto" onClick={(e) => e.stopPropagation()}>
+                    <div
+                      className="mt-1 flex items-center gap-1.5 pointer-events-auto"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <input
                         type="date"
                         value={editDateValue}
@@ -558,7 +588,7 @@ export function PhotoGallery() {
                   )}
                 </figcaption>
               </button>
-              
+
               <button
                 onClick={() => setFavorites((f) => ({ ...f, [p.caption]: !f[p.caption] }))}
                 aria-label="Favorite photo"
@@ -569,7 +599,7 @@ export function PhotoGallery() {
                   fill={favorites[p.caption] ? "currentColor" : "none"}
                 />
               </button>
-              
+
               <button
                 onClick={(e) => {
                   e.stopPropagation();

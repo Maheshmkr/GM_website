@@ -14,7 +14,7 @@ import {
   Loader2,
   Music4,
   Edit3,
-  Save
+  Save,
 } from "lucide-react";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -54,7 +54,9 @@ export function MusicPlayer() {
   const [songDescription, setSongDescription] = useState("");
   const [songDuration, setSongDuration] = useState("3:30");
   const [songDate, setSongDate] = useState(new Date().toISOString().split("T")[0]);
-  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "success" | "failed">("idle");
+  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "success" | "failed">(
+    "idle",
+  );
 
   // URL Modal States
   const [showUrlModal, setShowUrlModal] = useState(false);
@@ -111,7 +113,7 @@ export function MusicPlayer() {
 
       setUploadStatus("success");
       toast.success("Song uploaded successfully!");
-      
+
       // Reset uploader form
       setAudioFile(null);
       setCoverFile(null);
@@ -230,7 +232,7 @@ export function MusicPlayer() {
             loading="lazy"
             className={cn(
               "size-40 shrink-0 rounded-2xl object-cover shadow-[var(--shadow-glow)] transition-transform duration-700",
-              playing && "scale-[1.02]"
+              playing && "scale-[1.02]",
             )}
           />
           <div className="min-w-0 flex-1 text-center sm:text-left">
@@ -284,7 +286,7 @@ export function MusicPlayer() {
             aria-label={playing ? "Pause" : "Play"}
             className={cn(
               "btn-love grid size-14 place-items-center rounded-full cursor-pointer",
-              playing && "animate-glow-pulse"
+              playing && "animate-glow-pulse",
             )}
           >
             {playing ? (
@@ -342,7 +344,7 @@ export function MusicPlayer() {
                 onClick={() => play(i)}
                 className={cn(
                   "grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl p-2.5 text-left transition-colors hover:bg-secondary/70",
-                  i === index && "bg-secondary"
+                  i === index && "bg-secondary",
                 )}
               >
                 <img
@@ -355,7 +357,7 @@ export function MusicPlayer() {
                   <span
                     className={cn(
                       "block truncate text-sm font-medium",
-                      i === index && "text-primary"
+                      i === index && "text-primary",
                     )}
                   >
                     {s.title}
@@ -366,12 +368,12 @@ export function MusicPlayer() {
                   <Heart
                     className={cn(
                       "size-4 cursor-pointer",
-                      favorites[s.title] ? "text-primary" : "text-muted-foreground"
+                      favorites[s.title] ? "text-primary" : "text-muted-foreground",
                     )}
                     fill={favorites[s.title] ? "currentColor" : "none"}
                     onClick={() => toggleFavorite(s.title)}
                   />
-                  
+
                   {/* Inline Date display or Editor */}
                   {editingId === s._id ? (
                     <div className="flex items-center gap-1">
@@ -398,7 +400,9 @@ export function MusicPlayer() {
                     </div>
                   ) : (
                     <div className="flex items-center gap-1">
-                      <span className="text-[10px] text-muted-foreground font-medium">{s.date || ""}</span>
+                      <span className="text-[10px] text-muted-foreground font-medium">
+                        {s.date || ""}
+                      </span>
                       {s._id && (
                         <button
                           onClick={() => handleEditDate(s)}
@@ -445,7 +449,9 @@ export function MusicPlayer() {
 
             <form onSubmit={handleUploadSong} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">Song Title</label>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Song Title
+                </label>
                 <input
                   type="text"
                   value={songTitle}
@@ -455,7 +461,9 @@ export function MusicPlayer() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">Artist Name</label>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Artist Name
+                </label>
                 <input
                   type="text"
                   value={songArtist}
@@ -465,7 +473,9 @@ export function MusicPlayer() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">Note (optional)</label>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Note (optional)
+                </label>
                 <input
                   type="text"
                   value={songDescription}
@@ -476,7 +486,9 @@ export function MusicPlayer() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-muted-foreground mb-1">Duration (e.g. 4:23)</label>
+                  <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                    Duration (e.g. 4:23)
+                  </label>
                   <input
                     type="text"
                     value={songDuration}
@@ -485,7 +497,9 @@ export function MusicPlayer() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-muted-foreground mb-1">Memory Date</label>
+                  <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                    Memory Date
+                  </label>
                   <input
                     type="date"
                     value={songDate}
@@ -497,7 +511,9 @@ export function MusicPlayer() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">Album Cover (optional)</label>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Album Cover (optional)
+                </label>
                 <input
                   type="file"
                   accept="image/*"
@@ -550,7 +566,9 @@ export function MusicPlayer() {
 
             <form onSubmit={handleAddUrlSong} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">Song URL</label>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Song URL
+                </label>
                 <input
                   type="text"
                   value={inputUrl}
@@ -562,18 +580,24 @@ export function MusicPlayer() {
 
               {inputUrl.trim() && isAudioUrl(inputUrl) && (
                 <div className="space-y-2">
-                  <span className="block text-xs font-semibold text-muted-foreground text-center">Preview:</span>
+                  <span className="block text-xs font-semibold text-muted-foreground text-center">
+                    Preview:
+                  </span>
                   <audio
                     src={inputUrl}
                     controls
                     className="w-full mx-auto"
-                    onError={() => toast.error("Could not load audio preview. Verify the link is correct.")}
+                    onError={() =>
+                      toast.error("Could not load audio preview. Verify the link is correct.")
+                    }
                   />
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">Song Name</label>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Song Name
+                </label>
                 <input
                   type="text"
                   value={urlTitle}
@@ -583,7 +607,9 @@ export function MusicPlayer() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">Artist</label>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Artist
+                </label>
                 <input
                   type="text"
                   value={urlArtist}
@@ -594,7 +620,9 @@ export function MusicPlayer() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">Date</label>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Date
+                </label>
                 <input
                   type="date"
                   value={urlDate}
@@ -630,7 +658,9 @@ export function MusicPlayer() {
             </form>
 
             {urlStatus === "failed" && (
-              <p className="text-xs text-red-500 text-center font-medium">✕ Please enter a valid URL.</p>
+              <p className="text-xs text-red-500 text-center font-medium">
+                ✕ Please enter a valid URL.
+              </p>
             )}
           </div>
         </div>
@@ -656,7 +686,7 @@ function IconButton({
       aria-label={label}
       className={cn(
         "grid size-10 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground cursor-pointer",
-        active && "text-primary"
+        active && "text-primary",
       )}
     >
       {children}
