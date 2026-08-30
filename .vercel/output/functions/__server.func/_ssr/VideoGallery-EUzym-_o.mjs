@@ -1,10 +1,11 @@
 import { o as __toESM } from "../_runtime.mjs";
+import { n as uploadMediaInChunks, t as readJsonResponse } from "./api-DhUICLV2.mjs";
 import { t as cn } from "./utils-C_uf36nf.mjs";
 import { a as require_react, i as useQueryClient, n as useQuery, o as require_jsx_runtime } from "../_libs/react+tanstack__react-query.mjs";
 import { C as Link, E as Film, S as LoaderCircle, T as Heart, f as Play, h as PenLine, l as Save, r as Trash2, t as X } from "../_libs/lucide-react.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
 import { t as Reveal } from "./Reveal-DSJJWaqp.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/VideoGallery-DCwODTEq.js
+//#region node_modules/.nitro/vite/services/ssr/assets/VideoGallery-EUzym-_o.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function VideoGallery({ limit }) {
@@ -34,8 +35,9 @@ function VideoGallery({ limit }) {
 		queryKey: ["videos"],
 		queryFn: async () => {
 			const res = await fetch("/api/media?type=video");
-			if (!res.ok) throw new Error("Failed to fetch videos");
-			return res.json();
+			const payload = await readJsonResponse(res);
+			if (!payload.ok) throw new Error(payload.error || "Failed to fetch videos");
+			return payload.data ?? [];
 		}
 	});
 	const mappedVideos = (0, import_react.useMemo)(() => {
@@ -84,21 +86,16 @@ function VideoGallery({ limit }) {
 		e.preventDefault();
 		if (!file) return;
 		setStatus("uploading");
-		const formData = new FormData();
-		formData.append("file", file);
-		formData.append("title", title);
-		formData.append("description", description);
-		formData.append("duration", duration);
-		formData.append("type", "video");
-		formData.append("favorite", String(favorite));
-		formData.append("memoryDate", memoryDate);
 		try {
-			const res = await fetch("/api/media/upload", {
-				method: "POST",
-				body: formData
+			await uploadMediaInChunks({
+				file,
+				type: "video",
+				title,
+				description,
+				category: "Favorites",
+				favorite,
+				memoryDate
 			});
-			const data = await res.json();
-			if (!res.ok) throw new Error(data.error || "Upload failed");
 			setStatus("success");
 			toast.success("Video uploaded successfully!");
 			setFile(null);
@@ -137,8 +134,8 @@ function VideoGallery({ limit }) {
 					memoryDate: urlDate
 				})
 			});
-			const data = await res.json();
-			if (!res.ok) throw new Error(data.error || "Failed to add URL video");
+			const payload = await readJsonResponse(res);
+			if (!payload.ok) throw new Error(payload.error || "Failed to add URL video");
 			setUrlStatus("success");
 			toast.success("Video URL added successfully!");
 			setInputUrl("");

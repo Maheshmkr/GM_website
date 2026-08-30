@@ -95,3 +95,19 @@ const MediaItemSchema = new Schema(
 
 export const MediaItem =
   mongoose.models.MediaItem || mongoose.model("MediaItem", MediaItemSchema, "mediaItems");
+
+const UploadChunkSchema = new Schema(
+  {
+    uploadId: { type: String, required: true },
+    chunkIndex: { type: Number, required: true },
+    filename: { type: String, required: true },
+    contentType: { type: String, required: true },
+    type: { type: String, enum: ["image", "video", "song"], required: true },
+    data: { type: Buffer, required: true },
+    createdAt: { type: Date, default: Date.now },
+  },
+  { collection: "uploadChunks" },
+);
+
+export const UploadChunk =
+  mongoose.models.UploadChunk || mongoose.model("UploadChunk", UploadChunkSchema, "uploadChunks");

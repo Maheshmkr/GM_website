@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { songs as staticSongs, type Song } from "@/data/site";
+import { readJsonResponse } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 
 type MusicState = {
@@ -56,8 +57,9 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     queryKey: ["songs"],
     queryFn: async () => {
       const res = await fetch("/api/media?type=song");
-      if (!res.ok) throw new Error("Failed to fetch songs");
-      return res.json();
+      const payload = await readJsonResponse(res);
+      if (!payload.ok) throw new Error(payload.error || "Failed to fetch songs");
+      return payload.data ?? [];
     },
   });
 

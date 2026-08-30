@@ -18,9 +18,15 @@ export const Route = createFileRoute("/api/media")({
           }
 
           const items = await MediaItem.find(filter).sort({ createdAt: -1 });
-          return new Response(JSON.stringify(items), {
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({
+              success: true,
+              data: items,
+            }),
+            {
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (error: any) {
           console.error("Error fetching media:", error);
           return new Response(JSON.stringify({ error: "Internal server error" }), {

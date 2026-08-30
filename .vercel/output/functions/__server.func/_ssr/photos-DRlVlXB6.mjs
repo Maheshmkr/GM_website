@@ -1,4 +1,5 @@
 import { o as __toESM } from "../_runtime.mjs";
+import { n as uploadMediaInChunks, t as readJsonResponse } from "./api-DhUICLV2.mjs";
 import { t as cn } from "./utils-C_uf36nf.mjs";
 import { a as require_react, i as useQueryClient, n as useQuery, o as require_jsx_runtime } from "../_libs/react+tanstack__react-query.mjs";
 import { A as ChevronRight, C as Link, M as Camera, S as LoaderCircle, T as Heart, h as PenLine, j as ChevronLeft, l as Save, r as Trash2, t as X } from "../_libs/lucide-react.mjs";
@@ -6,7 +7,7 @@ import { t as SectionHeading } from "./SectionHeading-BVG9eVYl.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
 import { i as photoCategories } from "./site-DayVGLaA.mjs";
 import { t as Reveal } from "./Reveal-DSJJWaqp.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/photos-CTBI8iap.js
+//#region node_modules/.nitro/vite/services/ssr/assets/photos-DRlVlXB6.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function PhotoGallery() {
@@ -35,8 +36,9 @@ function PhotoGallery() {
 		queryKey: ["photos"],
 		queryFn: async () => {
 			const res = await fetch("/api/media?type=image");
-			if (!res.ok) throw new Error("Failed to fetch photos");
-			return res.json();
+			const payload = await readJsonResponse(res);
+			if (!payload.ok) throw new Error(payload.error || "Failed to fetch photos");
+			return payload.data ?? [];
 		}
 	});
 	const mappedPhotos = (0, import_react.useMemo)(() => {
@@ -90,20 +92,16 @@ function PhotoGallery() {
 		e.preventDefault();
 		if (!file) return;
 		setStatus("uploading");
-		const formData = new FormData();
-		formData.append("file", file);
-		formData.append("title", title);
-		formData.append("type", "image");
-		formData.append("category", category);
-		formData.append("favorite", String(favorite));
-		formData.append("memoryDate", memoryDate);
 		try {
-			const res = await fetch("/api/media/upload", {
-				method: "POST",
-				body: formData
+			await uploadMediaInChunks({
+				file,
+				type: "image",
+				title,
+				description: "",
+				category,
+				favorite,
+				memoryDate
 			});
-			const data = await res.json();
-			if (!res.ok) throw new Error(data.error || "Upload failed");
 			setStatus("success");
 			toast.success("Image uploaded successfully!");
 			setFile(null);
@@ -140,8 +138,8 @@ function PhotoGallery() {
 					memoryDate: urlDate
 				})
 			});
-			const data = await res.json();
-			if (!res.ok) throw new Error(data.error || "Failed to add URL image");
+			const payload = await readJsonResponse(res);
+			if (!payload.ok) throw new Error(payload.error || "Failed to add URL image");
 			setUrlStatus("success");
 			toast.success("Image URL added successfully!");
 			setInputUrl("");

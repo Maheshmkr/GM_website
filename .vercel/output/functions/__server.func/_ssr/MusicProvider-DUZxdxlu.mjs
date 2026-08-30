@@ -1,7 +1,8 @@
 import { o as __toESM } from "../_runtime.mjs";
+import { t as readJsonResponse } from "./api-DhUICLV2.mjs";
 import { a as require_react, n as useQuery, o as require_jsx_runtime } from "../_libs/react+tanstack__react-query.mjs";
 import { o as songs } from "./site-DayVGLaA.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/MusicProvider-CwrFKiWU.js
+//#region node_modules/.nitro/vite/services/ssr/assets/MusicProvider-DUZxdxlu.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var MusicContext = (0, import_react.createContext)(null);
@@ -22,8 +23,9 @@ function MusicProvider({ children }) {
 		queryKey: ["songs"],
 		queryFn: async () => {
 			const res = await fetch("/api/media?type=song");
-			if (!res.ok) throw new Error("Failed to fetch songs");
-			return res.json();
+			const payload = await readJsonResponse(res);
+			if (!payload.ok) throw new Error(payload.error || "Failed to fetch songs");
+			return payload.data ?? [];
 		}
 	});
 	const playlist = (0, import_react.useMemo)(() => {

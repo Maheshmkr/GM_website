@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { type Video } from "@/data/site";
 import { Reveal } from "@/components/Reveal";
+import { readJsonResponse, uploadMediaInChunks } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 export function VideoGallery({ limit }: { limit?: number }) {
@@ -42,8 +43,9 @@ export function VideoGallery({ limit }: { limit?: number }) {
     queryKey: ["videos"],
     queryFn: async () => {
       const res = await fetch("/api/media?type=video");
-      if (!res.ok) throw new Error("Failed to fetch videos");
-      return res.json();
+      const payload = await readJsonResponse(res);
+      if (!payload.ok) throw new Error(payload.error || "Failed to fetch videos");
+      return payload.data ?? [];
     },
   });
 
@@ -104,22 +106,16 @@ export function VideoGallery({ limit }: { limit?: number }) {
     if (!file) return;
     setStatus("uploading");
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("duration", duration);
-    formData.append("type", "video");
-    formData.append("favorite", String(favorite));
-    formData.append("memoryDate", memoryDate);
-
     try {
-      const res = await fetch("/api/media/upload", {
-        method: "POST",
-        body: formData,
+      await uploadMediaInChunks({
+        file,
+        type: "video",
+        title,
+        description,
+        category: "Favorites",
+        favorite,
+        memoryDate,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Upload failed");
 
       setStatus("success");
       toast.success("Video uploaded successfully!");
@@ -165,8 +161,8 @@ export function VideoGallery({ limit }: { limit?: number }) {
         }),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to add URL video");
+      const payload = await readJsonResponse(res);
+      if (!payload.ok) throw new Error(payload.error || "Failed to add URL video");
 
       setUrlStatus("success");
       toast.success("Video URL added successfully!");

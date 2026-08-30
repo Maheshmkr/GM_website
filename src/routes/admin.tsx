@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { SectionHeading } from "@/components/SectionHeading";
 import { Reveal } from "@/components/Reveal";
+import { readJsonResponse } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin")({
@@ -39,8 +40,9 @@ function AdminPage() {
     queryKey: ["photos"],
     queryFn: async () => {
       const res = await fetch("/api/media?type=image");
-      if (!res.ok) throw new Error("Failed to fetch photos");
-      return res.json();
+      const payload = await readJsonResponse(res);
+      if (!payload.ok) throw new Error(payload.error || "Failed to fetch photos");
+      return payload.data ?? [];
     },
   });
 
@@ -48,8 +50,9 @@ function AdminPage() {
     queryKey: ["videos"],
     queryFn: async () => {
       const res = await fetch("/api/media?type=video");
-      if (!res.ok) throw new Error("Failed to fetch videos");
-      return res.json();
+      const payload = await readJsonResponse(res);
+      if (!payload.ok) throw new Error(payload.error || "Failed to fetch videos");
+      return payload.data ?? [];
     },
   });
 
@@ -57,8 +60,9 @@ function AdminPage() {
     queryKey: ["songs"],
     queryFn: async () => {
       const res = await fetch("/api/media?type=song");
-      if (!res.ok) throw new Error("Failed to fetch songs");
-      return res.json();
+      const payload = await readJsonResponse(res);
+      if (!payload.ok) throw new Error(payload.error || "Failed to fetch songs");
+      return payload.data ?? [];
     },
   });
 
@@ -66,8 +70,9 @@ function AdminPage() {
     queryKey: ["timeline"],
     queryFn: async () => {
       const res = await fetch("/api/timeline");
-      if (!res.ok) throw new Error("Failed to fetch timeline");
-      return res.json();
+      const payload = await readJsonResponse(res);
+      if (!payload.ok) throw new Error(payload.error || "Failed to fetch timeline");
+      return payload.data ?? [];
     },
   });
 

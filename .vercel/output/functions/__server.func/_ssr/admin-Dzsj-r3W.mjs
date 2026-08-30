@@ -1,10 +1,11 @@
 import { o as __toESM } from "../_runtime.mjs";
+import { t as readJsonResponse } from "./api-DhUICLV2.mjs";
 import { t as cn } from "./utils-C_uf36nf.mjs";
 import { a as require_react, i as useQueryClient, n as useQuery, o as require_jsx_runtime, t as useMutation } from "../_libs/react+tanstack__react-query.mjs";
 import { D as ExternalLink, E as Film, M as Camera, N as Calendar, S as LoaderCircle, T as Heart, _ as Music, b as MapPin, d as Plus, f as Play, k as Clock, m as Pen, r as Trash2, t as X, v as Music4 } from "../_libs/lucide-react.mjs";
 import { t as SectionHeading } from "./SectionHeading-BVG9eVYl.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/admin-B_YlVO8T.js
+//#region node_modules/.nitro/vite/services/ssr/assets/admin-Dzsj-r3W.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function AdminPage() {
@@ -14,32 +15,36 @@ function AdminPage() {
 		queryKey: ["photos"],
 		queryFn: async () => {
 			const res = await fetch("/api/media?type=image");
-			if (!res.ok) throw new Error("Failed to fetch photos");
-			return res.json();
+			const payload = await readJsonResponse(res);
+			if (!payload.ok) throw new Error(payload.error || "Failed to fetch photos");
+			return payload.data ?? [];
 		}
 	});
 	const { data: videos = [], isLoading: loadingVideos } = useQuery({
 		queryKey: ["videos"],
 		queryFn: async () => {
 			const res = await fetch("/api/media?type=video");
-			if (!res.ok) throw new Error("Failed to fetch videos");
-			return res.json();
+			const payload = await readJsonResponse(res);
+			if (!payload.ok) throw new Error(payload.error || "Failed to fetch videos");
+			return payload.data ?? [];
 		}
 	});
 	const { data: songs = [], isLoading: loadingSongs } = useQuery({
 		queryKey: ["songs"],
 		queryFn: async () => {
 			const res = await fetch("/api/media?type=song");
-			if (!res.ok) throw new Error("Failed to fetch songs");
-			return res.json();
+			const payload = await readJsonResponse(res);
+			if (!payload.ok) throw new Error(payload.error || "Failed to fetch songs");
+			return payload.data ?? [];
 		}
 	});
 	const { data: timeline = [], isLoading: loadingTimeline } = useQuery({
 		queryKey: ["timeline"],
 		queryFn: async () => {
 			const res = await fetch("/api/timeline");
-			if (!res.ok) throw new Error("Failed to fetch timeline");
-			return res.json();
+			const payload = await readJsonResponse(res);
+			if (!payload.ok) throw new Error(payload.error || "Failed to fetch timeline");
+			return payload.data ?? [];
 		}
 	});
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {

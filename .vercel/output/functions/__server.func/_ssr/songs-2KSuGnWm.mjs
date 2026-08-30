@@ -1,11 +1,12 @@
 import { o as __toESM } from "../_runtime.mjs";
+import { n as uploadMediaInChunks, t as readJsonResponse } from "./api-DhUICLV2.mjs";
 import { t as cn } from "./utils-C_uf36nf.mjs";
 import { a as require_react, i as useQueryClient, o as require_jsx_runtime } from "../_libs/react+tanstack__react-query.mjs";
 import { C as Link, T as Heart, c as Shuffle, d as Plus, f as Play, g as Pause, h as PenLine, l as Save, o as SkipForward, r as Trash2, s as SkipBack, t as X, u as Repeat } from "../_libs/lucide-react.mjs";
 import { t as SectionHeading } from "./SectionHeading-BVG9eVYl.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
-import { n as formatTime, r as useMusic } from "./MusicProvider-CwrFKiWU.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/songs-D5VwhGM3.js
+import { n as formatTime, r as useMusic } from "./MusicProvider-DUZxdxlu.mjs";
+//#region node_modules/.nitro/vite/services/ssr/assets/songs-2KSuGnWm.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function MusicPlayer() {
@@ -47,22 +48,17 @@ function MusicPlayer() {
 			return;
 		}
 		setUploadStatus("uploading");
-		const formData = new FormData();
-		formData.append("file", audioFile);
-		if (coverFile) formData.append("coverFile", coverFile);
-		formData.append("title", songTitle);
-		formData.append("artist", songArtist);
-		formData.append("description", songDescription);
-		formData.append("duration", songDuration);
-		formData.append("type", "song");
-		formData.append("memoryDate", songDate);
 		try {
-			const res = await fetch("/api/media/upload", {
-				method: "POST",
-				body: formData
+			await uploadMediaInChunks({
+				file: audioFile,
+				type: "song",
+				title: songTitle,
+				artist: songArtist,
+				description: songDescription,
+				category: "Favorites",
+				favorite: false,
+				memoryDate: songDate
 			});
-			const data = await res.json();
-			if (!res.ok) throw new Error(data.error || "Upload failed");
 			setUploadStatus("success");
 			toast.success("Song uploaded successfully!");
 			setAudioFile(null);
@@ -102,8 +98,8 @@ function MusicPlayer() {
 					memoryDate: urlDate
 				})
 			});
-			const data = await res.json();
-			if (!res.ok) throw new Error(data.error || "Failed to add URL song");
+			const payload = await readJsonResponse(res);
+			if (!payload.ok) throw new Error(payload.error || "Failed to add URL song");
 			setUrlStatus("success");
 			toast.success("URL song added successfully!");
 			setInputUrl("");

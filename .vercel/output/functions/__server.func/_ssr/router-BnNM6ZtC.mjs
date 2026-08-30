@@ -5,9 +5,9 @@ import { T as Heart, a as Sparkles, f as Play, g as Pause, o as SkipForward, s a
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import { c as HeadContent, d as Outlet, f as lazyRouteComponent, g as useRouter, h as Link, m as createRootRouteWithContext, p as createFileRoute, s as Scripts, u as createRouter } from "../_libs/@tanstack/react-router+[...].mjs";
 import { t as girlfriend } from "./site-DayVGLaA.mjs";
-import { n as formatTime, r as useMusic, t as MusicProvider } from "./MusicProvider-CwrFKiWU.mjs";
+import { n as formatTime, r as useMusic, t as MusicProvider } from "./MusicProvider-DUZxdxlu.mjs";
 import { t as require_mongoose } from "../_libs/mongoose+mpath+mquery+ms+sift.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-dn_AaFf7.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-BnNM6ZtC.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var import_mongoose = /* @__PURE__ */ __toESM(require_mongoose());
@@ -436,7 +436,7 @@ function RootComponent() {
 		] })
 	});
 }
-var $$splitComponentImporter$6 = () => import("./routes-CtyeTld9.mjs");
+var $$splitComponentImporter$6 = () => import("./routes--wC3pO02.mjs");
 var title$5 = "For You — A Little World Made Just For Us";
 var description$5 = "A private collection of our photos, videos, songs, letters and the timeline of our story — made with all my love.";
 var Route$21 = createFileRoute("/")({
@@ -457,7 +457,7 @@ var Route$21 = createFileRoute("/")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$6, "component")
 });
-var $$splitComponentImporter$5 = () => import("./admin-B_YlVO8T.mjs");
+var $$splitComponentImporter$5 = () => import("./admin-Dzsj-r3W.mjs");
 var Route$20 = createFileRoute("/admin")({ component: lazyRouteComponent($$splitComponentImporter$5, "component") });
 var $$splitComponentImporter$4 = () => import("./letters-NDH4JAyn.mjs");
 var title$4 = "Letters For You — Open When...";
@@ -480,7 +480,7 @@ var Route$19 = createFileRoute("/letters")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$4, "component")
 });
-var $$splitComponentImporter$3 = () => import("./photos-CTBI8iap.mjs");
+var $$splitComponentImporter$3 = () => import("./photos-DRlVlXB6.mjs");
 var title$3 = "Our Beautiful Memories — Photos";
 var description$3 = "Every picture holds a special moment with you: our trips, dates, candid smiles and the days I never want to forget.";
 var Route$18 = createFileRoute("/photos")({
@@ -501,7 +501,7 @@ var Route$18 = createFileRoute("/photos")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$3, "component")
 });
-var $$splitComponentImporter$2 = () => import("./songs-D5VwhGM3.mjs");
+var $$splitComponentImporter$2 = () => import("./songs-2KSuGnWm.mjs");
 var title$2 = "Songs That Remind Me of You";
 var description$2 = "Our playlist — the melodies that speak your name, from the first song we danced to onwards.";
 var Route$17 = createFileRoute("/songs")({
@@ -543,7 +543,7 @@ var Route$16 = createFileRoute("/timeline")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-var $$splitComponentImporter = () => import("./videos-alNGKEdd.mjs");
+var $$splitComponentImporter = () => import("./videos-DbelLYCV.mjs");
 var title = "Our Videos — Moments In Motion";
 var description = "Little moments captured in motion: sunset dates, your laugh, our first trip and the candid clips I keep rewatching.";
 var Route$15 = createFileRoute("/videos")({
@@ -756,6 +756,42 @@ var MediaItemSchema = new import_mongoose.Schema({
 	memoryDate: { type: String }
 }, { timestamps: true });
 var MediaItem = import_mongoose.default.models.MediaItem || import_mongoose.default.model("MediaItem", MediaItemSchema, "mediaItems");
+var UploadChunkSchema = new import_mongoose.Schema({
+	uploadId: {
+		type: String,
+		required: true
+	},
+	chunkIndex: {
+		type: Number,
+		required: true
+	},
+	filename: {
+		type: String,
+		required: true
+	},
+	contentType: {
+		type: String,
+		required: true
+	},
+	type: {
+		type: String,
+		enum: [
+			"image",
+			"video",
+			"song"
+		],
+		required: true
+	},
+	data: {
+		type: Buffer,
+		required: true
+	},
+	createdAt: {
+		type: Date,
+		default: Date.now
+	}
+}, { collection: "uploadChunks" });
+import_mongoose.default.models.UploadChunk || import_mongoose.default.model("UploadChunk", UploadChunkSchema, "uploadChunks");
 var Route$14 = createFileRoute("/api/media")({ server: { handlers: { GET: async ({ request }) => {
 	try {
 		await dbConnect();
@@ -763,7 +799,10 @@ var Route$14 = createFileRoute("/api/media")({ server: { handlers: { GET: async 
 		const filter = {};
 		if (type) filter.type = type;
 		const items = await MediaItem.find(filter).sort({ createdAt: -1 });
-		return new Response(JSON.stringify(items), { headers: { "Content-Type": "application/json" } });
+		return new Response(JSON.stringify({
+			success: true,
+			data: items
+		}), { headers: { "Content-Type": "application/json" } });
 	} catch (error) {
 		console.error("Error fetching media:", error);
 		return new Response(JSON.stringify({ error: "Internal server error" }), {

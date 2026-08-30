@@ -16,6 +16,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { photoCategories, type Photo } from "@/data/site";
 import { Reveal } from "@/components/Reveal";
+import { readJsonResponse, uploadMediaInChunks } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 export function PhotoGallery() {
@@ -54,8 +55,9 @@ export function PhotoGallery() {
     queryKey: ["photos"],
     queryFn: async () => {
       const res = await fetch("/api/media?type=image");
-      if (!res.ok) throw new Error("Failed to fetch photos");
-      return res.json();
+      const payload = await readJsonResponse(res);
+      if (!payload.ok) throw new Error(payload.error || "Failed to fetch photos");
+      return payload.data ?? [];
     },
   });
 
@@ -118,21 +120,16 @@ export function PhotoGallery() {
     if (!file) return;
     setStatus("uploading");
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("title", title);
-    formData.append("type", "image");
-    formData.append("category", category);
-    formData.append("favorite", String(favorite));
-    formData.append("memoryDate", memoryDate);
-
     try {
-      const res = await fetch("/api/media/upload", {
-        method: "POST",
-        body: formData,
+      await uploadMediaInChunks({
+        file,
+        type: "image",
+        title,
+        description: "",
+        category,
+        favorite,
+        memoryDate,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Upload failed");
 
       setStatus("success");
       toast.success("Image uploaded successfully!");
@@ -176,8 +173,8 @@ export function PhotoGallery() {
         }),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to add URL image");
+      const payload = await readJsonResponse(res);
+      if (!payload.ok) throw new Error(payload.error || "Failed to add URL image");
 
       setUrlStatus("success");
       toast.success("Image URL added successfully!");
