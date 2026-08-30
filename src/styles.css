@@ -1,0 +1,271 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * "For You" — romantic memory site design system.
+ * Dark luxury base + pink/magenta glow accents.
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --radius: 1.125rem;
+  --background: oklch(0.09 0.022 300);
+  --foreground: oklch(0.97 0.005 300);
+  --surface: oklch(0.13 0.028 300);
+  --surface-2: oklch(0.17 0.032 300);
+  --card: oklch(0.14 0.03 300);
+  --card-foreground: oklch(0.97 0.005 300);
+  --popover: oklch(0.12 0.028 300);
+  --popover-foreground: oklch(0.97 0.005 300);
+  --primary: oklch(0.66 0.24 350);
+  --primary-foreground: oklch(0.99 0.005 350);
+  --secondary: oklch(0.2 0.04 305);
+  --secondary-foreground: oklch(0.95 0.01 320);
+  --muted: oklch(0.2 0.035 300);
+  --muted-foreground: oklch(0.7 0.03 310);
+  --accent: oklch(0.62 0.2 310);
+  --accent-foreground: oklch(0.99 0.005 320);
+  --destructive: oklch(0.6 0.23 20);
+  --destructive-foreground: oklch(0.99 0 0);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.66 0.24 350 / 60%);
+
+  --gradient-love: linear-gradient(120deg, oklch(0.72 0.23 350), oklch(0.6 0.22 315));
+  --gradient-text: linear-gradient(100deg, oklch(0.78 0.2 350), oklch(0.7 0.21 320));
+  --gradient-glass: linear-gradient(
+    150deg,
+    color-mix(in oklab, white 8%, transparent),
+    color-mix(in oklab, white 2%, transparent)
+  );
+  --shadow-glow: 0 18px 60px -18px color-mix(in oklab, var(--primary) 65%, transparent);
+  --shadow-soft: 0 24px 70px -30px oklch(0 0 0 / 80%);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(
+        60rem 40rem at 12% -10%,
+        color-mix(in oklab, var(--primary) 16%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        50rem 36rem at 92% 8%,
+        color-mix(in oklab, var(--accent) 14%, transparent),
+        transparent 70%
+      );
+    background-attachment: fixed;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+}
+
+@utility glass {
+  background-image: var(--gradient-glass);
+  background-color: color-mix(in oklab, var(--surface) 55%, transparent);
+  border: 1px solid color-mix(in oklab, white 10%, transparent);
+  backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: var(--shadow-soft);
+}
+
+@utility glass-hover {
+  transition:
+    transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.4s ease,
+    border-color 0.4s ease;
+  &:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in oklab, var(--primary) 45%, transparent);
+    box-shadow: var(--shadow-glow);
+  }
+}
+
+@utility gradient-text {
+  background-image: var(--gradient-text);
+  background-clip: text;
+  color: transparent;
+}
+
+@utility btn-love {
+  background-image: var(--gradient-love);
+  color: var(--primary-foreground);
+  box-shadow: var(--shadow-glow);
+  transition:
+    transform 0.25s ease,
+    filter 0.25s ease;
+  &:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.08);
+  }
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+@utility section-shell {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 80rem;
+  padding-inline: 1.25rem;
+}
+
+@keyframes float-up {
+  0% {
+    transform: translateY(0) scale(0.9);
+    opacity: 0;
+  }
+  10% {
+    opacity: var(--heart-opacity, 0.25);
+  }
+  90% {
+    opacity: var(--heart-opacity, 0.25);
+  }
+  100% {
+    transform: translateY(-110vh) scale(1.1);
+    opacity: 0;
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes pop-heart {
+  0% {
+    transform: translate(0, 0) scale(0.4);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx, 0), -180px) scale(1.2);
+    opacity: 0;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 45%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 14px color-mix(in oklab, var(--primary) 0%, transparent);
+  }
+}
+
+@keyframes letter-open {
+  from {
+    opacity: 0;
+    transform: translateY(24px) rotateX(-14deg) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotateX(0) scale(1);
+  }
+}
+
+@utility animate-float-up {
+  animation: float-up linear infinite;
+}
+
+@utility animate-twinkle {
+  animation: twinkle ease-in-out infinite;
+}
+
+@utility animate-glow-pulse {
+  animation: glow-pulse 2.4s ease-in-out infinite;
+}
+
+@utility animate-letter-open {
+  animation: letter-open 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@utility reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  &[data-visible="true"] {
+    animation: rise-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
