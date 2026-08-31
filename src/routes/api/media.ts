@@ -19,10 +19,7 @@ export const Route = createFileRoute("/api/media")({
 
           const items = await MediaItem.find(filter).sort({ createdAt: -1 });
           return new Response(
-            JSON.stringify({
-              success: true,
-              data: items,
-            }),
+            JSON.stringify(items),
             {
               headers: { "Content-Type": "application/json" },
             },

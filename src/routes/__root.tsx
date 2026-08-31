@@ -6,6 +6,8 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  redirect,
+  useLocation,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
@@ -16,6 +18,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { MusicProvider } from "@/components/music/MusicProvider";
 import { MiniPlayer } from "@/components/music/MiniPlayer";
+import { getSession } from "@/lib/auth-client";
 
 function NotFoundComponent() {
   return (
@@ -78,6 +81,33 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  loader: async (args: any) => {
+    throw new Error("Root loader args keys: " + Object.keys(args).join(", "));
+    // Skip protection for login, api, and static file requests
+    if (
+      location.pathname === "/login" ||
+      location.pathname.startsWith("/api/") ||
+      location.pathname.includes(".")
+    ) {
+      return { role: null };
+    }
+
+    const { role } = await getSession(request);
+
+    if (!role) {
+      throw redirect({
+        to: "/login",
+      });
+    }
+
+    if (location.pathname === "/admin" && role !== "admin") {
+      throw redirect({
+        to: "/",
+      });
+    }
+
+    return { role };
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -122,6 +152,19 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const location = useLocation();
+  const isLoginPage = location.pathname === "/login";
+
+  if (isLoginPage) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <Ambience />
+        <main className="relative z-10 min-h-screen flex items-center justify-center">
+          <Outlet />
+        </main>
+      </QueryClientProvider>
+    );
+  }
 
   return (
     <QueryClientProvider client={queryClient}>

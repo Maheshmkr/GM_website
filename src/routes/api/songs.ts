@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute } from "@tanstack/react-router";
 import { dbConnect } from "@/lib/db";
-import { Song } from "@/lib/models";
+import { MediaItem } from "@/lib/models";
 import mongoose from "mongoose";
 
 export const Route = createFileRoute("/api/songs")({
@@ -10,7 +10,7 @@ export const Route = createFileRoute("/api/songs")({
       GET: async () => {
         try {
           await dbConnect();
-          const songs = await Song.find().sort({ createdAt: -1 });
+          const songs = await MediaItem.find({ type: "song" }).sort({ createdAt: -1 });
           return new Response(JSON.stringify(songs), {
             headers: { "Content-Type": "application/json" },
           });
@@ -132,8 +132,10 @@ export const Route = createFileRoute("/api/songs")({
             }
           }
 
-          // Save metadata
-          const song = new Song({
+          // Save metadata to MediaItem
+          const song = new MediaItem({
+            type: "song",
+            source: "upload",
             title,
             artist,
             description: description || "",
@@ -143,6 +145,7 @@ export const Route = createFileRoute("/api/songs")({
             fileId,
             coverFileId,
             duration: duration || "3:00",
+            memoryDate: new Date().toISOString().split("T")[0],
           });
           await song.save();
 

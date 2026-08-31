@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute } from "@tanstack/react-router";
 import { dbConnect } from "@/lib/db";
-import { MediaItem } from "@/lib/models";
+import { MediaItem, UploadChunk } from "@/lib/models";
 import mongoose from "mongoose";
 
 export const Route = createFileRoute("/api/media/upload")({
@@ -131,7 +131,22 @@ export const Route = createFileRoute("/api/media/upload")({
             }
           }
 
-          // Upload binary data to GridFS
+          // Save chunk data temporarily
+          const uploadId = formData.get("uploadId") as string;
+          const chunkIndex = parseInt(formData.get("chunkIndex") as string, 10);
+          const totalChunks = parseInt(formData.get("totalChunks") as string, 10);
+          const isLastChunk = formData.get("isLastChunk") === "true";
+          const filename = (formData.get("filename") as string) || file.name;
+          const mimeType = (formData.get("mimeType") as string) || file.type;
+
+          if (!uploadId || isNaN(chunkIndex) || isNaN(totalChunks)) {
+            return new Response(JSON.stringify({ error: "Missing chunk upload parameters" }), {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            });
+          }
+
+          // Extract chunk binary
           const arrayBuffer = await file.arrayBuffer();
           const buffer = Buffer.from(arrayBuffer);
 
@@ -142,12 +157,53 @@ export const Route = createFileRoute("/api/media/upload")({
               headers: { "Content-Type": "application/json" },
             });
           }
+
+          // Save the chunk temporarily to UploadChunk collection
+          const tempChunk = new UploadChunk({
+            uploadId,
+            chunkIndex,
+            filename,
+            contentType: mimeType || "application/octet-stream",
+            type,
+            data: buffer,
+          });
+          await tempChunk.save();
+
+          // If this is not the last chunk, return success indicating chunk was saved
+          if (!isLastChunk) {
+            return new Response(
+              JSON.stringify({
+                success: true,
+                message: `Chunk ${chunkIndex + 1}/${totalChunks} uploaded successfully`,
+              }),
+              {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
+          }
+
+          // Assemble the chunks on the final chunk request
+          const chunks = await UploadChunk.find({ uploadId }).sort({ chunkIndex: 1 });
+          if (chunks.length < totalChunks) {
+            return new Response(
+              JSON.stringify({
+                error: `Chunk assembly failed. Only ${chunks.length}/${totalChunks} chunks received.`,
+              }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
+          }
+
+          const finalBuffer = Buffer.concat(chunks.map((c) => c.data));
           const bucket = new mongoose.mongo.GridFSBucket(db, { bucketName: "media" });
 
           const fileId = await new Promise<mongoose.Types.ObjectId>((resolve, reject) => {
-            const uploadStream = bucket.openUploadStream(file.name, {
+            const uploadStream = bucket.openUploadStream(filename, {
               contentType:
-                file.type ||
+                mimeType ||
                 (type === "song" ? "audio/mpeg" : type === "video" ? "video/mp4" : "image/jpeg"),
             });
             uploadStream.on("finish", () => {
@@ -156,27 +212,30 @@ export const Route = createFileRoute("/api/media/upload")({
             uploadStream.on("error", (err) => {
               reject(err);
             });
-            uploadStream.write(buffer);
+            uploadStream.write(finalBuffer);
             uploadStream.end();
           });
 
-          // Save metadata
+          // Save metadata to MediaItem
           const mediaItem = new MediaItem({
             type,
             source: "upload",
             title,
             artist: type === "song" ? artist || "Unknown Artist" : undefined,
-            filename: file.name,
+            filename,
             mimeType:
-              file.type ||
+              mimeType ||
               (type === "song" ? "audio/mpeg" : type === "video" ? "video/mp4" : "image/jpeg"),
-            fileSize: file.size,
+            fileSize: finalBuffer.length,
             fileId,
             category: category || "Favorites",
             favorite,
             memoryDate: memoryDate || new Date().toISOString().split("T")[0],
           });
           await mediaItem.save();
+
+          // Cleanup temporary chunks
+          await UploadChunk.deleteMany({ uploadId });
 
           return new Response(JSON.stringify(mediaItem), {
             status: 201,

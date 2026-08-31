@@ -1,1 +1,0 @@
-import{a as e}from"./utils-DZ6lqUmF.js";import{t}from"./SectionHeading-DLAG9nm1.js";import{t as n}from"./VideoGallery-Cha_Fc7t.js";var r=e();function i(){return(0,r.jsxs)(`section`,{className:`section-shell py-10 lg:py-16`,children:[(0,r.jsx)(t,{title:`Our Videos`,subtitle:`Little moments captured in motion.`}),(0,r.jsx)(n,{})]})}export{i as component};

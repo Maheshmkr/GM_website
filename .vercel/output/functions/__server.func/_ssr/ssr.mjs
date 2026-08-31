@@ -1,4 +1,9 @@
+import { o as __toESM } from "../_runtime.mjs";
+import { t as require_main } from "../_libs/dotenv.mjs";
+import { t as require_mongoose } from "../_libs/mongoose+mpath+mquery+ms+sift.mjs";
 //#region node_modules/.nitro/vite/services/ssr/index.js
+var import_main = /* @__PURE__ */ __toESM(require_main());
+var import_mongoose = /* @__PURE__ */ __toESM(require_mongoose());
 var lastCapturedError;
 var TTL_MS = 5e3;
 function record(error) {
@@ -91,9 +96,43 @@ function renderErrorPage() {
   </body>
 </html>`;
 }
+import_main.default.config();
+var MONGODB_URI = process.env.MONGO_URI || process.env.MONGODB_URI;
+var MONGODB_DB = process.env.MONGODB_DB || "gm-website";
+var cached = global.mongoose;
+if (!cached) cached = global.mongoose = {
+	conn: null,
+	promise: null
+};
+async function dbConnect() {
+	if (!MONGODB_URI) throw new Error("MONGODB_URI is not configured. Add it in Vercel → Project → Settings → Environment Variables.");
+	if (cached.conn) return cached.conn;
+	if (!cached.promise) {
+		const opts = {
+			bufferCommands: false,
+			dbName: MONGODB_DB
+		};
+		cached.promise = import_mongoose.default.connect(MONGODB_URI, opts).then((m) => {
+			console.log("MongoDB Atlas connected successfully");
+			return m;
+		}).catch((error) => {
+			console.error("MongoDB connection failed:", error.message);
+			cached.promise = null;
+			throw error;
+		});
+	}
+	try {
+		cached.conn = await cached.promise;
+	} catch (e) {
+		cached.promise = null;
+		throw e;
+	}
+	return cached.conn;
+}
+import_main.default.config();
 var serverEntryPromise;
 async function getServerEntry() {
-	if (!serverEntryPromise) serverEntryPromise = import("./server-CutHeZSP.mjs").then((m) => m.default ?? m);
+	if (!serverEntryPromise) serverEntryPromise = import("./server-Bc-GLrtd.mjs").then((m) => m.default ?? m);
 	return serverEntryPromise;
 }
 async function normalizeCatastrophicSsrResponse(response) {
@@ -117,6 +156,7 @@ function isH3SwallowedErrorBody(body) {
 }
 var server_default = { async fetch(request, env, ctx) {
 	try {
+		await dbConnect();
 		return await normalizeCatastrophicSsrResponse(await (await getServerEntry()).fetch(request, env, ctx));
 	} catch (error) {
 		console.error(error);
@@ -127,4 +167,4 @@ var server_default = { async fetch(request, env, ctx) {
 	}
 } };
 //#endregion
-export { server_default as default, renderErrorPage as t };
+export { server_default as default, renderErrorPage as n, dbConnect as t };

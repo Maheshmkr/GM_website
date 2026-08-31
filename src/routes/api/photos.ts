@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute } from "@tanstack/react-router";
 import { dbConnect } from "@/lib/db";
-import { Photo } from "@/lib/models";
+import { MediaItem } from "@/lib/models";
 import mongoose from "mongoose";
 
 export const Route = createFileRoute("/api/photos")({
@@ -10,7 +10,7 @@ export const Route = createFileRoute("/api/photos")({
       GET: async () => {
         try {
           await dbConnect();
-          const photos = await Photo.find().sort({ createdAt: -1 });
+          const photos = await MediaItem.find({ type: "image" }).sort({ createdAt: -1 });
           return new Response(JSON.stringify(photos), {
             headers: { "Content-Type": "application/json" },
           });
@@ -107,8 +107,10 @@ export const Route = createFileRoute("/api/photos")({
             uploadStream.end();
           });
 
-          // Save metadata
-          const photo = new Photo({
+          // Save metadata to MediaItem
+          const photo = new MediaItem({
+            type: "image",
+            source: "upload",
             title,
             description: description || "",
             filename: file.name,
@@ -117,6 +119,7 @@ export const Route = createFileRoute("/api/photos")({
             fileId,
             category: category || "Favorites",
             favorite,
+            memoryDate: new Date().toISOString().split("T")[0],
           });
           await photo.save();
 

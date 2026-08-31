@@ -1,5 +1,5 @@
-import { Link } from "@tanstack/react-router";
-import { Heart, Menu, Sparkles, X } from "lucide-react";
+import { Link, useLoaderData, useRouter } from "@tanstack/react-router";
+import { Heart, Menu, Sparkles, X, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const links = [
@@ -14,6 +14,15 @@ const links = [
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const loaderData = useLoaderData({ from: "__root__", strict: false });
+  const role = loaderData?.role;
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.invalidate();
+    window.location.href = "/login";
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -54,9 +63,21 @@ export function Navbar() {
         </ul>
 
         <div className="flex items-center justify-end gap-2">
-          <span className="glass hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-medium sm:inline-flex">
-            For You <span aria-hidden>💖</span>
-          </span>
+          {role && (
+            <span className="glass hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-medium sm:inline-flex">
+              {role === "admin" ? "Admin 🛠️" : "For You 💖"}
+            </span>
+          )}
+          {role && (
+            <button
+              onClick={handleLogout}
+              className="glass rounded-full px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 cursor-pointer flex items-center gap-1.5"
+              title="Logout"
+            >
+              <LogOut className="size-3.5" />
+              <span className="hidden sm:inline">Logout</span>
+            </button>
+          )}
           <button
             aria-label="Sparkle"
             className="glass grid size-10 place-items-center rounded-full text-primary transition-transform hover:rotate-12"
@@ -89,6 +110,20 @@ export function Navbar() {
                 </Link>
               </li>
             ))}
+            {role && (
+              <li>
+                <button
+                  onClick={async () => {
+                    setOpen(false);
+                    await handleLogout();
+                  }}
+                  className="w-full text-left rounded-xl px-4 py-3 text-sm text-destructive hover:bg-secondary/40 transition-colors flex items-center gap-2 cursor-pointer font-medium"
+                >
+                  <LogOut className="size-4" />
+                  Logout
+                </button>
+              </li>
+            )}
           </ul>
         </div>
       )}

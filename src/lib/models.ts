@@ -89,6 +89,9 @@ const MediaItemSchema = new Schema(
     category: { type: String, default: "Favorites" }, // For photo categories
     favorite: { type: Boolean, default: false }, // For photo/video favorite highlights
     memoryDate: { type: String }, // User manually selected date (YYYY-MM-DD)
+    description: { type: String }, // For description
+    duration: { type: String }, // For songs/videos duration
+    coverFileId: { type: Schema.Types.ObjectId }, // GridFS cover image file ID (optional)
   },
   { timestamps: true },
 );

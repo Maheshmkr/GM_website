@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute } from "@tanstack/react-router";
 import { dbConnect } from "@/lib/db";
-import { Video } from "@/lib/models";
+import { MediaItem } from "@/lib/models";
 import mongoose from "mongoose";
 
 export const Route = createFileRoute("/api/videos")({
@@ -10,7 +10,7 @@ export const Route = createFileRoute("/api/videos")({
       GET: async () => {
         try {
           await dbConnect();
-          const videos = await Video.find().sort({ createdAt: -1 });
+          const videos = await MediaItem.find({ type: "video" }).sort({ createdAt: -1 });
           return new Response(JSON.stringify(videos), {
             headers: { "Content-Type": "application/json" },
           });
@@ -105,8 +105,10 @@ export const Route = createFileRoute("/api/videos")({
             uploadStream.end();
           });
 
-          // Save metadata
-          const video = new Video({
+          // Save metadata to MediaItem
+          const video = new MediaItem({
+            type: "video",
+            source: "upload",
             title,
             description: description || "",
             filename: file.name,
@@ -115,6 +117,7 @@ export const Route = createFileRoute("/api/videos")({
             fileId,
             favorite,
             duration: duration || "0:30",
+            memoryDate: new Date().toISOString().split("T")[0],
           });
           await video.save();
 

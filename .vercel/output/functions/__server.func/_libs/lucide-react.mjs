@@ -115,6 +115,19 @@ var createLucideIcon = (iconName, iconNode) => {
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
+var ArrowRight = createLucideIcon("arrow-right", [["path", {
+	d: "M5 12h14",
+	key: "1ays0h"
+}], ["path", {
+	d: "m12 5 7 7-7 7",
+	key: "xquz4c"
+}]]);
+/**
+* @license lucide-react v0.575.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
 var Calendar = createLucideIcon("calendar", [
 	["path", {
 		d: "M8 2v4",
@@ -335,6 +348,44 @@ var LoaderCircle = createLucideIcon("loader-circle", [["path", {
 	d: "M21 12a9 9 0 1 1-6.219-8.56",
 	key: "13zald"
 }]]);
+/**
+* @license lucide-react v0.575.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
+var Lock = createLucideIcon("lock", [["rect", {
+	width: "18",
+	height: "11",
+	x: "3",
+	y: "11",
+	rx: "2",
+	ry: "2",
+	key: "1w4ew1"
+}], ["path", {
+	d: "M7 11V7a5 5 0 0 1 10 0v4",
+	key: "fwvmzm"
+}]]);
+/**
+* @license lucide-react v0.575.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
+var LogOut = createLucideIcon("log-out", [
+	["path", {
+		d: "m16 17 5-5-5-5",
+		key: "1bji2h"
+	}],
+	["path", {
+		d: "M21 12H9",
+		key: "dn1m92"
+	}],
+	["path", {
+		d: "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4",
+		key: "1uf3rs"
+	}]
+]);
 /**
 * @license lucide-react v0.575.0 - ISC
 *
@@ -709,4 +760,4 @@ var X = createLucideIcon("x", [["path", {
 	key: "d8bk6v"
 }]]);
 //#endregion
-export { ChevronRight as A, Link as C, ExternalLink as D, Film as E, Camera as M, Calendar as N, Coffee as O, LoaderCircle as S, Heart as T, Music as _, Sparkles as a, MapPin as b, Shuffle as c, Plus as d, Play as f, Pause as g, PenLine as h, Star as i, ChevronLeft as j, Clock as k, Save as l, Pen as m, Video as n, SkipForward as o, Plane as p, Trash2 as r, SkipBack as s, X as t, Repeat as u, Music4 as v, Image as w, Mail as x, Menu as y };
+export { Coffee as A, Lock as C, Heart as D, Image as E, Calendar as F, ArrowRight as I, ChevronRight as M, ChevronLeft as N, Film as O, Camera as P, LogOut as S, Link as T, Music as _, Sparkles as a, MapPin as b, Shuffle as c, Plus as d, Play as f, Pause as g, PenLine as h, Star as i, Clock as j, ExternalLink as k, Save as l, Pen as m, Video as n, SkipForward as o, Plane as p, Trash2 as r, SkipBack as s, X as t, Repeat as u, Music4 as v, LoaderCircle as w, Mail as x, Menu as y };

@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from "mongoose";
+import dotenv from "dotenv";
 
-const MONGODB_URI = process.env.MONGODB_URI;
+// Load environment variables
+dotenv.config();
+
+const MONGODB_URI = process.env.MONGO_URI || process.env.MONGODB_URI;
 const MONGODB_DB = process.env.MONGODB_DB || "gm-website";
 
 let cached = (global as any).mongoose;
@@ -28,8 +32,12 @@ export async function dbConnect() {
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((m) => {
-      console.log("Connected to MongoDB successfully");
+      console.log("MongoDB Atlas connected successfully");
       return m;
+    }).catch((error) => {
+      console.error("MongoDB connection failed:", error.message);
+      cached.promise = null;
+      throw error;
     });
   }
 
