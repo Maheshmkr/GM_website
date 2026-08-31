@@ -1,12 +1,13 @@
 import { o as __toESM } from "../_runtime.mjs";
 import { a as require_react, o as require_jsx_runtime } from "../_libs/react+tanstack__react-query.mjs";
-import { C as Lock, D as Heart, I as ArrowRight } from "../_libs/lucide-react.mjs";
+import { R as ArrowRight, T as Lock, i as User, k as Heart } from "../_libs/lucide-react.mjs";
 import { v as useRouter } from "../_libs/@tanstack/react-router+[...].mjs";
 import { t as toast } from "../_libs/sonner.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/login-Sj4zmDq8.js
+//#region node_modules/.nitro/vite/services/ssr/assets/login-nqSf7xLp.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function LoginComponent() {
+	const [username, setUsername] = (0, import_react.useState)("");
 	const [password, setPassword] = (0, import_react.useState)("");
 	const [loading, setLoading] = (0, import_react.useState)(false);
 	const router = useRouter();
@@ -21,7 +22,10 @@ function LoginComponent() {
 			const res = await fetch("/api/auth/login", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ password })
+				body: JSON.stringify({
+					username,
+					password
+				})
 			});
 			const data = await res.json();
 			if (res.ok && data.success) {
@@ -29,7 +33,7 @@ function LoginComponent() {
 				router.invalidate();
 				if (data.role === "admin") window.location.href = "/admin";
 				else window.location.href = "/";
-			} else toast.error(data.error || "Incorrect password");
+			} else toast.error(data.error || "Incorrect username or password");
 		} catch (err) {
 			console.error(err);
 			toast.error(err.message || "Something went wrong. Please try again.");
@@ -82,24 +86,40 @@ function LoginComponent() {
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
 					onSubmit: handleSubmit,
 					className: "space-y-5",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "relative",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted-foreground",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "size-4" })
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-							type: "password",
-							value: password,
-							onChange: (e) => setPassword(e.target.value),
-							placeholder: "Enter password...",
-							className: "w-full pl-11 pr-4 py-3.5 text-sm bg-surface/30 border border-border rounded-2xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-sans"
-						})]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-						type: "submit",
-						disabled: loading,
-						className: "w-full flex items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-semibold btn-love shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group transition-all",
-						children: [loading ? "Unlocking..." : "Unlock Story", !loading && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRight, { className: "size-4 group-hover:translate-x-1 transition-transform" })]
-					})]
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "relative",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted-foreground",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(User, { className: "size-4" })
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								type: "text",
+								value: username,
+								onChange: (e) => setUsername(e.target.value),
+								placeholder: "Username...",
+								className: "w-full pl-11 pr-4 py-3.5 text-sm bg-surface/30 border border-border rounded-2xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-sans"
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "relative",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted-foreground",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "size-4" })
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								type: "password",
+								value: password,
+								onChange: (e) => setPassword(e.target.value),
+								placeholder: "Enter password...",
+								className: "w-full pl-11 pr-4 py-3.5 text-sm bg-surface/30 border border-border rounded-2xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-sans"
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+							type: "submit",
+							disabled: loading,
+							className: "w-full flex items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-semibold btn-love shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group transition-all",
+							children: [loading ? "Unlocking..." : "Unlock Story", !loading && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRight, { className: "size-4 group-hover:translate-x-1 transition-transform" })]
+						})
+					]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 					className: "text-xs text-muted-foreground",

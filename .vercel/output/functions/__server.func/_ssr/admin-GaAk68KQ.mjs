@@ -2,10 +2,10 @@ import { o as __toESM } from "../_runtime.mjs";
 import { t as readJsonResponse } from "./api-DhUICLV2.mjs";
 import { t as cn } from "./utils-C_uf36nf.mjs";
 import { a as require_react, i as useQueryClient, n as useQuery, o as require_jsx_runtime, t as useMutation } from "../_libs/react+tanstack__react-query.mjs";
-import { D as Heart, F as Calendar, O as Film, P as Camera, _ as Music, b as MapPin, d as Plus, f as Play, j as Clock, k as ExternalLink, m as Pen, r as Trash2, t as X, v as Music4, w as LoaderCircle } from "../_libs/lucide-react.mjs";
+import { A as Film, E as LoaderCircle, I as Camera, L as Calendar, N as Clock, S as MapPin, a as Trash2, b as Music4, g as Pen, j as ExternalLink, k as Heart, m as Play, p as Plus, r as Users, t as X, y as Music } from "../_libs/lucide-react.mjs";
 import { t as SectionHeading } from "./SectionHeading-BVG9eVYl.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/admin-Dzsj-r3W.js
+//#region node_modules/.nitro/vite/services/ssr/assets/admin-GaAk68KQ.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function AdminPage() {
@@ -76,6 +76,11 @@ function AdminPage() {
 						id: "timeline",
 						label: "Timeline",
 						icon: Calendar
+					},
+					{
+						id: "users",
+						label: "Users",
+						icon: Users
 					}
 				].map((t) => {
 					const Icon = t.icon;
@@ -108,7 +113,8 @@ function AdminPage() {
 						timeline,
 						isLoading: loadingTimeline,
 						queryClient
-					})
+					}),
+					activeTab === "users" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(UsersManager, { queryClient })
 				]
 			})
 		]
@@ -1299,6 +1305,161 @@ function TimelineManager({ timeline, isLoading, queryClient }) {
 						})
 					]
 				}, item._id))
+			})]
+		})]
+	});
+}
+function UsersManager({ queryClient }) {
+	const [username, setUsername] = (0, import_react.useState)("");
+	const [password, setPassword] = (0, import_react.useState)("");
+	const [creating, setCreating] = (0, import_react.useState)(false);
+	const { data: users = [], isLoading } = useQuery({
+		queryKey: ["users"],
+		queryFn: async () => {
+			const res = await fetch("/api/users");
+			const payload = await readJsonResponse(res);
+			if (!payload.ok) throw new Error(payload.error || "Failed to fetch users");
+			return payload.data ?? [];
+		}
+	});
+	const createMutation = useMutation({
+		mutationFn: async (userData) => {
+			const res = await fetch("/api/users", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(userData)
+			});
+			const payload = await readJsonResponse(res);
+			if (!payload.ok) throw new Error(payload.error || "Create user failed");
+			return payload.data;
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["users"] });
+			toast.success("User created successfully!");
+			setUsername("");
+			setPassword("");
+		},
+		onError: (err) => {
+			toast.error(`Error creating user: ${err.message}`);
+		}
+	});
+	const deleteMutation = useMutation({
+		mutationFn: async (id) => {
+			const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
+			const payload = await readJsonResponse(res);
+			if (!payload.ok) throw new Error(payload.error || "Delete user failed");
+			return payload;
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["users"] });
+			toast.success("User deleted successfully!");
+		},
+		onError: (err) => {
+			toast.error(`Error deleting user: ${err.message}`);
+		}
+	});
+	const handleCreate = async (e) => {
+		e.preventDefault();
+		if (!username.trim()) {
+			toast.error("Username is required");
+			return;
+		}
+		if (!password.trim()) {
+			toast.error("Password is required");
+			return;
+		}
+		setCreating(true);
+		try {
+			await createMutation.mutateAsync({
+				username,
+				password
+			});
+		} catch (err) {} finally {
+			setCreating(false);
+		}
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "grid gap-8 lg:grid-cols-[1fr_2fr]",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+			className: "text-lg font-semibold flex items-center gap-2 mb-6",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "size-5 text-primary" }), " Create User Account"]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+			onSubmit: handleCreate,
+			className: "space-y-4",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+					className: "block text-xs font-semibold text-muted-foreground mb-1",
+					children: "Username"
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+					type: "text",
+					placeholder: "e.g. lovebird",
+					value: username,
+					onChange: (e) => setUsername(e.target.value),
+					className: "w-full text-sm bg-surface/50 border border-border rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+				})] }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+					className: "block text-xs font-semibold text-muted-foreground mb-1",
+					children: "Password"
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+					type: "password",
+					placeholder: "Enter account password...",
+					value: password,
+					onChange: (e) => setPassword(e.target.value),
+					className: "w-full text-sm bg-surface/50 border border-border rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+				})] }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					type: "submit",
+					disabled: creating,
+					className: "w-full btn-love rounded-full py-3 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50",
+					children: creating ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-4 animate-spin" }), " Creating..."] }) : "Create User"
+				})
+			]
+		})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "border-l border-border/30 pl-0 lg:pl-8",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+				className: "text-lg font-semibold mb-6 flex justify-between items-center",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "User Accounts" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+					className: "text-xs font-normal text-muted-foreground bg-secondary/80 px-2.5 py-1 rounded-full",
+					children: [users.length, " accounts"]
+				})]
+			}), isLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex items-center justify-center py-20 text-muted-foreground text-sm gap-2",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-5 animate-spin" }), " Loading user accounts..."]
+			}) : users.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "text-center py-20 text-muted-foreground text-sm",
+				children: "No database user accounts found. Use the form to create one."
+			}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "grid gap-4 sm:grid-cols-2",
+				children: users.map((u) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "bg-surface/30 border border-border rounded-2xl p-4 flex justify-between items-center relative group",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "min-w-0",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h4", {
+								className: "font-semibold text-sm truncate flex items-center gap-1.5",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "size-4 text-primary" }), u.username]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+								className: "text-[10px] text-muted-foreground mt-1",
+								children: ["Role: ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-foreground capitalize font-medium",
+									children: u.role
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+								className: "text-[9px] text-muted-foreground mt-0.5",
+								children: ["Created: ", new Date(u.createdAt).toLocaleDateString()]
+							})
+						]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: () => {
+							if (confirm(`Are you sure you want to delete user "${u.username}"?`)) deleteMutation.mutate(u._id);
+						},
+						className: "p-2 text-destructive hover:bg-destructive/10 rounded-full transition-colors",
+						title: "Delete Account",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "size-4" })
+					}) })]
+				}, u._id))
 			})]
 		})]
 	});

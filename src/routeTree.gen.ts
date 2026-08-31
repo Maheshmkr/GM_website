@@ -21,6 +21,7 @@ import { Route as ApiMediaRouteImport } from './routes/api/media'
 import { Route as ApiPhotosRouteImport } from './routes/api/photos'
 import { Route as ApiSongsRouteImport } from './routes/api/songs'
 import { Route as ApiTimelineRouteImport } from './routes/api/timeline'
+import { Route as ApiUsersRouteImport } from './routes/api/users'
 import { Route as ApiVideosRouteImport } from './routes/api/videos'
 import { Route as ApiAuthLoginRouteImport } from './routes/api/auth.login'
 import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth.logout'
@@ -31,6 +32,7 @@ import { Route as ApiMediaUrlRouteImport } from './routes/api/media.url'
 import { Route as ApiPhotosIdRouteImport } from './routes/api/photos.$id'
 import { Route as ApiSongsIdRouteImport } from './routes/api/songs.$id'
 import { Route as ApiTimelineIdRouteImport } from './routes/api/timeline.$id'
+import { Route as ApiUsersIdRouteImport } from './routes/api/users.$id'
 import { Route as ApiVideosIdRouteImport } from './routes/api/videos.$id'
 import { Route as ApiMediaEditIdRouteImport } from './routes/api/media.edit.$id'
 import { Route as ApiMediaFileFileIdRouteImport } from './routes/api/media.file.$fileId'
@@ -95,6 +97,11 @@ const ApiTimelineRoute = ApiTimelineRouteImport.update({
   path: '/api/timeline',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiUsersRoute = ApiUsersRouteImport.update({
+  id: '/api/users',
+  path: '/api/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiVideosRoute = ApiVideosRouteImport.update({
   id: '/api/videos',
   path: '/api/videos',
@@ -145,6 +152,11 @@ const ApiTimelineIdRoute = ApiTimelineIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => ApiTimelineRoute,
 } as any)
+const ApiUsersIdRoute = ApiUsersIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiUsersRoute,
+} as any)
 const ApiVideosIdRoute = ApiVideosIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -174,6 +186,7 @@ export interface FileRoutesByFullPath {
   '/api/photos': typeof ApiPhotosRouteWithChildren
   '/api/songs': typeof ApiSongsRouteWithChildren
   '/api/timeline': typeof ApiTimelineRouteWithChildren
+  '/api/users': typeof ApiUsersRouteWithChildren
   '/api/videos': typeof ApiVideosRouteWithChildren
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
@@ -184,6 +197,7 @@ export interface FileRoutesByFullPath {
   '/api/photos/$id': typeof ApiPhotosIdRoute
   '/api/songs/$id': typeof ApiSongsIdRoute
   '/api/timeline/$id': typeof ApiTimelineIdRoute
+  '/api/users/$id': typeof ApiUsersIdRoute
   '/api/videos/$id': typeof ApiVideosIdRoute
   '/api/media/edit/$id': typeof ApiMediaEditIdRoute
   '/api/media/file/$fileId': typeof ApiMediaFileFileIdRoute
@@ -201,6 +215,7 @@ export interface FileRoutesByTo {
   '/api/photos': typeof ApiPhotosRouteWithChildren
   '/api/songs': typeof ApiSongsRouteWithChildren
   '/api/timeline': typeof ApiTimelineRouteWithChildren
+  '/api/users': typeof ApiUsersRouteWithChildren
   '/api/videos': typeof ApiVideosRouteWithChildren
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
@@ -211,6 +226,7 @@ export interface FileRoutesByTo {
   '/api/photos/$id': typeof ApiPhotosIdRoute
   '/api/songs/$id': typeof ApiSongsIdRoute
   '/api/timeline/$id': typeof ApiTimelineIdRoute
+  '/api/users/$id': typeof ApiUsersIdRoute
   '/api/videos/$id': typeof ApiVideosIdRoute
   '/api/media/edit/$id': typeof ApiMediaEditIdRoute
   '/api/media/file/$fileId': typeof ApiMediaFileFileIdRoute
@@ -229,6 +245,7 @@ export interface FileRoutesById {
   '/api/photos': typeof ApiPhotosRouteWithChildren
   '/api/songs': typeof ApiSongsRouteWithChildren
   '/api/timeline': typeof ApiTimelineRouteWithChildren
+  '/api/users': typeof ApiUsersRouteWithChildren
   '/api/videos': typeof ApiVideosRouteWithChildren
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
@@ -239,6 +256,7 @@ export interface FileRoutesById {
   '/api/photos/$id': typeof ApiPhotosIdRoute
   '/api/songs/$id': typeof ApiSongsIdRoute
   '/api/timeline/$id': typeof ApiTimelineIdRoute
+  '/api/users/$id': typeof ApiUsersIdRoute
   '/api/videos/$id': typeof ApiVideosIdRoute
   '/api/media/edit/$id': typeof ApiMediaEditIdRoute
   '/api/media/file/$fileId': typeof ApiMediaFileFileIdRoute
@@ -258,6 +276,7 @@ export interface FileRouteTypes {
     | '/api/photos'
     | '/api/songs'
     | '/api/timeline'
+    | '/api/users'
     | '/api/videos'
     | '/api/auth/login'
     | '/api/auth/logout'
@@ -268,6 +287,7 @@ export interface FileRouteTypes {
     | '/api/photos/$id'
     | '/api/songs/$id'
     | '/api/timeline/$id'
+    | '/api/users/$id'
     | '/api/videos/$id'
     | '/api/media/edit/$id'
     | '/api/media/file/$fileId'
@@ -285,6 +305,7 @@ export interface FileRouteTypes {
     | '/api/photos'
     | '/api/songs'
     | '/api/timeline'
+    | '/api/users'
     | '/api/videos'
     | '/api/auth/login'
     | '/api/auth/logout'
@@ -295,6 +316,7 @@ export interface FileRouteTypes {
     | '/api/photos/$id'
     | '/api/songs/$id'
     | '/api/timeline/$id'
+    | '/api/users/$id'
     | '/api/videos/$id'
     | '/api/media/edit/$id'
     | '/api/media/file/$fileId'
@@ -312,6 +334,7 @@ export interface FileRouteTypes {
     | '/api/photos'
     | '/api/songs'
     | '/api/timeline'
+    | '/api/users'
     | '/api/videos'
     | '/api/auth/login'
     | '/api/auth/logout'
@@ -322,6 +345,7 @@ export interface FileRouteTypes {
     | '/api/photos/$id'
     | '/api/songs/$id'
     | '/api/timeline/$id'
+    | '/api/users/$id'
     | '/api/videos/$id'
     | '/api/media/edit/$id'
     | '/api/media/file/$fileId'
@@ -340,6 +364,7 @@ export interface RootRouteChildren {
   ApiPhotosRoute: typeof ApiPhotosRouteWithChildren
   ApiSongsRoute: typeof ApiSongsRouteWithChildren
   ApiTimelineRoute: typeof ApiTimelineRouteWithChildren
+  ApiUsersRoute: typeof ApiUsersRouteWithChildren
   ApiVideosRoute: typeof ApiVideosRouteWithChildren
   ApiAuthLoginRoute: typeof ApiAuthLoginRoute
   ApiAuthLogoutRoute: typeof ApiAuthLogoutRoute
@@ -432,6 +457,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTimelineRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/users': {
+      id: '/api/users'
+      path: '/api/users'
+      fullPath: '/api/users'
+      preLoaderRoute: typeof ApiUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/videos': {
       id: '/api/videos'
       path: '/api/videos'
@@ -501,6 +533,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/timeline/$id'
       preLoaderRoute: typeof ApiTimelineIdRouteImport
       parentRoute: typeof ApiTimelineRoute
+    }
+    '/api/users/$id': {
+      id: '/api/users/$id'
+      path: '/$id'
+      fullPath: '/api/users/$id'
+      preLoaderRoute: typeof ApiUsersIdRouteImport
+      parentRoute: typeof ApiUsersRoute
     }
     '/api/videos/$id': {
       id: '/api/videos/$id'
@@ -582,6 +621,18 @@ const ApiTimelineRouteWithChildren = ApiTimelineRoute._addFileChildren(
   ApiTimelineRouteChildren,
 )
 
+interface ApiUsersRouteChildren {
+  ApiUsersIdRoute: typeof ApiUsersIdRoute
+}
+
+const ApiUsersRouteChildren: ApiUsersRouteChildren = {
+  ApiUsersIdRoute: ApiUsersIdRoute,
+}
+
+const ApiUsersRouteWithChildren = ApiUsersRoute._addFileChildren(
+  ApiUsersRouteChildren,
+)
+
 interface ApiVideosRouteChildren {
   ApiVideosIdRoute: typeof ApiVideosIdRoute
 }
@@ -607,6 +658,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPhotosRoute: ApiPhotosRouteWithChildren,
   ApiSongsRoute: ApiSongsRouteWithChildren,
   ApiTimelineRoute: ApiTimelineRouteWithChildren,
+  ApiUsersRoute: ApiUsersRouteWithChildren,
   ApiVideosRoute: ApiVideosRouteWithChildren,
   ApiAuthLoginRoute: ApiAuthLoginRoute,
   ApiAuthLogoutRoute: ApiAuthLogoutRoute,

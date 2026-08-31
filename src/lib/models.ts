@@ -114,3 +114,17 @@ const UploadChunkSchema = new Schema(
 
 export const UploadChunk =
   mongoose.models.UploadChunk || mongoose.model("UploadChunk", UploadChunkSchema, "uploadChunks");
+
+// Define User schema
+const UserSchema = new Schema(
+  {
+    username: { type: String, required: true, unique: true, trim: true },
+    password: { type: String, required: true }, // Hashed password (SHA-256)
+    role: { type: String, enum: ["admin", "user"], default: "user" },
+  },
+  { timestamps: true }
+);
+
+export const User =
+  mongoose.models.User || mongoose.model("User", UserSchema, "users");
+

@@ -1,4 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { dbConnect } from "@/lib/db";
+import { User } from "@/lib/models";
+import crypto from "crypto";
 
 export const Route = createFileRoute("/api/auth/login")({
   server: {
@@ -6,7 +9,7 @@ export const Route = createFileRoute("/api/auth/login")({
       POST: async ({ request }) => {
         try {
           const body = await request.json();
-          const { password } = body;
+          const { username, password } = body;
 
           if (typeof password !== "string") {
             return new Response(JSON.stringify({ error: "Invalid password format" }), {
@@ -15,18 +18,43 @@ export const Route = createFileRoute("/api/auth/login")({
             });
           }
 
-          const userPass = process.env.USER_PASSWORD || "beautiful";
-          const adminPass = process.env.ADMIN_PASSWORD || "admin123";
+          const userPass = process.env["USER_PASSWORD"] || "beautiful";
+          const adminPass = process.env["ADMIN_PASSWORD"] || "admin123";
 
           let role: "admin" | "user" | null = null;
-          if (password === adminPass) {
+          const cleanUsername = typeof username === "string" ? username.trim() : "";
+
+          if (cleanUsername.toLowerCase() === "admin" && password === adminPass) {
             role = "admin";
-          } else if (password === userPass) {
-            role = "user";
+          } else if (cleanUsername) {
+            await dbConnect();
+            const user = await User.findOne({ username: cleanUsername });
+            if (user) {
+              const hashedPassword = crypto.createHash("sha256").update(password).digest("hex");
+              if (user.password === hashedPassword) {
+                role = user.role as "admin" | "user";
+              }
+            }
+            
+            // Fallback to environment passwords if DB user doesn't match
+            if (!role) {
+              if (password === adminPass) {
+                role = "admin";
+              } else if (password === userPass) {
+                role = "user";
+              }
+            }
+          } else {
+            // Password-only fallback
+            if (password === adminPass) {
+              role = "admin";
+            } else if (password === userPass) {
+              role = "user";
+            }
           }
 
           if (role) {
-            const secureFlag = process.env.NODE_ENV === "production" ? "; Secure" : "";
+            const secureFlag = process.env["NODE_ENV"] === "production" ? "; Secure" : "";
             return new Response(JSON.stringify({ success: true, role }), {
               headers: {
                 "Content-Type": "application/json",
@@ -35,7 +63,7 @@ export const Route = createFileRoute("/api/auth/login")({
             });
           }
 
-          return new Response(JSON.stringify({ success: false, error: "Incorrect password" }), {
+          return new Response(JSON.stringify({ success: false, error: "Incorrect username or password" }), {
             status: 401,
             headers: { "Content-Type": "application/json" },
           });
@@ -50,3 +78,4 @@ export const Route = createFileRoute("/api/auth/login")({
     },
   },
 });
+

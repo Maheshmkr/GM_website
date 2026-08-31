@@ -735,6 +735,47 @@ var Trash2 = createLucideIcon("trash-2", [
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
+var User = createLucideIcon("user", [["path", {
+	d: "M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2",
+	key: "975kel"
+}], ["circle", {
+	cx: "12",
+	cy: "7",
+	r: "4",
+	key: "17ys0d"
+}]]);
+/**
+* @license lucide-react v0.575.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
+var Users = createLucideIcon("users", [
+	["path", {
+		d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2",
+		key: "1yyitq"
+	}],
+	["path", {
+		d: "M16 3.128a4 4 0 0 1 0 7.744",
+		key: "16gr8j"
+	}],
+	["path", {
+		d: "M22 21v-2a4 4 0 0 0-3-3.87",
+		key: "kshegd"
+	}],
+	["circle", {
+		cx: "9",
+		cy: "7",
+		r: "4",
+		key: "nufk8"
+	}]
+]);
+/**
+* @license lucide-react v0.575.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
 var Video = createLucideIcon("video", [["path", {
 	d: "m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5",
 	key: "ftymec"
@@ -760,4 +801,4 @@ var X = createLucideIcon("x", [["path", {
 	key: "d8bk6v"
 }]]);
 //#endregion
-export { Coffee as A, Lock as C, Heart as D, Image as E, Calendar as F, ArrowRight as I, ChevronRight as M, ChevronLeft as N, Film as O, Camera as P, LogOut as S, Link as T, Music as _, Sparkles as a, MapPin as b, Shuffle as c, Plus as d, Play as f, Pause as g, PenLine as h, Star as i, Clock as j, ExternalLink as k, Save as l, Pen as m, Video as n, SkipForward as o, Plane as p, Trash2 as r, SkipBack as s, X as t, Repeat as u, Music4 as v, LoaderCircle as w, Mail as x, Menu as y };
+export { Film as A, Mail as C, Link as D, LoaderCircle as E, ChevronLeft as F, Camera as I, Calendar as L, Coffee as M, Clock as N, Image as O, ChevronRight as P, ArrowRight as R, MapPin as S, Lock as T, PenLine as _, Trash2 as a, Music4 as b, SkipForward as c, Save as d, Repeat as f, Pen as g, Plane as h, User as i, ExternalLink as j, Heart as k, SkipBack as l, Play as m, Video as n, Star as o, Plus as p, Users as r, Sparkles as s, X as t, Shuffle as u, Pause as v, LogOut as w, Menu as x, Music as y };

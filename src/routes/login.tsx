@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { createFileRoute, redirect, useRouter } from "@tanstack/react-router";
-import { Heart, Lock, ArrowRight } from "lucide-react";
+import { Heart, Lock, ArrowRight, User } from "lucide-react";
 import { toast } from "sonner";
 import { getSession } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/login")({
-  loader: async ({ request }) => {
-    const { role } = await getSession(request);
+  loader: async () => {
+    const { role } = await getSession();
     if (role === "admin") {
       throw redirect({ to: "/admin" });
     }
@@ -19,6 +19,7 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginComponent() {
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -35,7 +36,7 @@ function LoginComponent() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ username, password }),
       });
       const data = await res.json();
 
@@ -50,7 +51,7 @@ function LoginComponent() {
           window.location.href = "/";
         }
       } else {
-        toast.error(data.error || "Incorrect password");
+        toast.error(data.error || "Incorrect username or password");
       }
     } catch (err: any) {
       console.error(err);
@@ -92,6 +93,19 @@ function LoginComponent() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted-foreground">
+              <User className="size-4" />
+            </div>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Username..."
+              className="w-full pl-11 pr-4 py-3.5 text-sm bg-surface/30 border border-border rounded-2xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-sans"
+            />
+          </div>
+
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted-foreground">
               <Lock className="size-4" />

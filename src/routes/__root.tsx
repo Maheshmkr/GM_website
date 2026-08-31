@@ -81,8 +81,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  loader: async (args: any) => {
-    throw new Error("Root loader args keys: " + Object.keys(args).join(", "));
+  loader: async ({ location }) => {
     // Skip protection for login, api, and static file requests
     if (
       location.pathname === "/login" ||
@@ -92,7 +91,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       return { role: null };
     }
 
-    const { role } = await getSession(request);
+    const { role } = await getSession();
 
     if (!role) {
       throw redirect({

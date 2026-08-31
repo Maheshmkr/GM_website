@@ -19,6 +19,7 @@ import {
   Loader2,
   X,
   Play,
+  Users,
 } from "lucide-react";
 import { SectionHeading } from "@/components/SectionHeading";
 import { Reveal } from "@/components/Reveal";
@@ -29,7 +30,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Tab = "photos" | "videos" | "songs" | "timeline";
+type Tab = "photos" | "videos" | "songs" | "timeline" | "users";
 
 function AdminPage() {
   const [activeTab, setActiveTab] = useState<Tab>("photos");
@@ -91,6 +92,7 @@ function AdminPage() {
             { id: "videos", label: "Videos", icon: Film },
             { id: "songs", label: "Songs", icon: Music },
             { id: "timeline", label: "Timeline", icon: Calendar },
+            { id: "users", label: "Users", icon: Users },
           ] as const
         ).map((t) => {
           const Icon = t.icon;
@@ -128,6 +130,9 @@ function AdminPage() {
             isLoading={loadingTimeline}
             queryClient={queryClient}
           />
+        )}
+        {activeTab === "users" && (
+          <UsersManager queryClient={queryClient} />
         )}
       </div>
     </section>
@@ -1439,6 +1444,187 @@ function TimelineManager({
                     title="Delete Record"
                   >
                     <Trash2 className="size-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ==========================================
+   USERS MANAGER COMPONENT
+   ========================================== */
+function UsersManager({ queryClient }: { queryClient: any }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [creating, setCreating] = useState(false);
+
+  const { data: users = [], isLoading } = useQuery({
+    queryKey: ["users"],
+    queryFn: async () => {
+      const res = await fetch("/api/users");
+      const payload = await readJsonResponse(res);
+      if (!payload.ok) throw new Error(payload.error || "Failed to fetch users");
+      return payload.data ?? [];
+    },
+  });
+
+  const createMutation = useMutation({
+    mutationFn: async (userData: any) => {
+      const res = await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(userData),
+      });
+      const payload = await readJsonResponse(res);
+      if (!payload.ok) throw new Error(payload.error || "Create user failed");
+      return payload.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      toast.success("User created successfully!");
+      setUsername("");
+      setPassword("");
+    },
+    onError: (err: any) => {
+      toast.error(`Error creating user: ${err.message}`);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
+      const payload = await readJsonResponse(res);
+      if (!payload.ok) throw new Error(payload.error || "Delete user failed");
+      return payload;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      toast.success("User deleted successfully!");
+    },
+    onError: (err: any) => {
+      toast.error(`Error deleting user: ${err.message}`);
+    },
+  });
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!username.trim()) {
+      toast.error("Username is required");
+      return;
+    }
+    if (!password.trim()) {
+      toast.error("Password is required");
+      return;
+    }
+
+    setCreating(true);
+    try {
+      await createMutation.mutateAsync({ username, password });
+    } catch (err) {
+      // Handled by mutation onError
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  return (
+    <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
+      {/* Create User Form */}
+      <div>
+        <h3 className="text-lg font-semibold flex items-center gap-2 mb-6">
+          <Plus className="size-5 text-primary" /> Create User Account
+        </h3>
+        <form onSubmit={handleCreate} className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1">Username</label>
+            <input
+              type="text"
+              placeholder="e.g. lovebird"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full text-sm bg-surface/50 border border-border rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1">Password</label>
+            <input
+              type="password"
+              placeholder="Enter account password..."
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full text-sm bg-surface/50 border border-border rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={creating}
+            className="w-full btn-love rounded-full py-3 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            {creating ? (
+              <>
+                <Loader2 className="size-4 animate-spin" /> Creating...
+              </>
+            ) : (
+              "Create User"
+            )}
+          </button>
+        </form>
+      </div>
+
+      {/* Users List */}
+      <div className="border-l border-border/30 pl-0 lg:pl-8">
+        <h3 className="text-lg font-semibold mb-6 flex justify-between items-center">
+          <span>User Accounts</span>
+          <span className="text-xs font-normal text-muted-foreground bg-secondary/80 px-2.5 py-1 rounded-full">
+            {users.length} accounts
+          </span>
+        </h3>
+
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20 text-muted-foreground text-sm gap-2">
+            <Loader2 className="size-5 animate-spin" /> Loading user accounts...
+          </div>
+        ) : users.length === 0 ? (
+          <div className="text-center py-20 text-muted-foreground text-sm">
+            No database user accounts found. Use the form to create one.
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {users.map((u: any) => (
+              <div
+                key={u._id}
+                className="bg-surface/30 border border-border rounded-2xl p-4 flex justify-between items-center relative group"
+              >
+                <div className="min-w-0">
+                  <h4 className="font-semibold text-sm truncate flex items-center gap-1.5">
+                    <Users className="size-4 text-primary" />
+                    {u.username}
+                  </h4>
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Role: <span className="text-foreground capitalize font-medium">{u.role}</span>
+                  </p>
+                  <p className="text-[9px] text-muted-foreground mt-0.5">
+                    Created: {new Date(u.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+
+                <div>
+                  <button
+                    onClick={() => {
+                      if (confirm(`Are you sure you want to delete user "${u.username}"?`)) {
+                        deleteMutation.mutate(u._id);
+                      }
+                    }}
+                    className="p-2 text-destructive hover:bg-destructive/10 rounded-full transition-colors"
+                    title="Delete Account"
+                  >
+                    <Trash2 className="size-4" />
                   </button>
                 </div>
               </div>
