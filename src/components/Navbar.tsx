@@ -1,5 +1,5 @@
 import { Link, useLoaderData, useRouter } from "@tanstack/react-router";
-import { Heart, Menu, Sparkles, X, LogOut } from "lucide-react";
+import { Heart, Menu, Sparkles, X, LogOut, LogIn } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const links = [
@@ -63,20 +63,28 @@ export function Navbar() {
         </ul>
 
         <div className="flex items-center justify-end gap-2">
-          {role && (
-            <span className="glass hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-medium sm:inline-flex">
-              {role === "admin" ? "Admin 🛠️" : "For You 💖"}
-            </span>
-          )}
-          {role && (
-            <button
-              onClick={handleLogout}
-              className="glass rounded-full px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 cursor-pointer flex items-center gap-1.5"
-              title="Logout"
+          {role ? (
+            <>
+              <span className="glass hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-medium sm:inline-flex">
+                {role === "admin" ? "Admin 🛠️" : "For You 💖"}
+              </span>
+              <button
+                onClick={handleLogout}
+                className="glass rounded-full px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 cursor-pointer flex items-center gap-1.5"
+                title="Logout"
+              >
+                <LogOut className="size-3.5" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
+            </>
+          ) : (
+            <Link
+              to="/login"
+              className="glass rounded-full px-4 py-2 text-sm font-medium text-foreground hover:bg-secondary/60 transition-colors flex items-center gap-1.5"
             >
-              <LogOut className="size-3.5" />
-              <span className="hidden sm:inline">Logout</span>
-            </button>
+              <LogIn className="size-3.5" />
+              <span>Login</span>
+            </Link>
           )}
           <button
             aria-label="Sparkle"
@@ -110,7 +118,7 @@ export function Navbar() {
                 </Link>
               </li>
             ))}
-            {role && (
+            {role ? (
               <li>
                 <button
                   onClick={async () => {
@@ -122,6 +130,17 @@ export function Navbar() {
                   <LogOut className="size-4" />
                   Logout
                 </button>
+              </li>
+            ) : (
+              <li>
+                <Link
+                  to="/login"
+                  onClick={() => setOpen(false)}
+                  className="block rounded-xl px-4 py-3 text-sm text-foreground transition-colors hover:bg-secondary flex items-center gap-2 font-medium"
+                >
+                  <LogIn className="size-4" />
+                  Login
+                </Link>
               </li>
             )}
           </ul>
