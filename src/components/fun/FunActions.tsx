@@ -1,7 +1,7 @@
 import { RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type ActionType = "stone" | "hand" | "punch" | "hit" | "slap" | "love";
+export type ActionType = "tomato" | "stone" | "hand" | "punch" | "hit" | "slap" | "love";
 
 export interface ActionItem {
   id: ActionType;
@@ -12,6 +12,13 @@ export interface ActionItem {
 }
 
 export const ACTIONS: ActionItem[] = [
+  {
+    id: "tomato",
+    label: "Tomato",
+    icon: "🍅",
+    description: "Throw a juicy tomato!",
+    color: "hover:border-red-500/60 hover:shadow-red-500/20",
+  },
   {
     id: "stone",
     label: "Stone",
@@ -77,7 +84,7 @@ export function FunActions({
     <div className="flex flex-col items-center justify-center gap-4 w-full">
       {/* Action Toolbar */}
       <div className="glass w-full rounded-3xl p-3 sm:p-4 shadow-xl border border-white/10 backdrop-blur-2xl">
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-6 sm:gap-3">
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-7 sm:gap-2.5">
           {ACTIONS.map((act) => {
             const isSelected = selectedAction === act.id;
             return (

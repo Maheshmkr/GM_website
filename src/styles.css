@@ -339,6 +339,22 @@
   100% { transform: scale(0.85) translateY(-25px); opacity: 0; }
 }
 
+@keyframes tomato-flight {
+  0% {
+    transform: translate(140px, 160px) scale(0.6) rotate(-45deg);
+    opacity: 0.8;
+  }
+  60% {
+    transform: translate(20px, -20px) scale(1.2) rotate(180deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.4) rotate(360deg);
+    opacity: 1;
+  }
+}
+
+
 @utility reveal {
   opacity: 0;
   transform: translateY(26px);

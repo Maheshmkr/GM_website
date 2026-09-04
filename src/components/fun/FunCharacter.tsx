@@ -56,6 +56,8 @@ export function FunCharacter({
   const getAnimationClass = () => {
     if (!isReacting || !activeAction) return "";
     switch (activeAction) {
+      case "tomato":
+        return "animate-hit-shake";
       case "stone":
         return "animate-stone-shake";
       case "hand":
@@ -80,6 +82,7 @@ export function FunCharacter({
         className={cn(
           "relative w-full aspect-[4/5] sm:aspect-square rounded-3xl p-3 sm:p-4 transition-all duration-500",
           "glass border border-white/15 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)]",
+          selectedAction === "tomato" && isReacting && "shadow-[0_0_80px_rgba(239,68,68,0.7)] border-red-500/60",
           selectedAction === "love" && isReacting && "shadow-[0_0_80px_rgba(244,114,182,0.6)] border-primary/60",
           selectedAction === "punch" && isReacting && "shadow-[0_0_80px_rgba(239,68,68,0.6)] border-red-500/60",
           selectedAction === "stone" && isReacting && "shadow-[0_0_80px_rgba(245,158,11,0.6)] border-amber-500/60"
@@ -114,6 +117,14 @@ export function FunCharacter({
           {/* Vignette & Soft Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20 pointer-events-none" />
 
+          {/* Hand holding Tomato Ready Indicator */}
+          {selectedAction === "tomato" && !isReacting && (
+            <div className="absolute top-3 right-3 z-25 flex items-center gap-1.5 glass bg-red-500/25 border-red-500/50 px-3 py-1 rounded-full shadow-lg animate-bounce pointer-events-none">
+              <span className="text-lg">✋🍅</span>
+              <span className="text-[11px] font-bold text-red-200">Ready to throw!</span>
+            </div>
+          )}
+
           {/* Interactive Hover Prompt Badge */}
           <div className="absolute bottom-3 inset-x-3 flex justify-center pointer-events-none z-25">
             <span
@@ -125,12 +136,18 @@ export function FunCharacter({
               )}
             >
               {selectedAction
-                ? `Tap to use ${selectedAction.toUpperCase()}! ✨`
+                ? `Tap to throw ${selectedAction.toUpperCase()}! 💥`
                 : "Select an action below & tap me! ✨"}
             </span>
           </div>
 
           {/* TEMPORARY FACIAL REACTION FLASHES DURING IMPACT */}
+          {isReacting && activeAction === "tomato" && (
+            <div className="aria-hidden pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-red-600/15 backdrop-brightness-110">
+              <span className="text-6xl animate-ping">🍅💥</span>
+            </div>
+          )}
+
           {isReacting && activeAction === "stone" && (
             <div className="aria-hidden pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-start pt-6 animate-pulse">
               <span className="text-4xl drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]">💥🪨</span>

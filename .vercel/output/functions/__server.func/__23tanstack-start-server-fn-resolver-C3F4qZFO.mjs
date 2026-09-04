@@ -1,7 +1,7 @@
-//#region node_modules/.nitro/vite/services/ssr/assets/__23tanstack-start-server-fn-resolver-9vULenFk.js
+//#region node_modules/.nitro/vite/services/ssr/assets/__23tanstack-start-server-fn-resolver-C3F4qZFO.js
 var manifest = { "fa53db6d7d99485381d3938c052e3e0d28ade00339fe126c775ad001a03de872": {
 	functionName: "getSession_createServerFn_handler",
-	importer: () => import("./_ssr/auth-client-Bz-ukL1A.mjs")
+	importer: () => import("./_ssr/auth-client-CKsw58W7.mjs")
 } };
 async function getServerFnById(id, access) {
 	const serverFnInfo = manifest[id];

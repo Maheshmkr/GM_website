@@ -8,14 +8,14 @@ import { c as createServerFn, i as TSS_SERVER_FUNCTION } from "./createServerFn-
 import { n as girlfriend } from "./site-_zOoiwhn.mjs";
 import { t as require_mongoose } from "../_libs/mongoose+mpath+mquery+ms+sift.mjs";
 import { t as dbConnect } from "./ssr.mjs";
-import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-9vULenFk.mjs";
+import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-C3F4qZFO.mjs";
 import { n as formatTime, r as useMusic, t as MusicProvider } from "./MusicProvider-CexXRw5f.mjs";
 import crypto from "crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-nRryjWRB.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-B79-B8g-.js
 var import_mongoose = /* @__PURE__ */ __toESM(require_mongoose());
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-ivy1Z0AY.css";
+var styles_default = "/assets/styles-CaoPgwAu.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -524,7 +524,7 @@ var Route$28 = createFileRoute("/")({
 });
 var $$splitComponentImporter$7 = () => import("./admin-BR4-nR0-.mjs");
 var Route$27 = createFileRoute("/admin")({ component: lazyRouteComponent($$splitComponentImporter$7, "component") });
-var $$splitComponentImporter$6 = () => import("./fun-NVNL3IrP.mjs");
+var $$splitComponentImporter$6 = () => import("./fun-f4YPNlf8.mjs");
 var title$5 = "Fun Zone ❤️ — Interactive Character Game";
 var description$5 = "Playful interactive cartoon reactions! Select an action like Stone, Hand, Punch, Hit, Slap or Love and tap the picture for fun visual effects.";
 var Route$26 = createFileRoute("/fun")({

@@ -7,10 +7,17 @@ import { g as Link } from "../_libs/@tanstack/react-router+[...].mjs";
 import { t as toast } from "../_libs/sonner.mjs";
 import { t as funZoneConfig } from "./site-_zOoiwhn.mjs";
 import { t as Reveal } from "./Reveal-DSJJWaqp.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/fun-NVNL3IrP.js
+//#region node_modules/.nitro/vite/services/ssr/assets/fun-f4YPNlf8.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var ACTIONS = [
+	{
+		id: "tomato",
+		label: "Tomato",
+		icon: "🍅",
+		description: "Throw a juicy tomato!",
+		color: "hover:border-red-500/60 hover:shadow-red-500/20"
+	},
 	{
 		id: "stone",
 		label: "Stone",
@@ -61,7 +68,7 @@ function FunActions({ selectedAction, onSelectAction, onReset, isReacting, damag
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 			className: "glass w-full rounded-3xl p-3 sm:p-4 shadow-xl border border-white/10 backdrop-blur-2xl",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "grid grid-cols-3 gap-2 sm:grid-cols-6 sm:gap-3",
+				className: "grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-7 sm:gap-2.5",
 				children: ACTIONS.map((act) => {
 					const isSelected = selectedAction === act.id;
 					return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
@@ -106,6 +113,11 @@ function FunActions({ selectedAction, onSelectAction, onReset, isReacting, damag
 	});
 }
 var ACTION_COMIC_TEXTS = {
+	tomato: {
+		text: "SPLAT!",
+		color: "from-red-600 via-rose-600 to-amber-500",
+		subText: "🍅 Juicy Splatter!"
+	},
 	stone: {
 		text: "BONK!",
 		color: "from-amber-400 to-orange-500",
@@ -138,6 +150,15 @@ var ACTION_COMIC_TEXTS = {
 	}
 };
 var ACTION_PARTICLES = {
+	tomato: [
+		"🍅",
+		"💥",
+		"🔴",
+		"✨",
+		"🩸",
+		"💦",
+		"⭐"
+	],
 	stone: [
 		"🪨",
 		"✨",
@@ -186,38 +207,89 @@ var ACTION_PARTICLES = {
 function ImpactEffect({ action, clickPos, triggerId }) {
 	const [particles, setParticles] = (0, import_react.useState)([]);
 	const [activeText, setActiveText] = (0, import_react.useState)(null);
+	const [isTomatoFlying, setIsTomatoFlying] = (0, import_react.useState)(false);
+	const [showTomatoSplat, setShowTomatoSplat] = (0, import_react.useState)(false);
+	const [targetPos, setTargetPos] = (0, import_react.useState)({
+		x: 50,
+		y: 50
+	});
 	(0, import_react.useEffect)(() => {
 		if (!action || triggerId === 0) return;
-		const comicInfo = ACTION_COMIC_TEXTS[action];
-		const particleTemplates = ACTION_PARTICLES[action];
 		const posX = clickPos?.x ?? 50;
 		const posY = clickPos?.y ?? 50;
-		setActiveText({
-			...comicInfo,
+		setTargetPos({
 			x: posX,
 			y: posY
 		});
-		const count = action === "love" ? 18 : 14;
-		const newParticles = Array.from({ length: count }, (_, i) => {
-			const angle = i / count * 2 * Math.PI + (Math.random() * .4 - .2);
-			const distance = 40 + Math.random() * 90;
-			return {
-				id: Date.now() + i,
-				x: posX,
-				y: posY,
-				size: 18 + Math.random() * 16,
-				dx: Math.cos(angle) * distance,
-				dy: Math.sin(angle) * distance - (action === "love" ? 40 : 10),
-				rotation: Math.random() * 360 - 180,
-				content: particleTemplates[i % particleTemplates.length]
+		const comicInfo = ACTION_COMIC_TEXTS[action];
+		const particleTemplates = ACTION_PARTICLES[action];
+		if (action === "tomato") {
+			setIsTomatoFlying(true);
+			setShowTomatoSplat(false);
+			const flyTimer = setTimeout(() => {
+				setIsTomatoFlying(false);
+				setShowTomatoSplat(true);
+				setActiveText({
+					...comicInfo,
+					x: posX,
+					y: posY
+				});
+				const count = 16;
+				const newParticles = Array.from({ length: count }, (_, i) => {
+					const angle = i / count * 2 * Math.PI + (Math.random() * .4 - .2);
+					const distance = 45 + Math.random() * 95;
+					return {
+						id: Date.now() + i,
+						x: posX,
+						y: posY,
+						size: 20 + Math.random() * 18,
+						dx: Math.cos(angle) * distance,
+						dy: Math.sin(angle) * distance + (Math.random() * 20 - 5),
+						rotation: Math.random() * 360 - 180,
+						content: particleTemplates[i % particleTemplates.length]
+					};
+				});
+				setParticles(newParticles);
+			}, 220);
+			const cleanupTimer = setTimeout(() => {
+				setShowTomatoSplat(false);
+				setParticles([]);
+				setActiveText(null);
+			}, 1e3);
+			return () => {
+				clearTimeout(flyTimer);
+				clearTimeout(cleanupTimer);
 			};
-		});
-		setParticles(newParticles);
-		const timer = setTimeout(() => {
-			setParticles([]);
-			setActiveText(null);
-		}, 850);
-		return () => clearTimeout(timer);
+		} else {
+			setIsTomatoFlying(false);
+			setShowTomatoSplat(false);
+			setActiveText({
+				...comicInfo,
+				x: posX,
+				y: posY
+			});
+			const count = action === "love" ? 18 : 14;
+			const newParticles = Array.from({ length: count }, (_, i) => {
+				const angle = i / count * 2 * Math.PI + (Math.random() * .4 - .2);
+				const distance = 40 + Math.random() * 90;
+				return {
+					id: Date.now() + i,
+					x: posX,
+					y: posY,
+					size: 18 + Math.random() * 16,
+					dx: Math.cos(angle) * distance,
+					dy: Math.sin(angle) * distance - (action === "love" ? 40 : 10),
+					rotation: Math.random() * 360 - 180,
+					content: particleTemplates[i % particleTemplates.length]
+				};
+			});
+			setParticles(newParticles);
+			const timer = setTimeout(() => {
+				setParticles([]);
+				setActiveText(null);
+			}, 850);
+			return () => clearTimeout(timer);
+		}
 	}, [
 		action,
 		clickPos,
@@ -226,32 +298,155 @@ function ImpactEffect({ action, clickPos, triggerId }) {
 	if (!action || triggerId === 0) return null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "aria-hidden pointer-events-none absolute inset-0 z-30 overflow-hidden rounded-3xl",
-		children: [activeText && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "absolute z-40 -translate-x-1/2 -translate-y-1/2 text-center",
-			style: {
-				left: `${activeText.x}%`,
-				top: `${Math.max(15, activeText.y - 10)}%`
-			},
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: `animate-comic-pop inline-block rounded-2xl bg-gradient-to-r ${activeText.color} px-5 py-2 text-2xl font-black tracking-wider text-white shadow-2xl drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] md:text-4xl`,
-				children: activeText.text
-			}), activeText.subText && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "mt-1 text-xs font-bold text-white/90 drop-shadow md:text-sm",
-				children: activeText.subText
-			})]
-		}), particles.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-			className: "absolute select-none transition-all duration-700 ease-out",
-			style: {
-				left: `${p.x}%`,
-				top: `${p.y}%`,
-				fontSize: `${p.size}px`,
-				transform: `translate(-50%, -50%) translate(${p.dx}px, ${p.dy}px) rotate(${p.rotation}deg)`,
-				opacity: 0,
-				animation: "particle-burst 0.75s ease-out forwards",
-				filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.4))"
-			},
-			children: p.content
-		}, p.id))]
+		children: [
+			isTomatoFlying && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "absolute z-40 transition-all duration-[220ms] ease-in-out text-5xl sm:text-6xl drop-shadow-[0_10px_20px_rgba(0,0,0,0.6)]",
+				style: {
+					left: `${targetPos.x}%`,
+					top: `${targetPos.y}%`,
+					transform: "translate(-50%, -50%) scale(1.3) rotate(360deg)",
+					animation: "tomato-flight 0.22s cubic-bezier(0.2, 0.8, 0.4, 1) forwards"
+				},
+				children: "🍅"
+			}),
+			showTomatoSplat && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "absolute z-35 -translate-x-1/2 -translate-y-1/2 select-none animate-in fade-in zoom-in-50 duration-150",
+				style: {
+					left: `${targetPos.x}%`,
+					top: `${targetPos.y}%`,
+					width: "180px",
+					height: "180px"
+				},
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
+					viewBox: "0 0 100 100",
+					className: "w-full h-full drop-shadow-[0_4px_12px_rgba(185,28,28,0.7)]",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
+							cx: "22",
+							cy: "18",
+							r: "7",
+							fill: "#dc2626",
+							opacity: "0.9"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
+							cx: "78",
+							cy: "22",
+							r: "8",
+							fill: "#b91c1c",
+							opacity: "0.85"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
+							cx: "88",
+							cy: "65",
+							r: "6.5",
+							fill: "#ef4444",
+							opacity: "0.95"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
+							cx: "15",
+							cy: "72",
+							r: "7.5",
+							fill: "#b91c1c",
+							opacity: "0.9"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
+							cx: "50",
+							cy: "92",
+							r: "9",
+							fill: "#dc2626",
+							opacity: "0.9"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
+							cx: "82",
+							cy: "45",
+							r: "4",
+							fill: "#f87171",
+							opacity: "0.9"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
+							cx: "12",
+							cy: "40",
+							r: "5",
+							fill: "#ef4444",
+							opacity: "0.9"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", {
+							d: "M 50 50 Q 52 75 48 88 Q 50 94 53 88 Q 55 75 50 50",
+							fill: "#b91c1c",
+							opacity: "0.9"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", {
+							d: "M 60 50 Q 68 68 72 78 Q 75 82 74 76 Q 66 65 60 50",
+							fill: "#dc2626",
+							opacity: "0.85"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", {
+							d: "M 50 20 C 65 18, 75 30, 80 42 C 86 55, 78 72, 68 78 C 55 85, 40 82, 30 75 C 18 68, 16 52, 22 38 C 28 25, 38 22, 50 20 Z",
+							fill: "#dc2626"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", {
+							d: "M 48 30 C 58 28, 68 36, 70 46 C 72 56, 64 68, 54 70 C 42 72, 34 65, 32 54 C 30 42, 38 32, 48 30 Z",
+							fill: "#ef4444"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
+							cx: "45",
+							cy: "40",
+							r: "4",
+							fill: "#fecaca",
+							opacity: "0.8"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
+							cx: "58",
+							cy: "48",
+							r: "3",
+							fill: "#fef08a",
+							opacity: "0.9"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
+							cx: "42",
+							cy: "56",
+							r: "2.5",
+							fill: "#fef08a",
+							opacity: "0.9"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
+							cx: "54",
+							cy: "36",
+							r: "2.5",
+							fill: "#fef08a",
+							opacity: "0.9"
+						})
+					]
+				})
+			}),
+			activeText && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "absolute z-40 -translate-x-1/2 -translate-y-1/2 text-center",
+				style: {
+					left: `${activeText.x}%`,
+					top: `${Math.max(15, activeText.y - 10)}%`
+				},
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: `animate-comic-pop inline-block rounded-2xl bg-gradient-to-r ${activeText.color} px-5 py-2 text-2xl font-black tracking-wider text-white shadow-2xl drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] md:text-4xl`,
+					children: activeText.text
+				}), activeText.subText && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "mt-1 text-xs font-bold text-white/90 drop-shadow md:text-sm",
+					children: activeText.subText
+				})]
+			}),
+			particles.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "absolute select-none transition-all duration-700 ease-out",
+				style: {
+					left: `${p.x}%`,
+					top: `${p.y}%`,
+					fontSize: `${p.size}px`,
+					transform: `translate(-50%, -50%) translate(${p.dx}px, ${p.dy}px) rotate(${p.rotation}deg)`,
+					opacity: 0,
+					animation: "particle-burst 0.75s ease-out forwards",
+					filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.4))"
+				},
+				children: p.content
+			}, p.id))
+		]
 	});
 }
 function FunCharacter({ imageSrc, characterName, selectedAction, isReacting, activeAction, damageLevel, onTap, triggerId }) {
@@ -281,6 +476,7 @@ function FunCharacter({ imageSrc, characterName, selectedAction, isReacting, act
 	const getAnimationClass = () => {
 		if (!isReacting || !activeAction) return "";
 		switch (activeAction) {
+			case "tomato": return "animate-hit-shake";
 			case "stone": return "animate-stone-shake";
 			case "hand": return "animate-hand-thwack";
 			case "punch": return "animate-punch-pop";
@@ -293,7 +489,7 @@ function FunCharacter({ imageSrc, characterName, selectedAction, isReacting, act
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "relative flex flex-col items-center justify-center w-full max-w-md mx-auto my-3 sm:my-5",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: cn("relative w-full aspect-[4/5] sm:aspect-square rounded-3xl p-3 sm:p-4 transition-all duration-500", "glass border border-white/15 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)]", selectedAction === "love" && isReacting && "shadow-[0_0_80px_rgba(244,114,182,0.6)] border-primary/60", selectedAction === "punch" && isReacting && "shadow-[0_0_80px_rgba(239,68,68,0.6)] border-red-500/60", selectedAction === "stone" && isReacting && "shadow-[0_0_80px_rgba(245,158,11,0.6)] border-amber-500/60"),
+			className: cn("relative w-full aspect-[4/5] sm:aspect-square rounded-3xl p-3 sm:p-4 transition-all duration-500", "glass border border-white/15 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)]", selectedAction === "tomato" && isReacting && "shadow-[0_0_80px_rgba(239,68,68,0.7)] border-red-500/60", selectedAction === "love" && isReacting && "shadow-[0_0_80px_rgba(244,114,182,0.6)] border-primary/60", selectedAction === "punch" && isReacting && "shadow-[0_0_80px_rgba(239,68,68,0.6)] border-red-500/60", selectedAction === "stone" && isReacting && "shadow-[0_0_80px_rgba(245,158,11,0.6)] border-amber-500/60"),
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				ref: containerRef,
 				onClick: handlePointerDown,
@@ -320,11 +516,28 @@ function FunCharacter({ imageSrc, characterName, selectedAction, isReacting, act
 						className: "w-full h-full object-cover object-center select-none pointer-events-none transition-all duration-300"
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20 pointer-events-none" }),
+					selectedAction === "tomato" && !isReacting && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "absolute top-3 right-3 z-25 flex items-center gap-1.5 glass bg-red-500/25 border-red-500/50 px-3 py-1 rounded-full shadow-lg animate-bounce pointer-events-none",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-lg",
+							children: "✋🍅"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-[11px] font-bold text-red-200",
+							children: "Ready to throw!"
+						})]
+					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 						className: "absolute bottom-3 inset-x-3 flex justify-center pointer-events-none z-25",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							className: cn("glass px-3.5 py-1.5 rounded-full text-xs font-semibold text-white tracking-wide transition-all duration-300 shadow-lg backdrop-blur-md", selectedAction ? "bg-primary/40 border-primary/50 text-white animate-pulse" : "bg-black/40 border-white/10 text-white/90 group-hover:bg-primary/30"),
-							children: selectedAction ? `Tap to use ${selectedAction.toUpperCase()}! ✨` : "Select an action below & tap me! ✨"
+							children: selectedAction ? `Tap to throw ${selectedAction.toUpperCase()}! 💥` : "Select an action below & tap me! ✨"
+						})
+					}),
+					isReacting && activeAction === "tomato" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "aria-hidden pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-red-600/15 backdrop-brightness-110",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-6xl animate-ping",
+							children: "🍅💥"
 						})
 					}),
 					isReacting && activeAction === "stone" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
