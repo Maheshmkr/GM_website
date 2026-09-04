@@ -1,7 +1,6 @@
 import { useState, useRef, MouseEvent, TouchEvent } from "react";
 import type { ActionType } from "./FunActions";
 import { ImpactEffect } from "./ImpactEffect";
-import { DamageOverlay } from "./DamageOverlay";
 import { cn } from "@/lib/utils";
 
 interface FunCharacterProps {
@@ -114,9 +113,6 @@ export function FunCharacter({
 
           {/* Vignette & Soft Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20 pointer-events-none" />
-
-          {/* PERSISTENT CUMULATIVE DAMAGE OVERLAY */}
-          <DamageOverlay damageLevel={damageLevel} />
 
           {/* Interactive Hover Prompt Badge */}
           <div className="absolute bottom-3 inset-x-3 flex justify-center pointer-events-none z-25">

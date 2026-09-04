@@ -21,6 +21,10 @@ import {
   Play,
   Users,
   Link as LinkIcon,
+  Sparkles,
+  Upload,
+  Image as ImageIcon,
+  CheckCircle2,
 } from "lucide-react";
 import { SectionHeading } from "@/components/SectionHeading";
 import { Reveal } from "@/components/Reveal";
@@ -31,7 +35,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Tab = "photos" | "videos" | "songs" | "timeline" | "users";
+type Tab = "photos" | "videos" | "songs" | "timeline" | "fun" | "users";
 
 function AdminPage() {
   const [activeTab, setActiveTab] = useState<Tab>("photos");
@@ -113,6 +117,7 @@ function AdminPage() {
             { id: "videos", label: "Videos", icon: Film },
             { id: "songs", label: "Songs", icon: Music },
             { id: "timeline", label: "Timeline", icon: Calendar },
+            { id: "fun", label: "Fun Zone Images", icon: Sparkles },
             { id: "users", label: "Users", icon: Users },
           ] as const
         ).map((t) => {
@@ -151,6 +156,9 @@ function AdminPage() {
             isLoading={loadingTimeline}
             queryClient={queryClient}
           />
+        )}
+        {activeTab === "fun" && (
+          <FunZoneManager queryClient={queryClient} />
         )}
         {activeTab === "users" && (
           <UsersManager queryClient={queryClient} />
@@ -1988,3 +1996,349 @@ function UsersManager({ queryClient }: { queryClient: any }) {
     </div>
   );
 }
+
+/* ==========================================
+   FUN ZONE MANAGER COMPONENT
+   ========================================== */
+interface FunZoneStageItem {
+  _id?: string;
+  stage: number;
+  title: string;
+  filename: string;
+  mimeType: string;
+  fileSize: number;
+  fileId: string;
+  url: string;
+  updatedAt?: string;
+}
+
+const STAGES_CONFIG = [
+  {
+    stage: 1,
+    title: "Stage 1 — Normal",
+    description: "Initial character appearance (default / no damage).",
+    color: "from-emerald-500/20 to-teal-500/10 border-emerald-500/30",
+    badge: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
+  },
+  {
+    stage: 2,
+    title: "Stage 2 — Small Injury",
+    description: "Slight scratch or minor impact reaction.",
+    color: "from-amber-500/20 to-yellow-500/10 border-amber-500/30",
+    badge: "text-amber-400 bg-amber-500/10 border-amber-500/30",
+  },
+  {
+    stage: 3,
+    title: "Stage 3 — Bruise",
+    description: "Cheek bruise or visible scratch mark.",
+    color: "from-orange-500/20 to-amber-500/10 border-orange-500/30",
+    badge: "text-orange-400 bg-orange-500/10 border-orange-500/30",
+  },
+  {
+    stage: 4,
+    title: "Stage 4 — Bandage",
+    description: "Bandage on forehead/cheek or noticeable wound.",
+    color: "from-rose-500/20 to-red-500/10 border-rose-500/30",
+    badge: "text-rose-400 bg-rose-500/10 border-rose-500/30",
+  },
+  {
+    stage: 5,
+    title: "Stage 5 — Maximum Injury",
+    description: "Exaggerated cartoon knockout, dizzy stars, heavy bandages.",
+    color: "from-purple-500/20 to-pink-500/10 border-purple-500/30",
+    badge: "text-purple-400 bg-purple-500/10 border-purple-500/30",
+  },
+];
+
+function FunZoneManager({ queryClient }: { queryClient: any }) {
+  const [uploadingStage, setUploadingStage] = useState<number | null>(null);
+  const [deletingStage, setDeletingStage] = useState<number | null>(null);
+
+  const { data: stages = [], isLoading } = useQuery<FunZoneStageItem[]>({
+    queryKey: ["fun-stages"],
+    queryFn: async () => {
+      try {
+        const res = await fetch("/api/fun/stages");
+        if (!res.ok) return [];
+        return await res.json();
+      } catch (err) {
+        console.error("Error fetching fun zone stages:", err);
+        return [];
+      }
+    },
+  });
+
+  const handleStageFileUpload = async (stageNum: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validation
+    const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    if (!allowed.includes(file.type)) {
+      toast.error("Please upload a valid image (JPEG, PNG, WebP, GIF).");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image file size must be under 10MB.");
+      return;
+    }
+
+    setUploadingStage(stageNum);
+    const formData = new FormData();
+    formData.append("stage", String(stageNum));
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/fun/stages", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to upload stage image");
+      }
+
+      toast.success(`Stage ${stageNum} image updated successfully!`);
+      queryClient.invalidateQueries({ queryKey: ["fun-stages"] });
+    } catch (err: any) {
+      console.error(err);
+      toast.error(`Upload error: ${err.message}`);
+    } finally {
+      setUploadingStage(null);
+      // Reset input value so same file can be re-selected if needed
+      e.target.value = "";
+    }
+  };
+
+  const handleDeleteStage = async (stageNum: number, title: string) => {
+    if (
+      !confirm(
+        `Are you sure you want to delete the image for "${title}"?\n\nThis will permanently remove it from MongoDB storage.`
+      )
+    ) {
+      return;
+    }
+
+    setDeletingStage(stageNum);
+    try {
+      const res = await fetch(`/api/fun/stages?stage=${stageNum}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to delete stage image");
+      }
+
+      toast.success(`Stage ${stageNum} image deleted from storage & database!`);
+      queryClient.invalidateQueries({ queryKey: ["fun-stages"] });
+    } catch (err: any) {
+      console.error(err);
+      toast.error(`Delete error: ${err.message}`);
+    } finally {
+      setDeletingStage(null);
+    }
+  };
+
+  const getStageData = (stageNum: number): FunZoneStageItem | undefined => {
+    return stages.find((s) => s.stage === stageNum);
+  };
+
+  return (
+    <div>
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/40 pb-6">
+        <div>
+          <h2 className="text-2xl font-bold flex items-center gap-2.5">
+            <Sparkles className="size-6 text-primary animate-spin" />
+            <span>💥 Fun Zone Images</span>
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1.5 max-w-2xl">
+            Upload the finished character images for each of the 5 damage stages. You can re-upload,
+            replace, or permanently delete images stored in MongoDB GridFS.
+          </p>
+        </div>
+
+        <div className="glass px-4 py-2 rounded-2xl flex items-center gap-2 text-xs font-semibold self-start sm:self-auto">
+          <span className="text-muted-foreground">Configured:</span>
+          <span className="text-primary font-bold">{stages.length} / 5 Stages</span>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-3">
+          <Loader2 className="size-8 animate-spin text-primary" />
+          <p className="text-sm">Loading Fun Zone stage configurations...</p>
+        </div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {STAGES_CONFIG.map((config) => {
+            const stageData = getStageData(config.stage);
+            const isCurrentUploading = uploadingStage === config.stage;
+            const isCurrentDeleting = deletingStage === config.stage;
+            const inputId = `fun-stage-upload-${config.stage}`;
+
+            return (
+              <div
+                key={config.stage}
+                className={cn(
+                  "relative flex flex-col justify-between rounded-3xl p-5 border bg-gradient-to-b transition-all duration-300 shadow-lg backdrop-blur-xl",
+                  config.color,
+                  stageData
+                    ? "border-white/20 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)]"
+                    : "border-dashed border-white/10"
+                )}
+              >
+                {/* Stage Header */}
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className="text-xs font-black uppercase tracking-wider text-muted-foreground">
+                      STAGE {config.stage}
+                    </span>
+                    {stageData ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        <CheckCircle2 className="size-3" /> Set
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-secondary/80 text-muted-foreground">
+                        Not Set
+                      </span>
+                    )}
+                  </div>
+
+                  <h3 className="font-bold text-base text-foreground leading-tight">
+                    {config.title}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-1 min-h-[32px] line-clamp-2">
+                    {config.description}
+                  </p>
+                </div>
+
+                {/* Stage Preview / Upload Zone */}
+                <div className="my-4 flex flex-col items-center justify-center">
+                  {stageData ? (
+                    <div className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden glass border border-white/20 shadow-inner group">
+                      <img
+                        src={stageData.url}
+                        alt={config.title}
+                        className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                      />
+
+                      {/* Quick delete button overlay */}
+                      <button
+                        onClick={() => handleDeleteStage(config.stage, config.title)}
+                        disabled={isCurrentDeleting || isCurrentUploading}
+                        title="Delete image from DB"
+                        className="absolute top-2.5 right-2.5 size-7 rounded-full bg-destructive/85 text-white flex items-center justify-center shadow-lg hover:bg-destructive transition-all opacity-0 group-hover:opacity-100 cursor-pointer hover:scale-110 disabled:opacity-50"
+                      >
+                        {isCurrentDeleting ? (
+                          <Loader2 className="size-3.5 animate-spin" />
+                        ) : (
+                          <Trash2 className="size-3.5" />
+                        )}
+                      </button>
+
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3 pointer-events-none">
+                        <p className="text-[11px] font-medium text-white truncate">
+                          {stageData.filename}
+                        </p>
+                        <p className="text-[10px] text-white/70">
+                          {(stageData.fileSize / 1024).toFixed(0)} KB
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-full aspect-[4/5] rounded-2xl border-2 border-dashed border-white/15 flex flex-col items-center justify-center text-center p-4 bg-black/20">
+                      <ImageIcon className="size-10 text-muted-foreground/40 mb-2" />
+                      <span className="text-xs font-medium text-muted-foreground">
+                        No image uploaded
+                      </span>
+                      <span className="text-[10px] text-muted-foreground/60 mt-0.5">
+                        JPG, PNG, WebP up to 10MB
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Upload / Replace & Delete Action Buttons */}
+                <div>
+                  <input
+                    type="file"
+                    id={inputId}
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    className="hidden"
+                    disabled={isCurrentUploading || isCurrentDeleting}
+                    onChange={(e) => handleStageFileUpload(config.stage, e)}
+                  />
+
+                  {stageData ? (
+                    <div className="flex items-center gap-2">
+                      <label
+                        htmlFor={inputId}
+                        className={cn(
+                          "flex-1 glass hover:bg-white/15 text-foreground py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-all border border-white/15 hover:scale-[1.02] active:scale-[0.98]",
+                          (isCurrentUploading || isCurrentDeleting) && "opacity-60 cursor-not-allowed pointer-events-none"
+                        )}
+                      >
+                        {isCurrentUploading ? (
+                          <>
+                            <Loader2 className="size-3.5 animate-spin text-primary" />
+                            <span>Replacing...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="size-3.5 text-primary" />
+                            <span>Replace</span>
+                          </>
+                        )}
+                      </label>
+
+                      <button
+                        onClick={() => handleDeleteStage(config.stage, config.title)}
+                        disabled={isCurrentDeleting || isCurrentUploading}
+                        title={`Delete ${config.title} from MongoDB storage`}
+                        className={cn(
+                          "glass hover:bg-destructive/20 text-destructive border border-destructive/30 py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98]",
+                          (isCurrentDeleting || isCurrentUploading) && "opacity-60 cursor-not-allowed"
+                        )}
+                      >
+                        {isCurrentDeleting ? (
+                          <Loader2 className="size-3.5 animate-spin" />
+                        ) : (
+                          <Trash2 className="size-3.5" />
+                        )}
+                        <span className="hidden sm:inline">Delete</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <label
+                      htmlFor={inputId}
+                      className={cn(
+                        "w-full btn-love py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md hover:scale-[1.02] active:scale-[0.98]",
+                        isCurrentUploading && "opacity-60 cursor-not-allowed"
+                      )}
+                    >
+                      {isCurrentUploading ? (
+                        <>
+                          <Loader2 className="size-3.5 animate-spin text-white" />
+                          <span>Uploading...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="size-3.5" />
+                          <span>Upload Image</span>
+                        </>
+                      )}
+                    </label>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+

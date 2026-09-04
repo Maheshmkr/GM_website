@@ -1,13 +1,13 @@
 import { o as __toESM } from "../_runtime.mjs";
 import { t as cn } from "./utils-C_uf36nf.mjs";
-import { a as require_react, o as require_jsx_runtime } from "../_libs/react+tanstack__react-query.mjs";
-import { A as Image, V as ArrowLeft, f as RotateCcw, s as Sparkles } from "../_libs/lucide-react.mjs";
+import { a as require_react, n as useQuery, o as require_jsx_runtime } from "../_libs/react+tanstack__react-query.mjs";
+import { U as ArrowLeft, c as Sparkles, p as RotateCcw } from "../_libs/lucide-react.mjs";
 import { t as SectionHeading } from "./SectionHeading-BVG9eVYl.mjs";
 import { g as Link } from "../_libs/@tanstack/react-router+[...].mjs";
 import { t as toast } from "../_libs/sonner.mjs";
-import { o as photos, t as funZoneConfig } from "./site-_zOoiwhn.mjs";
+import { t as funZoneConfig } from "./site-_zOoiwhn.mjs";
 import { t as Reveal } from "./Reveal-DSJJWaqp.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/fun-DinIa_Yv.js
+//#region node_modules/.nitro/vite/services/ssr/assets/fun-NVNL3IrP.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var ACTIONS = [
@@ -54,7 +54,8 @@ var ACTIONS = [
 		color: "hover:border-primary/80 hover:shadow-primary/30"
 	}
 ];
-function FunActions({ selectedAction, onSelectAction, onReset, isReacting }) {
+function FunActions({ selectedAction, onSelectAction, onReset, isReacting, damageLevel = 0 }) {
+	const canReset = Boolean(selectedAction || isReacting || damageLevel > 0);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "flex flex-col items-center justify-center gap-4 w-full",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -96,9 +97,9 @@ function FunActions({ selectedAction, onSelectAction, onReset, isReacting }) {
 				}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Tip: Select an action button above to start." })
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 				onClick: onReset,
-				disabled: !selectedAction && !isReacting,
+				disabled: !canReset,
 				"aria-label": "Reset action and restore picture",
-				className: cn("glass rounded-full px-4 py-2 text-xs font-semibold transition-all duration-300 flex items-center gap-1.5 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary", selectedAction || isReacting ? "text-destructive hover:bg-destructive/15 border-destructive/30 hover:scale-105" : "text-muted-foreground/40 opacity-50 cursor-not-allowed border-white/5"),
+				className: cn("glass rounded-full px-4 py-2 text-xs font-semibold transition-all duration-300 flex items-center gap-1.5 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary", canReset ? "text-destructive hover:bg-destructive/15 border-destructive/30 hover:scale-105" : "text-muted-foreground/40 opacity-50 cursor-not-allowed border-white/5"),
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RotateCcw, { className: "size-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Reset" })]
 			})]
 		})]
@@ -253,100 +254,6 @@ function ImpactEffect({ action, clickPos, triggerId }) {
 		}, p.id))]
 	});
 }
-function DamageOverlay({ damageLevel }) {
-	if (damageLevel <= 0) return null;
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "aria-hidden pointer-events-none absolute inset-0 z-15 overflow-hidden rounded-2xl select-none",
-		children: [
-			damageLevel >= 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-[48%] right-[18%] w-14 h-14 rounded-full bg-rose-600/40 blur-md" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "absolute top-[50%] right-[22%] w-10 h-6 flex items-center justify-center -rotate-12 drop-shadow",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
-					viewBox: "0 0 40 24",
-					className: "w-full h-full text-red-500 fill-none stroke-current stroke-[2.5]",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", {
-						d: "M 5,12 Q 15,4 25,12 T 35,8",
-						strokeLinecap: "round"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", {
-						d: "M 12,18 L 24,6",
-						strokeLinecap: "round"
-					})]
-				})
-			})] }),
-			damageLevel >= 2 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-[42%] left-[18%] w-16 h-16 rounded-full bg-gradient-to-br from-purple-700/60 via-indigo-600/50 to-rose-600/40 blur-[2px] border border-purple-400/40 shadow-inner" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "absolute top-[46%] left-[22%] w-9 h-6 rotate-12",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
-					viewBox: "0 0 30 20",
-					className: "w-full h-full text-amber-300 stroke-current stroke-2 fill-none",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", {
-						d: "M 4,6 L 24,14",
-						strokeLinecap: "round"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", {
-						d: "M 8,16 L 22,4",
-						strokeLinecap: "round"
-					})]
-				})
-			})] }),
-			damageLevel >= 3 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "absolute top-[18%] left-[30%] w-[40%] h-[11%] -rotate-6 bg-gradient-to-r from-amber-100 via-stone-100 to-amber-100 border-2 border-amber-300/90 rounded-lg shadow-lg flex items-center justify-center",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "w-7 h-full bg-amber-200/70 border-x border-amber-300/70 flex items-center justify-center",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-[11px] font-bold text-amber-800/80 select-none",
-						children: "✚"
-					})
-				})
-			}) }),
-			damageLevel >= 4 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "absolute top-[54%] right-[16%] w-10 h-10 flex items-center justify-center",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute w-9 h-3.5 bg-amber-100 border-2 border-amber-300/90 rounded rotate-45 shadow-md" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute w-9 h-3.5 bg-amber-100 border-2 border-amber-300/90 rounded -rotate-45 shadow-md" })]
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "absolute top-[72%] left-[40%] w-14 h-7 opacity-90",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
-					viewBox: "0 0 40 20",
-					className: "w-full h-full text-rose-500 fill-none stroke-current stroke-[2.5]",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", {
-						d: "M 6,10 L 18,14",
-						strokeLinecap: "round"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", {
-						d: "M 22,6 L 34,12",
-						strokeLinecap: "round"
-					})]
-				})
-			})] }),
-			damageLevel >= 5 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "absolute top-[2%] inset-x-0 flex justify-center items-center gap-2 animate-bounce",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-xl animate-spin",
-							children: "💫"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-2xl animate-pulse",
-							children: "⭐"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-xl animate-spin",
-							children: "💫"
-						})
-					]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "absolute top-[40%] left-[14%] w-9 h-9 flex items-center justify-center",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute w-8 h-3 bg-yellow-100 border border-yellow-400 rounded rotate-30 shadow-sm" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute w-8 h-3 bg-yellow-100 border border-yellow-400 rounded -rotate-60 shadow-sm" })]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "absolute top-[24%] right-[12%] text-2xl animate-pulse",
-					children: "💧"
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "absolute top-[4%] right-[4%] bg-red-600/90 text-white font-black text-[10px] tracking-wider px-2 py-0.5 rounded-full border border-red-300 shadow-lg animate-pulse",
-					children: "MAX DAMAGE! 😵"
-				})
-			] })
-		]
-	});
-}
 function FunCharacter({ imageSrc, characterName, selectedAction, isReacting, activeAction, damageLevel, onTap, triggerId }) {
 	const [clickPos, setClickPos] = (0, import_react.useState)(null);
 	const containerRef = (0, import_react.useRef)(null);
@@ -413,7 +320,6 @@ function FunCharacter({ imageSrc, characterName, selectedAction, isReacting, act
 						className: "w-full h-full object-cover object-center select-none pointer-events-none transition-all duration-300"
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20 pointer-events-none" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DamageOverlay, { damageLevel }),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 						className: "absolute bottom-3 inset-x-3 flex justify-center pointer-events-none z-25",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
@@ -479,41 +385,35 @@ function FunCharacter({ imageSrc, characterName, selectedAction, isReacting, act
 		})
 	});
 }
-var DAMAGE_DESCRIPTIONS = [
+var STAGE_INFO = [
 	{
-		level: 0,
-		text: "Normal 🙂",
-		detail: "No damage",
+		stage: 1,
+		title: "Stage 1 — Normal",
+		badge: "Normal 🙂",
 		color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30"
 	},
 	{
-		level: 1,
-		text: "Small Hit 🩹",
-		detail: "Tiny cheek scratch",
+		stage: 2,
+		title: "Stage 2 — Small Injury",
+		badge: "Small Hit 🩹",
 		color: "text-amber-400 bg-amber-500/10 border-amber-500/30"
 	},
 	{
-		level: 2,
-		text: "Bruised 😣",
-		detail: "Cartoon cheek bruise",
+		stage: 3,
+		title: "Stage 3 — Bruise",
+		badge: "Bruised 😣",
 		color: "text-orange-400 bg-orange-500/10 border-orange-500/30"
 	},
 	{
-		level: 3,
-		text: "Bandaged 🩹",
-		detail: "Forehead cartoon bandage",
+		stage: 4,
+		title: "Stage 4 — Bandage",
+		badge: "Bandaged 🩹",
 		color: "text-rose-400 bg-rose-500/10 border-rose-500/30"
 	},
 	{
-		level: 4,
-		text: "Heavy Damage 😵",
-		detail: "Scratches & cross-bandages",
-		color: "text-red-400 bg-red-500/10 border-red-500/30"
-	},
-	{
-		level: 5,
-		text: "MAX DAMAGE! 💫",
-		detail: "Exaggerated cartoon state!",
+		stage: 5,
+		title: "Stage 5 — Maximum Injury",
+		badge: "MAX DAMAGE! 💫",
 		color: "text-purple-400 bg-purple-500/20 border-purple-500/50 animate-pulse"
 	}
 ];
@@ -523,21 +423,27 @@ function FunZone() {
 	const [isReacting, setIsReacting] = (0, import_react.useState)(false);
 	const [damageLevel, setDamageLevel] = (0, import_react.useState)(0);
 	const [triggerId, setTriggerId] = (0, import_react.useState)(0);
-	const availableImages = [{
-		src: funZoneConfig.characterImage,
-		label: "Default Hero"
-	}, ...photos.slice(0, 5).map((p, idx) => ({
-		src: p.image,
-		label: p.caption || `Photo ${idx + 1}`
-	}))];
-	const [currentImageIndex, setCurrentImageIndex] = (0, import_react.useState)(0);
-	const currentImage = availableImages[currentImageIndex]?.src || funZoneConfig.characterImage;
+	const { data: stages = [] } = useQuery({
+		queryKey: ["fun-stages"],
+		queryFn: async () => {
+			try {
+				const res = await fetch("/api/fun/stages");
+				if (!res.ok) return [];
+				return await res.json();
+			} catch (err) {
+				console.error("Error fetching fun zone stages:", err);
+				return [];
+			}
+		}
+	});
+	const currentStageInfo = STAGE_INFO[damageLevel] || STAGE_INFO[0];
+	const currentImage = stages.find((s) => s.stage === currentStageInfo.stage)?.url || funZoneConfig.characterImage;
 	const handleSelectAction = (action) => {
 		setSelectedAction(action);
 		const actDef = ACTIONS.find((a) => a.id === action);
 		if (actDef) toast.info(`${actDef.icon} ${actDef.label} selected — now tap the picture!`, { duration: 1800 });
 	};
-	const handleTapCharacter = (clickPos) => {
+	const handleTapCharacter = () => {
 		if (!selectedAction) {
 			toast.warning("Please select an action from the toolbar below first!", { icon: "👇" });
 			return;
@@ -546,15 +452,18 @@ function FunZone() {
 		setIsReacting(true);
 		setTriggerId((prev) => prev + 1);
 		if (selectedAction !== "love") setDamageLevel((prev) => {
-			const next = Math.min(prev + 1, 5);
-			if (next === 5 && prev < 5) toast.error("MAX DAMAGE REACHED! 💫 Bandages & bruises everywhere!", { duration: 2500 });
+			const next = Math.min(prev + 1, 4);
+			if (next === 4 && prev < 4) toast.error("Stage 5 — Maximum Injury reached! 💫", { duration: 2500 });
 			return next;
 		});
 		else setDamageLevel((prev) => {
 			if (prev > 0) {
-				toast.success("❤️ Love healed a bit of damage!", { duration: 1800 });
-				return Math.max(0, prev - 1);
+				const next = Math.max(0, prev - 1);
+				const healedStage = STAGE_INFO[next];
+				toast.success(`❤️ Love healed! Back to ${healedStage?.title || "Stage 1"} ✨`, { duration: 2e3 });
+				return next;
 			}
+			toast.success("❤️ LOVE! ✨ All healed & happy!", { duration: 1800 });
 			return 0;
 		});
 		setTimeout(() => {
@@ -567,28 +476,18 @@ function FunZone() {
 		setIsReacting(false);
 		setDamageLevel(0);
 		setTriggerId(0);
-		toast.success("✨ Everything reset back to normal!", { duration: 1500 });
+		toast.success("↻ Reset back to Stage 1 (Normal)!", { duration: 1500 });
 	};
-	const handleNextPhoto = () => {
-		setCurrentImageIndex((prev) => (prev + 1) % availableImages.length);
-		setDamageLevel(0);
-	};
-	const currentDamageInfo = DAMAGE_DESCRIPTIONS[damageLevel] || DAMAGE_DESCRIPTIONS[0];
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 		className: "section-shell relative py-6 lg:py-10 min-h-[85vh] flex flex-col justify-between",
 		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "flex items-center justify-between mb-6",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
 					to: "/",
 					className: "glass rounded-full px-4 py-2 text-xs sm:text-sm font-semibold text-muted-foreground hover:text-foreground transition-all flex items-center gap-2 hover:scale-105",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "size-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Back to Home" })]
-				}), availableImages.length > 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-					onClick: handleNextPhoto,
-					"aria-label": "Switch character photo",
-					className: "glass rounded-full px-3.5 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20 transition-all flex items-center gap-1.5 cursor-pointer",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Image, { className: "size-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Switch Photo" })]
-				})]
+				})
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SectionHeading, {
 				title: funZoneConfig.title,
 				subtitle: funZoneConfig.subtitle
@@ -608,13 +507,9 @@ function FunZone() {
 					}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 						className: "inline-flex items-center gap-2 glass px-4 py-1.5 rounded-full text-xs font-medium text-muted-foreground",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "👇 Choose an action & tap the picture!" })
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: `inline-flex items-center gap-1.5 glass px-3 py-1 rounded-full text-xs font-bold border ${currentDamageInfo.color}`,
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-							"Damage Lvl ",
-							damageLevel,
-							"/5:"
-						] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: currentDamageInfo.text })]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: `inline-flex items-center gap-1.5 glass px-3 py-1 rounded-full text-xs font-bold border ${currentStageInfo.color}`,
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: currentStageInfo.title })
 					})]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FunCharacter, {
 					imageSrc: currentImage,
@@ -633,7 +528,8 @@ function FunZone() {
 					selectedAction,
 					onSelectAction: handleSelectAction,
 					onReset: handleReset,
-					isReacting
+					isReacting,
+					damageLevel
 				})
 			}) })
 		]

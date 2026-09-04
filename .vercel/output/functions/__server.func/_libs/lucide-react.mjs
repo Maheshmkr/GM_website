@@ -204,6 +204,21 @@ var ChevronRight = createLucideIcon("chevron-right", [["path", {
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
+var CircleCheck = createLucideIcon("circle-check", [["circle", {
+	cx: "12",
+	cy: "12",
+	r: "10",
+	key: "1mglay"
+}], ["path", {
+	d: "m9 12 2 2 4-4",
+	key: "dzmm74"
+}]]);
+/**
+* @license lucide-react v0.575.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
 var Clock = createLucideIcon("clock", [["circle", {
 	cx: "12",
 	cy: "12",
@@ -781,6 +796,26 @@ var Trash2 = createLucideIcon("trash-2", [
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
+var Upload = createLucideIcon("upload", [
+	["path", {
+		d: "M12 3v12",
+		key: "1x0j5s"
+	}],
+	["path", {
+		d: "m17 8-5-5-5 5",
+		key: "7q97r8"
+	}],
+	["path", {
+		d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4",
+		key: "ih7n3h"
+	}]
+]);
+/**
+* @license lucide-react v0.575.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
 var User = createLucideIcon("user", [["path", {
 	d: "M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2",
 	key: "975kel"
@@ -847,4 +882,4 @@ var X = createLucideIcon("x", [["path", {
 	key: "d8bk6v"
 }]]);
 //#endregion
-export { Image as A, ArrowRight as B, MapPin as C, Lock as D, LogIn as E, Clock as F, ChevronRight as I, ChevronLeft as L, Film as M, ExternalLink as N, LoaderCircle as O, Coffee as P, Camera as R, Menu as S, LogOut as T, ArrowLeft as V, Pen as _, Trash2 as a, Music as b, SkipForward as c, Save as d, RotateCcw as f, Plane as g, Play as h, User as i, Heart as j, Link as k, SkipBack as l, Plus as m, Video as n, Star as o, Repeat as p, Users as r, Sparkles as s, X as t, Shuffle as u, PenLine as v, Mail as w, Music4 as x, Pause as y, Calendar as z };
+export { Link as A, Camera as B, Menu as C, LogIn as D, LogOut as E, Coffee as F, ArrowRight as H, Clock as I, CircleCheck as L, Heart as M, Film as N, Lock as O, ExternalLink as P, ChevronRight as R, Music4 as S, Mail as T, ArrowLeft as U, Calendar as V, Plane as _, Upload as a, Pause as b, Sparkles as c, Shuffle as d, Save as f, Play as g, Plus as h, User as i, Image as j, LoaderCircle as k, SkipForward as l, Repeat as m, Video as n, Trash2 as o, RotateCcw as p, Users as r, Star as s, X as t, SkipBack as u, Pen as v, MapPin as w, Music as x, PenLine as y, ChevronLeft as z };

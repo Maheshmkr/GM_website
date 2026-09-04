@@ -2,10 +2,10 @@ import { o as __toESM } from "../_runtime.mjs";
 import { t as readJsonResponse } from "./api-BUT7_u4b.mjs";
 import { t as cn } from "./utils-C_uf36nf.mjs";
 import { a as require_react, i as useQueryClient, n as useQuery, o as require_jsx_runtime, t as useMutation } from "../_libs/react+tanstack__react-query.mjs";
-import { C as MapPin, F as Clock, M as Film, N as ExternalLink, O as LoaderCircle, R as Camera, _ as Pen, a as Trash2, b as Music, h as Play, j as Heart, k as Link, m as Plus, r as Users, t as X, x as Music4, z as Calendar } from "../_libs/lucide-react.mjs";
+import { A as Link, B as Camera, I as Clock, L as CircleCheck, M as Heart, N as Film, P as ExternalLink, S as Music4, V as Calendar, a as Upload, c as Sparkles, g as Play, h as Plus, j as Image, k as LoaderCircle, o as Trash2, r as Users, t as X, v as Pen, w as MapPin, x as Music } from "../_libs/lucide-react.mjs";
 import { t as SectionHeading } from "./SectionHeading-BVG9eVYl.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/admin-B6RtHnm4.js
+//#region node_modules/.nitro/vite/services/ssr/assets/admin-BR4-nR0-.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function AdminPage() {
@@ -98,6 +98,11 @@ function AdminPage() {
 						icon: Calendar
 					},
 					{
+						id: "fun",
+						label: "Fun Zone Images",
+						icon: Sparkles
+					},
+					{
 						id: "users",
 						label: "Users",
 						icon: Users
@@ -134,6 +139,7 @@ function AdminPage() {
 						isLoading: loadingTimeline,
 						queryClient
 					}),
+					activeTab === "fun" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FunZoneManager, { queryClient }),
 					activeTab === "users" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(UsersManager, { queryClient })
 				]
 			})
@@ -1728,6 +1734,248 @@ function UsersManager({ queryClient }) {
 			})]
 		})]
 	});
+}
+var STAGES_CONFIG = [
+	{
+		stage: 1,
+		title: "Stage 1 — Normal",
+		description: "Initial character appearance (default / no damage).",
+		color: "from-emerald-500/20 to-teal-500/10 border-emerald-500/30",
+		badge: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30"
+	},
+	{
+		stage: 2,
+		title: "Stage 2 — Small Injury",
+		description: "Slight scratch or minor impact reaction.",
+		color: "from-amber-500/20 to-yellow-500/10 border-amber-500/30",
+		badge: "text-amber-400 bg-amber-500/10 border-amber-500/30"
+	},
+	{
+		stage: 3,
+		title: "Stage 3 — Bruise",
+		description: "Cheek bruise or visible scratch mark.",
+		color: "from-orange-500/20 to-amber-500/10 border-orange-500/30",
+		badge: "text-orange-400 bg-orange-500/10 border-orange-500/30"
+	},
+	{
+		stage: 4,
+		title: "Stage 4 — Bandage",
+		description: "Bandage on forehead/cheek or noticeable wound.",
+		color: "from-rose-500/20 to-red-500/10 border-rose-500/30",
+		badge: "text-rose-400 bg-rose-500/10 border-rose-500/30"
+	},
+	{
+		stage: 5,
+		title: "Stage 5 — Maximum Injury",
+		description: "Exaggerated cartoon knockout, dizzy stars, heavy bandages.",
+		color: "from-purple-500/20 to-pink-500/10 border-purple-500/30",
+		badge: "text-purple-400 bg-purple-500/10 border-purple-500/30"
+	}
+];
+function FunZoneManager({ queryClient }) {
+	const [uploadingStage, setUploadingStage] = (0, import_react.useState)(null);
+	const [deletingStage, setDeletingStage] = (0, import_react.useState)(null);
+	const { data: stages = [], isLoading } = useQuery({
+		queryKey: ["fun-stages"],
+		queryFn: async () => {
+			try {
+				const res = await fetch("/api/fun/stages");
+				if (!res.ok) return [];
+				return await res.json();
+			} catch (err) {
+				console.error("Error fetching fun zone stages:", err);
+				return [];
+			}
+		}
+	});
+	const handleStageFileUpload = async (stageNum, e) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+		if (![
+			"image/jpeg",
+			"image/png",
+			"image/webp",
+			"image/gif"
+		].includes(file.type)) {
+			toast.error("Please upload a valid image (JPEG, PNG, WebP, GIF).");
+			return;
+		}
+		if (file.size > 10485760) {
+			toast.error("Image file size must be under 10MB.");
+			return;
+		}
+		setUploadingStage(stageNum);
+		const formData = new FormData();
+		formData.append("stage", String(stageNum));
+		formData.append("file", file);
+		try {
+			const res = await fetch("/api/fun/stages", {
+				method: "POST",
+				body: formData
+			});
+			const data = await res.json();
+			if (!res.ok) throw new Error(data.error || "Failed to upload stage image");
+			toast.success(`Stage ${stageNum} image updated successfully!`);
+			queryClient.invalidateQueries({ queryKey: ["fun-stages"] });
+		} catch (err) {
+			console.error(err);
+			toast.error(`Upload error: ${err.message}`);
+		} finally {
+			setUploadingStage(null);
+			e.target.value = "";
+		}
+	};
+	const handleDeleteStage = async (stageNum, title) => {
+		if (!confirm(`Are you sure you want to delete the image for "${title}"?\n\nThis will permanently remove it from MongoDB storage.`)) return;
+		setDeletingStage(stageNum);
+		try {
+			const res = await fetch(`/api/fun/stages?stage=${stageNum}`, { method: "DELETE" });
+			const data = await res.json();
+			if (!res.ok) throw new Error(data.error || "Failed to delete stage image");
+			toast.success(`Stage ${stageNum} image deleted from storage & database!`);
+			queryClient.invalidateQueries({ queryKey: ["fun-stages"] });
+		} catch (err) {
+			console.error(err);
+			toast.error(`Delete error: ${err.message}`);
+		} finally {
+			setDeletingStage(null);
+		}
+	};
+	const getStageData = (stageNum) => {
+		return stages.find((s) => s.stage === stageNum);
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/40 pb-6",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", {
+			className: "text-2xl font-bold flex items-center gap-2.5",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sparkles, { className: "size-6 text-primary animate-spin" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "💥 Fun Zone Images" })]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			className: "text-sm text-muted-foreground mt-1.5 max-w-2xl",
+			children: "Upload the finished character images for each of the 5 damage stages. You can re-upload, replace, or permanently delete images stored in MongoDB GridFS."
+		})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "glass px-4 py-2 rounded-2xl flex items-center gap-2 text-xs font-semibold self-start sm:self-auto",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "text-muted-foreground",
+				children: "Configured:"
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+				className: "text-primary font-bold",
+				children: [stages.length, " / 5 Stages"]
+			})]
+		})]
+	}), isLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "flex flex-col items-center justify-center py-20 text-muted-foreground gap-3",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-8 animate-spin text-primary" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			className: "text-sm",
+			children: "Loading Fun Zone stage configurations..."
+		})]
+	}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5",
+		children: STAGES_CONFIG.map((config) => {
+			const stageData = getStageData(config.stage);
+			const isCurrentUploading = uploadingStage === config.stage;
+			const isCurrentDeleting = deletingStage === config.stage;
+			const inputId = `fun-stage-upload-${config.stage}`;
+			return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: cn("relative flex flex-col justify-between rounded-3xl p-5 border bg-gradient-to-b transition-all duration-300 shadow-lg backdrop-blur-xl", config.color, stageData ? "border-white/20 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)]" : "border-dashed border-white/10"),
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center justify-between gap-2 mb-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+								className: "text-xs font-black uppercase tracking-wider text-muted-foreground",
+								children: ["STAGE ", config.stage]
+							}), stageData ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+								className: "inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "size-3" }), " Set"]
+							}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-[10px] font-medium px-2 py-0.5 rounded-full bg-secondary/80 text-muted-foreground",
+								children: "Not Set"
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+							className: "font-bold text-base text-foreground leading-tight",
+							children: config.title
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-xs text-muted-foreground mt-1 min-h-[32px] line-clamp-2",
+							children: config.description
+						})
+					] }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "my-4 flex flex-col items-center justify-center",
+						children: stageData ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "relative w-full aspect-[4/5] rounded-2xl overflow-hidden glass border border-white/20 shadow-inner group",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+									src: stageData.url,
+									alt: config.title,
+									className: "w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									onClick: () => handleDeleteStage(config.stage, config.title),
+									disabled: isCurrentDeleting || isCurrentUploading,
+									title: "Delete image from DB",
+									className: "absolute top-2.5 right-2.5 size-7 rounded-full bg-destructive/85 text-white flex items-center justify-center shadow-lg hover:bg-destructive transition-all opacity-0 group-hover:opacity-100 cursor-pointer hover:scale-110 disabled:opacity-50",
+									children: isCurrentDeleting ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-3.5 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "size-3.5" })
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3 pointer-events-none",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "text-[11px] font-medium text-white truncate",
+										children: stageData.filename
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+										className: "text-[10px] text-white/70",
+										children: [(stageData.fileSize / 1024).toFixed(0), " KB"]
+									})]
+								})
+							]
+						}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "w-full aspect-[4/5] rounded-2xl border-2 border-dashed border-white/15 flex flex-col items-center justify-center text-center p-4 bg-black/20",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Image, { className: "size-10 text-muted-foreground/40 mb-2" }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-xs font-medium text-muted-foreground",
+									children: "No image uploaded"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-[10px] text-muted-foreground/60 mt-0.5",
+									children: "JPG, PNG, WebP up to 10MB"
+								})
+							]
+						})
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+						type: "file",
+						id: inputId,
+						accept: "image/jpeg,image/png,image/webp,image/gif",
+						className: "hidden",
+						disabled: isCurrentUploading || isCurrentDeleting,
+						onChange: (e) => handleStageFileUpload(config.stage, e)
+					}), stageData ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+							htmlFor: inputId,
+							className: cn("flex-1 glass hover:bg-white/15 text-foreground py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-all border border-white/15 hover:scale-[1.02] active:scale-[0.98]", (isCurrentUploading || isCurrentDeleting) && "opacity-60 cursor-not-allowed pointer-events-none"),
+							children: isCurrentUploading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-3.5 animate-spin text-primary" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Replacing..." })] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Upload, { className: "size-3.5 text-primary" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Replace" })] })
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+							onClick: () => handleDeleteStage(config.stage, config.title),
+							disabled: isCurrentDeleting || isCurrentUploading,
+							title: `Delete ${config.title} from MongoDB storage`,
+							className: cn("glass hover:bg-destructive/20 text-destructive border border-destructive/30 py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98]", (isCurrentDeleting || isCurrentUploading) && "opacity-60 cursor-not-allowed"),
+							children: [isCurrentDeleting ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-3.5 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "size-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "hidden sm:inline",
+								children: "Delete"
+							})]
+						})]
+					}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+						htmlFor: inputId,
+						className: cn("w-full btn-love py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md hover:scale-[1.02] active:scale-[0.98]", isCurrentUploading && "opacity-60 cursor-not-allowed"),
+						children: isCurrentUploading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-3.5 animate-spin text-white" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Uploading..." })] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Upload, { className: "size-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Upload Image" })] })
+					})] })
+				]
+			}, config.stage);
+		})
+	})] });
 }
 //#endregion
 export { AdminPage as component };

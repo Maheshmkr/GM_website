@@ -128,3 +128,21 @@ const UserSchema = new Schema(
 export const User =
   mongoose.models.User || mongoose.model("User", UserSchema, "users");
 
+// Define FunZoneStage schema
+const FunZoneStageSchema = new Schema(
+  {
+    stage: { type: Number, required: true, unique: true, min: 1, max: 5 },
+    title: { type: String, required: true },
+    filename: { type: String, required: true },
+    mimeType: { type: String, required: true },
+    fileSize: { type: Number, required: true },
+    fileId: { type: Schema.Types.ObjectId, required: true }, // GridFS file ID
+  },
+  { timestamps: true }
+);
+
+export const FunZoneStage =
+  mongoose.models.FunZoneStage ||
+  mongoose.model("FunZoneStage", FunZoneStageSchema, "funZoneStages");
+
+

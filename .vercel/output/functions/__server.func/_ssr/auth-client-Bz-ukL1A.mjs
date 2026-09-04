@@ -1,5 +1,5 @@
 import { c as createServerFn, i as TSS_SERVER_FUNCTION } from "./createServerFn-CIHAFgYl.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/auth-client-C2Rbula4.js
+//#region node_modules/.nitro/vite/services/ssr/assets/auth-client-Bz-ukL1A.js
 var createServerRpc = (serverFnMeta, splitImportFn) => {
 	const url = "/_serverFn/" + serverFnMeta.id;
 	return Object.assign(splitImportFn, {
@@ -14,7 +14,7 @@ var getSession_createServerFn_handler = createServerRpc({
 	filename: "src/lib/auth-client.ts"
 }, (opts) => getSession.__executeServer(opts));
 var getSession = createServerFn({ method: "GET" }).handler(getSession_createServerFn_handler, async () => {
-	const { getCookie } = await import("./server-DswDYfTu.mjs");
+	const { getCookie } = await import("./server-QLwA7krg.mjs");
 	return { role: getCookie("auth_role") || null };
 });
 //#endregion

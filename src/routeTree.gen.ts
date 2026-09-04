@@ -27,6 +27,7 @@ import { Route as ApiVideosRouteImport } from './routes/api/videos'
 import { Route as ApiAuthLoginRouteImport } from './routes/api/auth.login'
 import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth.logout'
 import { Route as ApiAuthSessionRouteImport } from './routes/api/auth.session'
+import { Route as ApiFunStagesRouteImport } from './routes/api/fun.stages'
 import { Route as ApiMediaIdRouteImport } from './routes/api/media.$id'
 import { Route as ApiMediaUploadRouteImport } from './routes/api/media.upload'
 import { Route as ApiMediaUrlRouteImport } from './routes/api/media.url'
@@ -128,6 +129,11 @@ const ApiAuthSessionRoute = ApiAuthSessionRouteImport.update({
   path: '/api/auth/session',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiFunStagesRoute = ApiFunStagesRouteImport.update({
+  id: '/api/fun/stages',
+  path: '/api/fun/stages',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiMediaIdRoute = ApiMediaIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -198,6 +204,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
   '/api/auth/session': typeof ApiAuthSessionRoute
+  '/api/fun/stages': typeof ApiFunStagesRoute
   '/api/media/$id': typeof ApiMediaIdRoute
   '/api/media/upload': typeof ApiMediaUploadRoute
   '/api/media/url': typeof ApiMediaUrlRoute
@@ -228,6 +235,7 @@ export interface FileRoutesByTo {
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
   '/api/auth/session': typeof ApiAuthSessionRoute
+  '/api/fun/stages': typeof ApiFunStagesRoute
   '/api/media/$id': typeof ApiMediaIdRoute
   '/api/media/upload': typeof ApiMediaUploadRoute
   '/api/media/url': typeof ApiMediaUrlRoute
@@ -259,6 +267,7 @@ export interface FileRoutesById {
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
   '/api/auth/session': typeof ApiAuthSessionRoute
+  '/api/fun/stages': typeof ApiFunStagesRoute
   '/api/media/$id': typeof ApiMediaIdRoute
   '/api/media/upload': typeof ApiMediaUploadRoute
   '/api/media/url': typeof ApiMediaUrlRoute
@@ -291,6 +300,7 @@ export interface FileRouteTypes {
     | '/api/auth/login'
     | '/api/auth/logout'
     | '/api/auth/session'
+    | '/api/fun/stages'
     | '/api/media/$id'
     | '/api/media/upload'
     | '/api/media/url'
@@ -321,6 +331,7 @@ export interface FileRouteTypes {
     | '/api/auth/login'
     | '/api/auth/logout'
     | '/api/auth/session'
+    | '/api/fun/stages'
     | '/api/media/$id'
     | '/api/media/upload'
     | '/api/media/url'
@@ -351,6 +362,7 @@ export interface FileRouteTypes {
     | '/api/auth/login'
     | '/api/auth/logout'
     | '/api/auth/session'
+    | '/api/fun/stages'
     | '/api/media/$id'
     | '/api/media/upload'
     | '/api/media/url'
@@ -382,6 +394,7 @@ export interface RootRouteChildren {
   ApiAuthLoginRoute: typeof ApiAuthLoginRoute
   ApiAuthLogoutRoute: typeof ApiAuthLogoutRoute
   ApiAuthSessionRoute: typeof ApiAuthSessionRoute
+  ApiFunStagesRoute: typeof ApiFunStagesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -510,6 +523,13 @@ declare module '@tanstack/react-router' {
       path: '/api/auth/session'
       fullPath: '/api/auth/session'
       preLoaderRoute: typeof ApiAuthSessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/fun/stages': {
+      id: '/api/fun/stages'
+      path: '/api/fun/stages'
+      fullPath: '/api/fun/stages'
+      preLoaderRoute: typeof ApiFunStagesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/media/$id': {
@@ -684,6 +704,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthLoginRoute: ApiAuthLoginRoute,
   ApiAuthLogoutRoute: ApiAuthLogoutRoute,
   ApiAuthSessionRoute: ApiAuthSessionRoute,
+  ApiFunStagesRoute: ApiFunStagesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

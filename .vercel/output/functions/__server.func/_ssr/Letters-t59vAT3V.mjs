@@ -1,6 +1,6 @@
 import { o as __toESM } from "../_runtime.mjs";
 import { a as require_react, o as require_jsx_runtime } from "../_libs/react+tanstack__react-query.mjs";
-import { j as Heart, t as X, w as Mail } from "../_libs/lucide-react.mjs";
+import { M as Heart, T as Mail, t as X } from "../_libs/lucide-react.mjs";
 import { i as letters } from "./site-_zOoiwhn.mjs";
 import { t as Reveal } from "./Reveal-DSJJWaqp.mjs";
 //#region node_modules/.nitro/vite/services/ssr/assets/Letters-t59vAT3V.js

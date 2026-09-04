@@ -1,4 +1,4 @@
-//#region node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-DRXuaEOK.js
+//#region node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-BIHny-A_.js
 var tsrStartManifest = () => ({ routes: {
 	__root__: {
 		filePath: "C:/Users/mahes/Downloads/GM_Website/src/routes/__root.tsx",
@@ -20,37 +20,37 @@ var tsrStartManifest = () => ({ routes: {
 			"/api/videos",
 			"/api/auth/login",
 			"/api/auth/logout",
-			"/api/auth/session"
+			"/api/auth/session",
+			"/api/fun/stages"
 		],
-		preloads: ["/assets/index-BKNa3WYK.js", "/assets/heart-CJLjDj4v.js"],
+		preloads: ["/assets/index-0-ZIcg1B.js", "/assets/heart-CJLjDj4v.js"],
 		scripts: [{ attrs: {
 			type: "module",
 			async: !0,
-			src: "/assets/index-BKNa3WYK.js"
+			src: "/assets/index-0-ZIcg1B.js"
 		} }]
 	},
 	"/": {
 		filePath: "C:/Users/mahes/Downloads/GM_Website/src/routes/index.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/routes-D2FadEAU.js",
-			"/assets/Surprise-DH1C4lSz.js",
-			"/assets/image-DslSx73-.js",
-			"/assets/Letters-DBj-zgZ2.js",
-			"/assets/music-DYN9lkCS.js",
+			"/assets/routes-7IXfjSRu.js",
+			"/assets/Surprise-CU4Nvscz.js",
+			"/assets/music-BPrDfMN-.js",
+			"/assets/Letters-BLcmKRNd.js",
 			"/assets/SectionHeading-BmL1yZsm.js",
-			"/assets/Reveal-B3DS8p2X.js",
-			"/assets/VideoGallery-CWxu20r-.js"
+			"/assets/Reveal-DQaAs3th.js",
+			"/assets/VideoGallery-D3s3xXO0.js"
 		]
 	},
 	"/admin": {
 		filePath: "C:/Users/mahes/Downloads/GM_Website/src/routes/admin.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/admin-d8sYEwSq.js",
+			"/assets/admin-DE-9a-f8.js",
+			"/assets/music-BPrDfMN-.js",
 			"/assets/loader-circle-CENuMKHS.js",
-			"/assets/music-DYN9lkCS.js",
-			"/assets/dist-Bn8wrbI2.js",
+			"/assets/dist-B9G3qEGF.js",
 			"/assets/SectionHeading-BmL1yZsm.js"
 		]
 	},
@@ -58,44 +58,43 @@ var tsrStartManifest = () => ({ routes: {
 		filePath: "C:/Users/mahes/Downloads/GM_Website/src/routes/fun.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/fun-DPSIy6JG.js",
-			"/assets/image-DslSx73-.js",
-			"/assets/dist-Bn8wrbI2.js",
+			"/assets/fun-E9Z3dR0V.js",
+			"/assets/dist-B9G3qEGF.js",
 			"/assets/SectionHeading-BmL1yZsm.js",
-			"/assets/Reveal-B3DS8p2X.js"
+			"/assets/Reveal-DQaAs3th.js"
 		]
 	},
 	"/letters": {
 		filePath: "C:/Users/mahes/Downloads/GM_Website/src/routes/letters.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/letters-BZtdEG4Y.js",
-			"/assets/Letters-DBj-zgZ2.js",
+			"/assets/letters-DsxDmXfS.js",
+			"/assets/Letters-BLcmKRNd.js",
 			"/assets/SectionHeading-BmL1yZsm.js"
 		]
 	},
 	"/login": {
 		filePath: "C:/Users/mahes/Downloads/GM_Website/src/routes/login.tsx",
 		children: void 0,
-		preloads: ["/assets/login-DQanvGIj.js", "/assets/dist-Bn8wrbI2.js"]
+		preloads: ["/assets/login-bJ2o0EMO.js", "/assets/dist-B9G3qEGF.js"]
 	},
 	"/photos": {
 		filePath: "C:/Users/mahes/Downloads/GM_Website/src/routes/photos.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/photos-TAIOWUFg.js",
+			"/assets/photos-DNGtEShu.js",
 			"/assets/loader-circle-CENuMKHS.js",
-			"/assets/dist-Bn8wrbI2.js",
+			"/assets/dist-B9G3qEGF.js",
 			"/assets/SectionHeading-BmL1yZsm.js",
-			"/assets/Reveal-B3DS8p2X.js"
+			"/assets/Reveal-DQaAs3th.js"
 		]
 	},
 	"/songs": {
 		filePath: "C:/Users/mahes/Downloads/GM_Website/src/routes/songs.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/songs-QnbXB52Z.js",
-			"/assets/dist-Bn8wrbI2.js",
+			"/assets/songs-CGecoGPo.js",
+			"/assets/dist-B9G3qEGF.js",
 			"/assets/SectionHeading-BmL1yZsm.js"
 		]
 	},
@@ -103,8 +102,8 @@ var tsrStartManifest = () => ({ routes: {
 		filePath: "C:/Users/mahes/Downloads/GM_Website/src/routes/timeline.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/timeline-DJX-5uWm.js",
-			"/assets/Surprise-DH1C4lSz.js",
+			"/assets/timeline-BjQX4kHv.js",
+			"/assets/Surprise-CU4Nvscz.js",
 			"/assets/SectionHeading-BmL1yZsm.js"
 		]
 	},
@@ -112,9 +111,9 @@ var tsrStartManifest = () => ({ routes: {
 		filePath: "C:/Users/mahes/Downloads/GM_Website/src/routes/videos.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/videos-BlXFK5OO.js",
+			"/assets/videos-DrNn9ehd.js",
 			"/assets/SectionHeading-BmL1yZsm.js",
-			"/assets/VideoGallery-CWxu20r-.js"
+			"/assets/VideoGallery-D3s3xXO0.js"
 		]
 	}
 } });

@@ -61,6 +61,7 @@ interface FunActionsProps {
   onSelectAction: (action: ActionType) => void;
   onReset: () => void;
   isReacting: boolean;
+  damageLevel?: number;
 }
 
 export function FunActions({
@@ -68,7 +69,10 @@ export function FunActions({
   onSelectAction,
   onReset,
   isReacting,
+  damageLevel = 0,
 }: FunActionsProps) {
+  const canReset = Boolean(selectedAction || isReacting || damageLevel > 0);
+
   return (
     <div className="flex flex-col items-center justify-center gap-4 w-full">
       {/* Action Toolbar */}
@@ -130,11 +134,11 @@ export function FunActions({
 
         <button
           onClick={onReset}
-          disabled={!selectedAction && !isReacting}
+          disabled={!canReset}
           aria-label="Reset action and restore picture"
           className={cn(
             "glass rounded-full px-4 py-2 text-xs font-semibold transition-all duration-300 flex items-center gap-1.5 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary",
-            selectedAction || isReacting
+            canReset
               ? "text-destructive hover:bg-destructive/15 border-destructive/30 hover:scale-105"
               : "text-muted-foreground/40 opacity-50 cursor-not-allowed border-white/5"
           )}
