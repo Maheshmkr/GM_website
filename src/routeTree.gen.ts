@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as FunRouteImport } from './routes/fun'
 import { Route as LettersRouteImport } from './routes/letters'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as PhotosRouteImport } from './routes/photos'
@@ -45,6 +46,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FunRoute = FunRouteImport.update({
+  id: '/fun',
+  path: '/fun',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LettersRoute = LettersRouteImport.update({
@@ -176,6 +182,7 @@ const ApiMediaFileFileIdRoute = ApiMediaFileFileIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/fun': typeof FunRoute
   '/letters': typeof LettersRoute
   '/login': typeof LoginRoute
   '/photos': typeof PhotosRoute
@@ -205,6 +212,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/fun': typeof FunRoute
   '/letters': typeof LettersRoute
   '/login': typeof LoginRoute
   '/photos': typeof PhotosRoute
@@ -235,6 +243,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/fun': typeof FunRoute
   '/letters': typeof LettersRoute
   '/login': typeof LoginRoute
   '/photos': typeof PhotosRoute
@@ -266,6 +275,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/fun'
     | '/letters'
     | '/login'
     | '/photos'
@@ -295,6 +305,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/fun'
     | '/letters'
     | '/login'
     | '/photos'
@@ -324,6 +335,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/fun'
     | '/letters'
     | '/login'
     | '/photos'
@@ -354,6 +366,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  FunRoute: typeof FunRoute
   LettersRoute: typeof LettersRoute
   LoginRoute: typeof LoginRoute
   PhotosRoute: typeof PhotosRoute
@@ -385,6 +398,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fun': {
+      id: '/fun'
+      path: '/fun'
+      fullPath: '/fun'
+      preLoaderRoute: typeof FunRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/letters': {
@@ -648,6 +668,7 @@ const ApiVideosRouteWithChildren = ApiVideosRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  FunRoute: FunRoute,
   LettersRoute: LettersRoute,
   LoginRoute: LoginRoute,
   PhotosRoute: PhotosRoute,

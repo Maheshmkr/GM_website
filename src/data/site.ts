@@ -302,3 +302,12 @@ export const timeline: Milestone[] = [
     image: memory3,
   },
 ];
+
+export const funZoneConfig = {
+  /** Default character image used for Fun Zone */
+  characterImage: hero1,
+  characterName: girlfriend.nickname || "Cutie",
+  title: "Fun Zone ❤️",
+  subtitle: "Choose an action and tap the picture!",
+};
+
