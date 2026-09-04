@@ -14,7 +14,7 @@ const links = [
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const loaderData = useLoaderData({ from: "__root__", strict: false });
+  const loaderData = useLoaderData({ strict: false }) as { role?: string | null } | undefined;
   const role = loaderData?.role;
   const router = useRouter();
 
@@ -72,6 +72,7 @@ export function Navbar() {
                 onClick={handleLogout}
                 className="glass rounded-full px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 cursor-pointer flex items-center gap-1.5"
                 title="Logout"
+                suppressHydrationWarning
               >
                 <LogOut className="size-3.5" />
                 <span className="hidden sm:inline">Logout</span>
@@ -89,6 +90,7 @@ export function Navbar() {
           <button
             aria-label="Sparkle"
             className="glass grid size-10 place-items-center rounded-full text-primary transition-transform hover:rotate-12"
+            suppressHydrationWarning
           >
             <Sparkles className="size-4" />
           </button>

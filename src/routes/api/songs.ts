@@ -32,6 +32,7 @@ export const Route = createFileRoute("/api/songs")({
           const artist = formData.get("artist") as string | null;
           const description = formData.get("description") as string | null;
           const duration = formData.get("duration") as string | null;
+          const memoryDate = formData.get("memoryDate") as string | null;
 
           if (!file) {
             return new Response(JSON.stringify({ error: "No audio file uploaded" }), {
@@ -145,7 +146,7 @@ export const Route = createFileRoute("/api/songs")({
             fileId,
             coverFileId,
             duration: duration || "3:00",
-            memoryDate: new Date().toISOString().split("T")[0],
+            memoryDate: memoryDate || new Date().toISOString().split("T")[0],
           });
           await song.save();
 

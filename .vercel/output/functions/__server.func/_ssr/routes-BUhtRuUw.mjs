@@ -7,10 +7,10 @@ import { g as Link } from "../_libs/@tanstack/react-router+[...].mjs";
 import { a as photos, c as videos, n as heroSlides, o as songs, r as letters, t as girlfriend } from "./site-DayVGLaA.mjs";
 import { t as Reveal } from "./Reveal-DSJJWaqp.mjs";
 import { t as Letters } from "./Letters-EMTLsVnR.mjs";
-import { r as useMusic } from "./MusicProvider-DUZxdxlu.mjs";
-import { t as VideoGallery } from "./VideoGallery-TCO3wYO7.mjs";
+import { r as useMusic } from "./MusicProvider-1Hvq6PXj.mjs";
+import { t as VideoGallery } from "./VideoGallery-Bl2ZouvL.mjs";
 import { n as Timeline, t as Surprise } from "./Surprise-DpnU-p8N.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-CpZdV-X4.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-BUhtRuUw.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function Hero() {

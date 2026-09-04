@@ -20,6 +20,7 @@ import {
   X,
   Play,
   Users,
+  Link as LinkIcon,
 } from "lucide-react";
 import { SectionHeading } from "@/components/SectionHeading";
 import { Reveal } from "@/components/Reveal";
@@ -40,40 +41,60 @@ function AdminPage() {
   const { data: photos = [], isLoading: loadingPhotos } = useQuery({
     queryKey: ["photos"],
     queryFn: async () => {
-      const res = await fetch("/api/media?type=image");
-      const payload = await readJsonResponse(res);
-      if (!payload.ok) throw new Error(payload.error || "Failed to fetch photos");
-      return payload.data ?? [];
+      try {
+        const res = await fetch("/api/media?type=image");
+        const payload = await readJsonResponse(res);
+        if (!payload.ok) return [];
+        return Array.isArray(payload.data) ? payload.data : [];
+      } catch (err) {
+        console.error("Error fetching photos:", err);
+        return [];
+      }
     },
   });
 
   const { data: videos = [], isLoading: loadingVideos } = useQuery({
     queryKey: ["videos"],
     queryFn: async () => {
-      const res = await fetch("/api/media?type=video");
-      const payload = await readJsonResponse(res);
-      if (!payload.ok) throw new Error(payload.error || "Failed to fetch videos");
-      return payload.data ?? [];
+      try {
+        const res = await fetch("/api/media?type=video");
+        const payload = await readJsonResponse(res);
+        if (!payload.ok) return [];
+        return Array.isArray(payload.data) ? payload.data : [];
+      } catch (err) {
+        console.error("Error fetching videos:", err);
+        return [];
+      }
     },
   });
 
   const { data: songs = [], isLoading: loadingSongs } = useQuery({
     queryKey: ["songs"],
     queryFn: async () => {
-      const res = await fetch("/api/media?type=song");
-      const payload = await readJsonResponse(res);
-      if (!payload.ok) throw new Error(payload.error || "Failed to fetch songs");
-      return payload.data ?? [];
+      try {
+        const res = await fetch("/api/media?type=song");
+        const payload = await readJsonResponse(res);
+        if (!payload.ok) return [];
+        return Array.isArray(payload.data) ? payload.data : [];
+      } catch (err) {
+        console.error("Error fetching songs:", err);
+        return [];
+      }
     },
   });
 
   const { data: timeline = [], isLoading: loadingTimeline } = useQuery({
     queryKey: ["timeline"],
     queryFn: async () => {
-      const res = await fetch("/api/timeline");
-      const payload = await readJsonResponse(res);
-      if (!payload.ok) throw new Error(payload.error || "Failed to fetch timeline");
-      return payload.data ?? [];
+      try {
+        const res = await fetch("/api/timeline");
+        const payload = await readJsonResponse(res);
+        if (!payload.ok) return [];
+        return Array.isArray(payload.data) ? payload.data : [];
+      } catch (err) {
+        console.error("Error fetching timeline:", err);
+        return [];
+      }
     },
   });
 
@@ -644,6 +665,9 @@ function VideosManager({
 /* ==========================================
    SONGS MANAGER COMPONENT
    ========================================== */
+/* ==========================================
+   SONGS MANAGER COMPONENT
+   ========================================== */
 function SongsManager({
   songs,
   isLoading,
@@ -653,13 +677,30 @@ function SongsManager({
   isLoading: boolean;
   queryClient: any;
 }) {
+  const safeSongs = Array.isArray(songs) ? songs : [];
+  // Local Upload State
   const [file, setFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [title, setTitle] = useState("");
-  const [artist, setArtist] = useState("");
-  const [description, setDescription] = useState("");
-  const [duration, setDuration] = useState("3:30");
+  const [uploadTitle, setUploadTitle] = useState("");
+  const [uploadArtist, setUploadArtist] = useState("");
+  const [uploadDescription, setUploadDescription] = useState("");
+  const [uploadDuration, setUploadDuration] = useState("3:30");
+  const [uploadDate, setUploadDate] = useState(new Date().toISOString().split("T")[0]);
   const [uploading, setUploading] = useState(false);
+
+  // Spotify State
+  const [spotifyUrl, setSpotifyUrl] = useState("");
+  const [spotifyTitle, setSpotifyTitle] = useState("");
+  const [spotifyArtist, setSpotifyArtist] = useState("");
+  const [spotifyDate, setSpotifyDate] = useState(new Date().toISOString().split("T")[0]);
+  const [addingSpotify, setAddingSpotify] = useState(false);
+
+  // Google Drive State
+  const [driveUrl, setDriveUrl] = useState("");
+  const [driveTitle, setDriveTitle] = useState("");
+  const [driveArtist, setDriveArtist] = useState("");
+  const [driveDate, setDriveDate] = useState(new Date().toISOString().split("T")[0]);
+  const [addingDrive, setAddingDrive] = useState(false);
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -676,13 +717,14 @@ function SongsManager({
     },
   });
 
+  // Handle local upload
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
       toast.error("Please select an audio file");
       return;
     }
-    if (!title.trim() || !artist.trim()) {
+    if (!uploadTitle.trim() || !uploadArtist.trim()) {
       toast.error("Title and Artist are required");
       return;
     }
@@ -693,10 +735,11 @@ function SongsManager({
     if (coverFile) {
       formData.append("coverFile", coverFile);
     }
-    formData.append("title", title);
-    formData.append("artist", artist);
-    formData.append("description", description);
-    formData.append("duration", duration);
+    formData.append("title", uploadTitle);
+    formData.append("artist", uploadArtist);
+    formData.append("description", uploadDescription);
+    formData.append("duration", uploadDuration);
+    formData.append("memoryDate", uploadDate);
 
     try {
       const res = await fetch("/api/songs", {
@@ -712,10 +755,11 @@ function SongsManager({
       toast.success("Song uploaded successfully!");
       setFile(null);
       setCoverFile(null);
-      setTitle("");
-      setArtist("");
-      setDescription("");
-      setDuration("3:30");
+      setUploadTitle("");
+      setUploadArtist("");
+      setUploadDescription("");
+      setUploadDuration("3:30");
+      setUploadDate(new Date().toISOString().split("T")[0]);
       const fileInput = document.getElementById("song-file") as HTMLInputElement;
       if (fileInput) fileInput.value = "";
       const coverInput = document.getElementById("cover-file") as HTMLInputElement;
@@ -730,111 +774,398 @@ function SongsManager({
     }
   };
 
-  return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
-      {/* Upload Form */}
-      <div>
-        <h3 className="text-lg font-semibold flex items-center gap-2 mb-6">
-          <Plus className="size-5 text-primary" /> Add Song
-        </h3>
-        <form onSubmit={handleUpload} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-muted-foreground mb-1">
-              Select Audio File (MP3, WAV, OGG, WEBM)
-            </label>
-            <input
-              id="song-file"
-              type="file"
-              accept="audio/*"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-              className="w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-secondary file:text-foreground hover:file:bg-secondary/80 bg-surface/50 border border-border rounded-xl p-2.5"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-muted-foreground mb-1">
-              Select Album Art / Cover (JPEG, PNG, optional)
-            </label>
-            <input
-              id="cover-file"
-              type="file"
-              accept="image/*"
-              onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
-              className="w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-secondary file:text-foreground hover:file:bg-secondary/80 bg-surface/50 border border-border rounded-xl p-2.5"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-muted-foreground mb-1">
-                Song Title
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. Perfect"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full text-sm bg-surface/50 border border-border rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-muted-foreground mb-1">
-                Artist
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. Ed Sheeran"
-                value={artist}
-                onChange={(e) => setArtist(e.target.value)}
-                className="w-full text-sm bg-surface/50 border border-border rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-muted-foreground mb-1">
-              Note / Personal Message
-            </label>
-            <textarea
-              placeholder="This song always reminds me of that trip..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={2}
-              className="w-full text-sm bg-surface/50 border border-border rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary resize-none"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-muted-foreground mb-1">
-              Duration (e.g. 4:23)
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. 4:23"
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
-              className="w-full text-sm bg-surface/50 border border-border rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-          </div>
+  // Fetch Spotify metadata via oEmbed when URL changes
+  const handleSpotifyUrlChange = async (urlVal: string) => {
+    setSpotifyUrl(urlVal);
+    if (urlVal.includes("spotify.com/track/") || urlVal.startsWith("spotify:track:")) {
+      try {
+        const cleanUrl = urlVal.trim();
+        const oembedRes = await fetch(
+          `https://open.spotify.com/oembed?url=${encodeURIComponent(cleanUrl)}`,
+        );
+        if (oembedRes.ok) {
+          const data = await oembedRes.json();
+          if (data.title && !spotifyTitle) {
+            setSpotifyTitle(data.title);
+          }
+          if (data.author_name && !spotifyArtist) {
+            setSpotifyArtist(data.author_name);
+          }
+        }
+      } catch (_) {
+        // Silently fail if oEmbed isn't reachable
+      }
+    }
+  };
 
-          <button
-            type="submit"
-            disabled={uploading}
-            className="w-full btn-love rounded-full py-3 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            {uploading ? (
-              <>
-                <Loader2 className="size-4 animate-spin" /> Uploading...
-              </>
-            ) : (
-              "Upload Song"
-            )}
-          </button>
-        </form>
+  // Handle Add Spotify Song
+  const handleAddSpotify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!spotifyUrl.trim()) {
+      toast.error("Please paste a Spotify URL");
+      return;
+    }
+    if (!spotifyTitle.trim() || !spotifyArtist.trim()) {
+      toast.error("Song Title and Artist are required");
+      return;
+    }
+
+    setAddingSpotify(true);
+    try {
+      const res = await fetch("/api/media/url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "song",
+          sourceType: "spotify",
+          url: spotifyUrl,
+          title: spotifyTitle,
+          artist: spotifyArtist,
+          memoryDate: spotifyDate,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to add Spotify song");
+      }
+
+      toast.success("Spotify song added successfully!");
+      setSpotifyUrl("");
+      setSpotifyTitle("");
+      setSpotifyArtist("");
+      setSpotifyDate(new Date().toISOString().split("T")[0]);
+
+      queryClient.invalidateQueries({ queryKey: ["songs"] });
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message);
+    } finally {
+      setAddingSpotify(false);
+    }
+  };
+
+  // Handle Add Google Drive Song
+  const handleAddDrive = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!driveUrl.trim()) {
+      toast.error("Please paste a Google Drive URL");
+      return;
+    }
+    if (!driveTitle.trim() || !driveArtist.trim()) {
+      toast.error("Song Title and Artist are required");
+      return;
+    }
+
+    setAddingDrive(true);
+    try {
+      const res = await fetch("/api/media/url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "song",
+          sourceType: "google-drive",
+          url: driveUrl,
+          title: driveTitle,
+          artist: driveArtist,
+          memoryDate: driveDate,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to add Google Drive song");
+      }
+
+      toast.success("Google Drive song added successfully!");
+      setDriveUrl("");
+      setDriveTitle("");
+      setDriveArtist("");
+      setDriveDate(new Date().toISOString().split("T")[0]);
+
+      queryClient.invalidateQueries({ queryKey: ["songs"] });
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message);
+    } finally {
+      setAddingDrive(false);
+    }
+  };
+
+  return (
+    <div className="grid gap-8 lg:grid-cols-[1fr_1.5fr]">
+      {/* Upload & Add Forms */}
+      <div className="space-y-8">
+        <div>
+          <h3 className="text-lg font-semibold flex items-center gap-2 mb-2">
+            <Plus className="size-5 text-primary" /> ADD SONG
+          </h3>
+          <p className="text-xs text-muted-foreground mb-6">
+            Upload from computer or add external Spotify / Google Drive tracks.
+          </p>
+        </div>
+
+        {/* 1. Upload from Computer */}
+        <div className="border border-border/60 bg-surface/20 rounded-2xl p-5 space-y-4">
+          <h4 className="text-sm font-semibold text-foreground flex items-center gap-2 border-b border-border/40 pb-2">
+            <Music className="size-4 text-primary" /> Upload from Computer
+          </h4>
+          <form onSubmit={handleUpload} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                Choose Song File (MP3, WAV, OGG, WEBM)
+              </label>
+              <input
+                id="song-file"
+                type="file"
+                accept="audio/*"
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                className="w-full text-xs text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-secondary file:text-foreground hover:file:bg-secondary/80 bg-surface/50 border border-border rounded-xl p-2"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                Album Art / Cover (JPEG, PNG, optional)
+              </label>
+              <input
+                id="cover-file"
+                type="file"
+                accept="image/*"
+                onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
+                className="w-full text-xs text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-secondary file:text-foreground hover:file:bg-secondary/80 bg-surface/50 border border-border rounded-xl p-2"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Song Title
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Perfect"
+                  value={uploadTitle}
+                  onChange={(e) => setUploadTitle(e.target.value)}
+                  className="w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Artist
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Ed Sheeran"
+                  value={uploadArtist}
+                  onChange={(e) => setUploadArtist(e.target.value)}
+                  className="w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Memory Date
+                </label>
+                <input
+                  type="date"
+                  value={uploadDate}
+                  onChange={(e) => setUploadDate(e.target.value)}
+                  className="w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Duration (e.g. 4:23)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. 4:23"
+                  value={uploadDuration}
+                  onChange={(e) => setUploadDuration(e.target.value)}
+                  className="w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                Note / Description
+              </label>
+              <textarea
+                placeholder="This song always reminds me of..."
+                value={uploadDescription}
+                onChange={(e) => setUploadDescription(e.target.value)}
+                rows={2}
+                className="w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary resize-none"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={uploading}
+              className="w-full btn-love rounded-full py-2.5 text-xs font-semibold flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+            >
+              {uploading ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" /> Uploading...
+                </>
+              ) : (
+                "Upload Song"
+              )}
+            </button>
+          </form>
+        </div>
+
+        {/* 2. Add Spotify Song */}
+        <div className="border border-border/60 bg-surface/20 rounded-2xl p-5 space-y-4">
+          <h4 className="text-sm font-semibold text-foreground flex items-center gap-2 border-b border-border/40 pb-2">
+            <ExternalLink className="size-4 text-emerald-500" /> Add Spotify Song
+          </h4>
+          <form onSubmit={handleAddSpotify} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                Paste Spotify URL
+              </label>
+              <input
+                type="text"
+                placeholder="https://open.spotify.com/track/xxxxxxxxxxxxxxxx"
+                value={spotifyUrl}
+                onChange={(e) => handleSpotifyUrlChange(e.target.value)}
+                className="w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Song Title
+                </label>
+                <input
+                  type="text"
+                  placeholder="Song Title"
+                  value={spotifyTitle}
+                  onChange={(e) => setSpotifyTitle(e.target.value)}
+                  className="w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Artist
+                </label>
+                <input
+                  type="text"
+                  placeholder="Artist"
+                  value={spotifyArtist}
+                  onChange={(e) => setSpotifyArtist(e.target.value)}
+                  className="w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                Memory Date
+              </label>
+              <input
+                type="date"
+                value={spotifyDate}
+                onChange={(e) => setSpotifyDate(e.target.value)}
+                className="w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={addingSpotify}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-full py-2.5 text-xs font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors cursor-pointer"
+            >
+              {addingSpotify ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" /> Adding...
+                </>
+              ) : (
+                "Add Spotify Song"
+              )}
+            </button>
+          </form>
+        </div>
+
+        {/* 3. Add Google Drive Song */}
+        <div className="border border-border/60 bg-surface/20 rounded-2xl p-5 space-y-4">
+          <h4 className="text-sm font-semibold text-foreground flex items-center gap-2 border-b border-border/40 pb-2">
+            <LinkIcon className="size-4 text-blue-400" /> Add Google Drive Song
+          </h4>
+          <form onSubmit={handleAddDrive} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                Paste Google Drive Shared URL
+              </label>
+              <input
+                type="text"
+                placeholder="https://drive.google.com/file/d/FILE_ID/view?usp=sharing"
+                value={driveUrl}
+                onChange={(e) => setDriveUrl(e.target.value)}
+                className="w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Song Title
+                </label>
+                <input
+                  type="text"
+                  placeholder="Song Title"
+                  value={driveTitle}
+                  onChange={(e) => setDriveTitle(e.target.value)}
+                  className="w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Artist
+                </label>
+                <input
+                  type="text"
+                  placeholder="Artist"
+                  value={driveArtist}
+                  onChange={(e) => setDriveArtist(e.target.value)}
+                  className="w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                Memory Date
+              </label>
+              <input
+                type="date"
+                value={driveDate}
+                onChange={(e) => setDriveDate(e.target.value)}
+                className="w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={addingDrive}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-full py-2.5 text-xs font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors cursor-pointer"
+            >
+              {addingDrive ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" /> Adding...
+                </>
+              ) : (
+                "Add Google Drive Song"
+              )}
+            </button>
+          </form>
+        </div>
       </div>
 
       {/* Record Grid */}
       <div className="border-l border-border/30 pl-0 lg:pl-8">
         <h3 className="text-lg font-semibold mb-6 flex justify-between items-center">
-          <span>Uploaded Songs</span>
+          <span>Uploaded & Added Songs</span>
           <span className="text-xs font-normal text-muted-foreground bg-secondary/80 px-2.5 py-1 rounded-full">
-            {songs.length} records
+            {safeSongs.length} records
           </span>
         </h3>
 
@@ -842,68 +1173,90 @@ function SongsManager({
           <div className="flex items-center justify-center py-20 text-muted-foreground text-sm gap-2">
             <Loader2 className="size-5 animate-spin" /> Loading songs...
           </div>
-        ) : songs.length === 0 ? (
+        ) : safeSongs.length === 0 ? (
           <div className="text-center py-20 text-muted-foreground text-sm">
-            No songs found in MongoDB. Use the form to upload.
+            No songs found in MongoDB. Use the forms to add songs.
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
-            {songs.map((s) => (
-              <div
-                key={s._id}
-                className="bg-surface/30 border border-border rounded-2xl p-4 flex gap-4 items-start relative group"
-              >
-                {s.coverFileId ? (
-                  <img
-                    src={`/api/media/${s.coverFileId}`}
-                    alt={s.title}
-                    className="size-16 rounded-xl object-cover border border-border shrink-0"
-                  />
-                ) : (
-                  <div className="size-16 rounded-xl bg-secondary border border-border flex items-center justify-center shrink-0">
-                    <Music4 className="size-6 text-primary" />
-                  </div>
-                )}
-                <div className="min-w-0 flex-1">
-                  <h4 className="font-semibold text-sm truncate">{s.title}</h4>
-                  <p className="text-xs text-muted-foreground truncate mt-0.5">by {s.artist}</p>
-                  <p className="text-[10px] text-muted-foreground/60 italic truncate mt-1">
-                    "{s.description || "No description"}"
-                  </p>
-                  <div className="flex flex-wrap gap-1.5 mt-2">
-                    <span className="text-[10px] bg-secondary px-2 py-0.5 rounded-full text-foreground/80 font-medium">
-                      {s.duration}
-                    </span>
-                    <span className="text-[10px] bg-secondary/40 px-2 py-0.5 rounded-full text-muted-foreground">
-                      {(s.fileSize / 1024 / 1024).toFixed(1)} MB
-                    </span>
-                  </div>
-                </div>
+            {safeSongs.map((s) => {
+              const sourceLabel =
+                s.source === "spotify"
+                  ? "Spotify"
+                  : s.source === "google-drive"
+                    ? "Google Drive"
+                    : s.source === "upload"
+                      ? "Computer Upload"
+                      : "External Link";
 
-                <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-surface/90 rounded-full p-1 border border-border shadow-md">
-                  <a
-                    href={`/api/media/${s.fileId}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-1 hover:text-primary transition-colors"
-                    title="Listen/Download"
-                  >
-                    <ExternalLink className="size-3.5" />
-                  </a>
-                  <button
-                    onClick={() => {
-                      if (confirm("Are you sure you want to delete this song?")) {
-                        deleteMutation.mutate(s._id);
-                      }
-                    }}
-                    className="p-1 text-destructive hover:text-destructive/80 transition-colors"
-                    title="Delete Record"
-                  >
-                    <Trash2 className="size-3.5" />
-                  </button>
+              const sourceBadgeColor =
+                s.source === "spotify"
+                  ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                  : s.source === "google-drive"
+                    ? "bg-blue-500/20 text-blue-400 border-blue-500/30"
+                    : "bg-secondary text-foreground/80 border-border/40";
+
+              return (
+                <div
+                  key={s._id}
+                  className="bg-surface/30 border border-border rounded-2xl p-4 flex gap-4 items-start relative group"
+                >
+                  {s.coverFileId ? (
+                    <img
+                      src={`/api/media/${s.coverFileId}`}
+                      alt={s.title}
+                      className="size-16 rounded-xl object-cover border border-border shrink-0"
+                    />
+                  ) : (
+                    <div className="size-16 rounded-xl bg-secondary border border-border flex items-center justify-center shrink-0">
+                      <Music4 className="size-6 text-primary" />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-semibold text-sm truncate">{s.title}</h4>
+                    <p className="text-xs text-muted-foreground truncate mt-0.5">by {s.artist}</p>
+                    {s.memoryDate && (
+                      <p className="text-[10px] text-muted-foreground/80 font-medium mt-1">
+                        📅 {s.memoryDate}
+                      </p>
+                    )}
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      <span
+                        className={cn(
+                          "text-[10px] px-2 py-0.5 rounded-full font-medium border",
+                          sourceBadgeColor,
+                        )}
+                      >
+                        {sourceLabel}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-surface/90 rounded-full p-1 border border-border shadow-md">
+                    <a
+                      href={s.source === "upload" ? `/api/media/${s.fileId}` : s.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="p-1 hover:text-primary transition-colors"
+                      title="Open Source"
+                    >
+                      <ExternalLink className="size-3.5" />
+                    </a>
+                    <button
+                      onClick={() => {
+                        if (confirm("Are you sure you want to delete this song?")) {
+                          deleteMutation.mutate(s._id);
+                        }
+                      }}
+                      className="p-1 text-destructive hover:text-destructive/80 transition-colors cursor-pointer"
+                      title="Delete Record"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

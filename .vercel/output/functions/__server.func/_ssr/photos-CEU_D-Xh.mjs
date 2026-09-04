@@ -1,13 +1,13 @@
 import { o as __toESM } from "../_runtime.mjs";
-import { t as readJsonResponse } from "./api-DhUICLV2.mjs";
+import { t as readJsonResponse } from "./api-BUT7_u4b.mjs";
 import { t as cn } from "./utils-C_uf36nf.mjs";
 import { a as require_react, i as useQueryClient, n as useQuery, o as require_jsx_runtime } from "../_libs/react+tanstack__react-query.mjs";
-import { E as LoaderCircle, F as ChevronLeft, P as ChevronRight, k as Heart, t as X } from "../_libs/lucide-react.mjs";
+import { D as LoaderCircle, F as ChevronLeft, P as ChevronRight, k as Heart, t as X } from "../_libs/lucide-react.mjs";
 import { t as SectionHeading } from "./SectionHeading-BVG9eVYl.mjs";
 import "../_libs/sonner.mjs";
 import { i as photoCategories } from "./site-DayVGLaA.mjs";
 import { t as Reveal } from "./Reveal-DSJJWaqp.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/photos-Dx2I3d_1.js
+//#region node_modules/.nitro/vite/services/ssr/assets/photos-CEU_D-Xh.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function PhotoGallery() {

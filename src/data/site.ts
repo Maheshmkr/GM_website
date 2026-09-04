@@ -178,6 +178,8 @@ export type Song = {
   _id?: string;
   date?: string;
   rawDate?: string;
+  source?: "upload" | "url" | "spotify" | "google-drive";
+  url?: string;
 };
 
 export const songs: Song[] = [

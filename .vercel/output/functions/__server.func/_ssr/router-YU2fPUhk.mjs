@@ -1,21 +1,21 @@
 import { o as __toESM } from "../_runtime.mjs";
 import { t as cn } from "./utils-C_uf36nf.mjs";
 import { a as require_react, o as require_jsx_runtime, r as QueryClientProvider } from "../_libs/react+tanstack__react-query.mjs";
-import { c as SkipForward, k as Heart, l as SkipBack, m as Play, s as Sparkles, t as X, v as Pause, w as LogOut, x as Menu } from "../_libs/lucide-react.mjs";
+import { T as LogIn, c as SkipForward, k as Heart, l as SkipBack, m as Play, s as Sparkles, t as X, v as Pause, w as LogOut, x as Menu } from "../_libs/lucide-react.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import { _ as useLoaderData, c as HeadContent, d as createRouter, f as Outlet, g as Link, h as createRootRouteWithContext, j as redirect, l as useLocation, m as createFileRoute, p as lazyRouteComponent, s as Scripts, v as useRouter } from "../_libs/@tanstack/react-router+[...].mjs";
 import { c as createServerFn, i as TSS_SERVER_FUNCTION } from "./createServerFn-CIHAFgYl.mjs";
 import { t as girlfriend } from "./site-DayVGLaA.mjs";
 import { t as require_mongoose } from "../_libs/mongoose+mpath+mquery+ms+sift.mjs";
 import { t as dbConnect } from "./ssr.mjs";
-import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-BPYZg-o4.mjs";
-import { n as formatTime, r as useMusic, t as MusicProvider } from "./MusicProvider-DUZxdxlu.mjs";
+import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-CWOK5L6l.mjs";
+import { n as formatTime, r as useMusic, t as MusicProvider } from "./MusicProvider-1Hvq6PXj.mjs";
 import crypto from "crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-wz2luHfd.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-YU2fPUhk.js
 var import_mongoose = /* @__PURE__ */ __toESM(require_mongoose());
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-DFifZz_B.css";
+var styles_default = "/assets/styles-QMG4u-vx.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -110,10 +110,7 @@ var links = [
 function Navbar() {
 	const [open, setOpen] = (0, import_react.useState)(false);
 	const [scrolled, setScrolled] = (0, import_react.useState)(false);
-	const role = useLoaderData({
-		from: "__root__",
-		strict: false
-	})?.role;
+	const role = useLoaderData({ strict: false })?.role;
 	const router = useRouter();
 	const handleLogout = async () => {
 		await fetch("/api/auth/logout", { method: "POST" });
@@ -152,11 +149,10 @@ function Navbar() {
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-center justify-end gap-2",
 					children: [
-						role && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						role ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							className: "glass hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-medium sm:inline-flex",
 							children: role === "admin" ? "Admin 🛠️" : "For You 💖"
-						}),
-						role && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 							onClick: handleLogout,
 							className: "glass rounded-full px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 cursor-pointer flex items-center gap-1.5",
 							title: "Logout",
@@ -164,6 +160,10 @@ function Navbar() {
 								className: "hidden sm:inline",
 								children: "Logout"
 							})]
+						})] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
+							to: "/login",
+							className: "glass rounded-full px-4 py-2 text-sm font-medium text-foreground hover:bg-secondary/60 transition-colors flex items-center gap-1.5",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LogIn, { className: "size-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Login" })]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 							"aria-label": "Sparkle",
@@ -190,13 +190,18 @@ function Navbar() {
 					onClick: () => setOpen(false),
 					className: "block rounded-xl px-4 py-3 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground data-[status=active]:bg-secondary data-[status=active]:text-primary",
 					children: l.label
-				}) }, l.to)), role && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+				}) }, l.to)), role ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 					onClick: async () => {
 						setOpen(false);
 						await handleLogout();
 					},
 					className: "w-full text-left rounded-xl px-4 py-3 text-sm text-destructive hover:bg-secondary/40 transition-colors flex items-center gap-2 cursor-pointer font-medium",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LogOut, { className: "size-4" }), "Logout"]
+				}) }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Link, {
+					to: "/login",
+					onClick: () => setOpen(false),
+					className: "block rounded-xl px-4 py-3 text-sm text-foreground transition-colors hover:bg-secondary flex items-center gap-2 font-medium",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LogIn, { className: "size-4" }), "Login"]
 				}) })]
 			})
 		})]
@@ -490,7 +495,7 @@ function RootComponent() {
 		] })
 	});
 }
-var $$splitComponentImporter$7 = () => import("./routes-CpZdV-X4.mjs");
+var $$splitComponentImporter$7 = () => import("./routes-BUhtRuUw.mjs");
 var title$5 = "For You — A Little World Made Just For Us";
 var description$5 = "A private collection of our photos, videos, songs, letters and the timeline of our story — made with all my love.";
 var Route$26 = createFileRoute("/")({
@@ -511,7 +516,7 @@ var Route$26 = createFileRoute("/")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$7, "component")
 });
-var $$splitComponentImporter$6 = () => import("./admin-GaAk68KQ.mjs");
+var $$splitComponentImporter$6 = () => import("./admin-Byi_hNqW.mjs");
 var Route$25 = createFileRoute("/admin")({ component: lazyRouteComponent($$splitComponentImporter$6, "component") });
 var $$splitComponentImporter$5 = () => import("./letters-NDH4JAyn.mjs");
 var title$4 = "Letters For You — Open When...";
@@ -544,7 +549,7 @@ var Route$23 = createFileRoute("/login")({
 	},
 	component: lazyRouteComponent($$splitComponentImporter$4, "component")
 });
-var $$splitComponentImporter$3 = () => import("./photos-Dx2I3d_1.mjs");
+var $$splitComponentImporter$3 = () => import("./photos-CEU_D-Xh.mjs");
 var title$3 = "Our Beautiful Memories — Photos";
 var description$3 = "Every picture holds a special moment with you: our trips, dates, candid smiles and the days I never want to forget.";
 var Route$22 = createFileRoute("/photos")({
@@ -565,7 +570,7 @@ var Route$22 = createFileRoute("/photos")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$3, "component")
 });
-var $$splitComponentImporter$2 = () => import("./songs-2KSuGnWm.mjs");
+var $$splitComponentImporter$2 = () => import("./songs-aY2ClTNZ.mjs");
 var title$2 = "Songs That Remind Me of You";
 var description$2 = "Our playlist — the melodies that speak your name, from the first song we danced to onwards.";
 var Route$21 = createFileRoute("/songs")({
@@ -607,7 +612,7 @@ var Route$20 = createFileRoute("/timeline")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-var $$splitComponentImporter = () => import("./videos-Bn5CeJQC.mjs");
+var $$splitComponentImporter = () => import("./videos-CfSrdCHo.mjs");
 var title = "Our Videos — Moments In Motion";
 var description = "Little moments captured in motion: sunset dates, your laugh, our first trip and the candid clips I keep rewatching.";
 var Route$19 = createFileRoute("/videos")({
@@ -768,7 +773,12 @@ var MediaItemSchema = new import_mongoose.Schema({
 	},
 	source: {
 		type: String,
-		enum: ["upload", "url"],
+		enum: [
+			"upload",
+			"url",
+			"spotify",
+			"google-drive"
+		],
 		required: true
 	},
 	title: {
@@ -836,8 +846,7 @@ var UserSchema = new import_mongoose.Schema({
 		type: String,
 		required: true,
 		unique: true,
-		trim: true,
-		lowercase: true
+		trim: true
 	},
 	password: {
 		type: String,
@@ -991,6 +1000,7 @@ var Route$16 = createFileRoute("/api/songs")({ server: { handlers: {
 			const artist = formData.get("artist");
 			const description = formData.get("description");
 			const duration = formData.get("duration");
+			const memoryDate = formData.get("memoryDate");
 			if (!file) return new Response(JSON.stringify({ error: "No audio file uploaded" }), {
 				status: 400,
 				headers: { "Content-Type": "application/json" }
@@ -1068,7 +1078,7 @@ var Route$16 = createFileRoute("/api/songs")({ server: { handlers: {
 				fileId,
 				coverFileId,
 				duration: duration || "3:00",
-				memoryDate: (/* @__PURE__ */ new Date()).toISOString().split("T")[0]
+				memoryDate: memoryDate || (/* @__PURE__ */ new Date()).toISOString().split("T")[0]
 			});
 			await song.save();
 			return new Response(JSON.stringify(song), {
@@ -1240,9 +1250,9 @@ var Route$14 = createFileRoute("/api/users")({ server: { handlers: {
 				status: 400,
 				headers: { "Content-Type": "application/json" }
 			});
-			const cleanUsername = username.trim().toLowerCase();
+			const cleanUsername = username.trim();
 			await dbConnect();
-			if (cleanUsername === "admin") return new Response(JSON.stringify({ error: "Username 'admin' is reserved" }), {
+			if (cleanUsername.toLowerCase() === "admin") return new Response(JSON.stringify({ error: "Username 'admin' is reserved" }), {
 				status: 400,
 				headers: { "Content-Type": "application/json" }
 			});
@@ -1384,14 +1394,18 @@ var Route$12 = createFileRoute("/api/auth/login")({ server: { handlers: { POST: 
 		const userPass = process.env["USER_PASSWORD"] || "beautiful";
 		const adminPass = process.env["ADMIN_PASSWORD"] || "admin123";
 		let role = null;
-		const cleanUsername = typeof username === "string" ? username.trim().toLowerCase() : "";
-		if (cleanUsername === "admin" && password === adminPass) role = "admin";
+		const cleanUsername = typeof username === "string" ? username.trim() : "";
+		if (cleanUsername.toLowerCase() === "admin" && password === adminPass) role = "admin";
 		else if (cleanUsername) {
 			await dbConnect();
 			const user = await User$1.findOne({ username: cleanUsername });
 			if (user) {
 				const hashedPassword = crypto.createHash("sha256").update(password).digest("hex");
 				if (user.password === hashedPassword) role = user.role;
+			}
+			if (!role) {
+				if (password === adminPass) role = "admin";
+				else if (password === userPass) role = "user";
 			}
 		} else if (password === adminPass) role = "admin";
 		else if (password === userPass) role = "user";
@@ -1756,10 +1770,18 @@ var Route$8 = createFileRoute("/api/media/upload")({ server: { handlers: { POST:
 		});
 	}
 } } } });
+function extractSpotifyTrackId(url) {
+	const match = url.match(/(?:open\.spotify\.com\/(?:intl-[a-z]{2}\/)?track\/|spotify:track:)([a-zA-Z0-9]{22})/i);
+	return match ? match[1] : null;
+}
+function extractGoogleDriveFileId(url) {
+	const match = url.match(/(?:\/file\/d\/|[?&]id=)([a-zA-Z0-9_-]{20,})/i);
+	return match ? match[1] : null;
+}
 var Route$7 = createFileRoute("/api/media/url")({ server: { handlers: { POST: async ({ request }) => {
 	try {
 		await dbConnect();
-		const { title, artist, url, type, memoryDate, category } = await request.json();
+		const { title, artist, url, type, memoryDate, category, sourceType } = await request.json();
 		if (!type || ![
 			"image",
 			"video",
@@ -1768,6 +1790,82 @@ var Route$7 = createFileRoute("/api/media/url")({ server: { handlers: { POST: as
 			status: 400,
 			headers: { "Content-Type": "application/json" }
 		});
+		if (!url || !url.trim()) return new Response(JSON.stringify({ error: "Media URL is required" }), {
+			status: 400,
+			headers: { "Content-Type": "application/json" }
+		});
+		const trimmedUrl = url.trim();
+		const lowerUrl = trimmedUrl.toLowerCase();
+		let determinedSource = "url";
+		let canonicalUrl = trimmedUrl;
+		if (type === "song") {
+			const isSpotify = sourceType === "spotify" || lowerUrl.includes("spotify.com") || lowerUrl.startsWith("spotify:track:");
+			const isGoogleDrive = sourceType === "google-drive" || lowerUrl.includes("drive.google.com") || lowerUrl.includes("docs.google.com");
+			if (isSpotify) {
+				const trackId = extractSpotifyTrackId(trimmedUrl);
+				if (!trackId) return new Response(JSON.stringify({ error: "Invalid Spotify song URL" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" }
+				});
+				determinedSource = "spotify";
+				canonicalUrl = `https://open.spotify.com/track/${trackId}`;
+				if (await MediaItem.findOne({
+					type: "song",
+					$or: [{ url: canonicalUrl }, { url: { $regex: trackId } }]
+				})) return new Response(JSON.stringify({ error: "This song has already been added." }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" }
+				});
+			} else if (isGoogleDrive) {
+				const fileId = extractGoogleDriveFileId(trimmedUrl);
+				if (!fileId) return new Response(JSON.stringify({ error: "Invalid Google Drive URL" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" }
+				});
+				determinedSource = "google-drive";
+				canonicalUrl = `https://drive.google.com/file/d/${fileId}/view?usp=sharing`;
+				if (await MediaItem.findOne({
+					type: "song",
+					$or: [{ url: canonicalUrl }, { url: { $regex: fileId } }]
+				})) return new Response(JSON.stringify({ error: "This song has already been added." }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" }
+				});
+			} else {
+				try {
+					new URL(trimmedUrl);
+				} catch (_) {
+					return new Response(JSON.stringify({ error: "Please enter a valid URL." }), {
+						status: 400,
+						headers: { "Content-Type": "application/json" }
+					});
+				}
+				if (lowerUrl.includes("youtube.com") || lowerUrl.includes("youtu.be") || lowerUrl.includes("instagram.com") || lowerUrl.includes("soundcloud.com")) return new Response(JSON.stringify({ error: "This URL cannot be played directly as an audio file. Please use a Spotify URL, Google Drive URL, or direct audio link." }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" }
+				});
+				if (await MediaItem.findOne({
+					type: "song",
+					url: canonicalUrl
+				})) return new Response(JSON.stringify({ error: "This song has already been added." }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" }
+				});
+			}
+		} else {
+			try {
+				new URL(trimmedUrl);
+			} catch (_) {
+				return new Response(JSON.stringify({ error: "Please enter a valid URL." }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" }
+				});
+			}
+			if (lowerUrl.includes("youtube.com") || lowerUrl.includes("youtu.be") || lowerUrl.includes("spotify.com") || lowerUrl.includes("instagram.com") || lowerUrl.includes("soundcloud.com")) return new Response(JSON.stringify({ error: type === "video" ? "This URL cannot be played directly as a video file. Please use a direct video URL." : "This URL cannot be rendered directly as an image. Please use a direct image URL." }), {
+				status: 400,
+				headers: { "Content-Type": "application/json" }
+			});
+		}
 		if (!title || !title.trim()) return new Response(JSON.stringify({ error: "Title is required" }), {
 			status: 400,
 			headers: { "Content-Type": "application/json" }
@@ -1776,35 +1874,12 @@ var Route$7 = createFileRoute("/api/media/url")({ server: { handlers: { POST: as
 			status: 400,
 			headers: { "Content-Type": "application/json" }
 		});
-		if (!url || !url.trim()) return new Response(JSON.stringify({ error: "Media URL is required" }), {
-			status: 400,
-			headers: { "Content-Type": "application/json" }
-		});
-		try {
-			new URL(url);
-		} catch (_) {
-			return new Response(JSON.stringify({ error: "Please enter a valid URL." }), {
-				status: 400,
-				headers: { "Content-Type": "application/json" }
-			});
-		}
-		const lowerUrl = url.toLowerCase();
-		if (lowerUrl.includes("youtube.com") || lowerUrl.includes("youtu.be") || lowerUrl.includes("spotify.com") || lowerUrl.includes("instagram.com") || lowerUrl.includes("soundcloud.com")) {
-			let errorMsg = "This URL cannot be played directly.";
-			if (type === "song") errorMsg = "This URL cannot be played directly as an audio file. Please use a direct audio URL.";
-			else if (type === "video") errorMsg = "This URL cannot be played directly as a video file. Please use a direct video URL.";
-			else if (type === "image") errorMsg = "This URL cannot be rendered directly as an image. Please use a direct image URL.";
-			return new Response(JSON.stringify({ error: errorMsg }), {
-				status: 400,
-				headers: { "Content-Type": "application/json" }
-			});
-		}
 		const mediaItem = new MediaItem({
 			type,
-			source: "url",
-			title,
-			artist: type === "song" ? artist : void 0,
-			url,
+			source: determinedSource,
+			title: title.trim(),
+			artist: type === "song" ? artist ? artist.trim() : "Unknown Artist" : void 0,
+			url: canonicalUrl,
 			memoryDate: memoryDate || (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
 			category: category || "Favorites"
 		});
@@ -1815,7 +1890,7 @@ var Route$7 = createFileRoute("/api/media/url")({ server: { handlers: { POST: as
 		});
 	} catch (error) {
 		console.error("Error creating URL media item:", error);
-		return new Response(JSON.stringify({ error: "Internal server error" }), {
+		return new Response(JSON.stringify({ error: error.message || "Internal server error" }), {
 			status: 500,
 			headers: { "Content-Type": "application/json" }
 		});

@@ -56,10 +56,15 @@ export function MusicProvider({ children }: { children: ReactNode }) {
   const { data: serverSongs = [] } = useQuery({
     queryKey: ["songs"],
     queryFn: async () => {
-      const res = await fetch("/api/media?type=song");
-      const payload = await readJsonResponse(res);
-      if (!payload.ok) throw new Error(payload.error || "Failed to fetch songs");
-      return payload.data ?? [];
+      try {
+        const res = await fetch("/api/media?type=song");
+        const payload = await readJsonResponse(res);
+        if (!payload.ok) return [];
+        return Array.isArray(payload.data) ? payload.data : [];
+      } catch (err) {
+        console.error("Error fetching songs:", err);
+        return [];
+      }
     },
   });
 
@@ -67,14 +72,26 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     if (serverSongs.length > 0) {
       return serverSongs.map((s: any) => {
         const displayDate = s.memoryDate || s.createdAt || new Date().toISOString();
+        let audioUrl = s.url || "";
+        if (s.source === "upload" && s.fileId) {
+          audioUrl = `/api/media/file/${s.fileId}`;
+        } else if (s.source === "google-drive" && s.url) {
+          const match = s.url.match(/(?:\/file\/d\/|[?&]id=)([a-zA-Z0-9_-]{20,})/i);
+          if (match) {
+            audioUrl = `https://drive.google.com/uc?export=download&id=${match[1]}`;
+          }
+        }
+
         return {
           _id: s._id,
           title: s.title,
           artist: s.artist,
-          audio: s.source === "url" ? s.url : `/api/media/file/${s.fileId}`,
+          audio: audioUrl,
           cover: s.coverFileId ? `/api/media/file/${s.coverFileId}` : staticSongs[0]!.cover,
           duration: s.duration || "3:00",
           note: s.description || "",
+          source: s.source || (s.fileId ? "upload" : "url"),
+          url: s.url,
           rawDate: displayDate.split("T")[0],
           date: displayDate
             ? new Date(displayDate).toLocaleDateString("en-GB", {

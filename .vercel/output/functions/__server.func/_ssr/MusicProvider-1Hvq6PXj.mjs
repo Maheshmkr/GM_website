@@ -1,8 +1,8 @@
 import { o as __toESM } from "../_runtime.mjs";
-import { t as readJsonResponse } from "./api-DhUICLV2.mjs";
+import { t as readJsonResponse } from "./api-BUT7_u4b.mjs";
 import { a as require_react, n as useQuery, o as require_jsx_runtime } from "../_libs/react+tanstack__react-query.mjs";
 import { o as songs } from "./site-DayVGLaA.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/MusicProvider-DUZxdxlu.js
+//#region node_modules/.nitro/vite/services/ssr/assets/MusicProvider-1Hvq6PXj.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var MusicContext = (0, import_react.createContext)(null);
@@ -22,23 +22,36 @@ function MusicProvider({ children }) {
 	const { data: serverSongs = [] } = useQuery({
 		queryKey: ["songs"],
 		queryFn: async () => {
-			const res = await fetch("/api/media?type=song");
-			const payload = await readJsonResponse(res);
-			if (!payload.ok) throw new Error(payload.error || "Failed to fetch songs");
-			return payload.data ?? [];
+			try {
+				const res = await fetch("/api/media?type=song");
+				const payload = await readJsonResponse(res);
+				if (!payload.ok) return [];
+				return Array.isArray(payload.data) ? payload.data : [];
+			} catch (err) {
+				console.error("Error fetching songs:", err);
+				return [];
+			}
 		}
 	});
 	const playlist = (0, import_react.useMemo)(() => {
 		if (serverSongs.length > 0) return serverSongs.map((s) => {
 			const displayDate = s.memoryDate || s.createdAt || (/* @__PURE__ */ new Date()).toISOString();
+			let audioUrl = s.url || "";
+			if (s.source === "upload" && s.fileId) audioUrl = `/api/media/file/${s.fileId}`;
+			else if (s.source === "google-drive" && s.url) {
+				const match = s.url.match(/(?:\/file\/d\/|[?&]id=)([a-zA-Z0-9_-]{20,})/i);
+				if (match) audioUrl = `https://drive.google.com/uc?export=download&id=${match[1]}`;
+			}
 			return {
 				_id: s._id,
 				title: s.title,
 				artist: s.artist,
-				audio: s.source === "url" ? s.url : `/api/media/file/${s.fileId}`,
+				audio: audioUrl,
 				cover: s.coverFileId ? `/api/media/file/${s.coverFileId}` : songs[0].cover,
 				duration: s.duration || "3:00",
 				note: s.description || "",
+				source: s.source || (s.fileId ? "upload" : "url"),
+				url: s.url,
 				rawDate: displayDate.split("T")[0],
 				date: displayDate ? new Date(displayDate).toLocaleDateString("en-GB", {
 					day: "2-digit",

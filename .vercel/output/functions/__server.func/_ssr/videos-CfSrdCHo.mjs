@@ -1,7 +1,7 @@
 import { o as require_jsx_runtime } from "../_libs/react+tanstack__react-query.mjs";
 import { t as SectionHeading } from "./SectionHeading-BVG9eVYl.mjs";
-import { t as VideoGallery } from "./VideoGallery-TCO3wYO7.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/videos-Bn5CeJQC.js
+import { t as VideoGallery } from "./VideoGallery-Bl2ZouvL.mjs";
+//#region node_modules/.nitro/vite/services/ssr/assets/videos-CfSrdCHo.js
 var import_jsx_runtime = require_jsx_runtime();
 function VideosPage() {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {

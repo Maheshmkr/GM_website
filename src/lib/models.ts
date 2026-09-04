@@ -78,7 +78,7 @@ export const Timeline =
 const MediaItemSchema = new Schema(
   {
     type: { type: String, enum: ["image", "video", "song"], required: true },
-    source: { type: String, enum: ["upload", "url"], required: true },
+    source: { type: String, enum: ["upload", "url", "spotify", "google-drive"], required: true },
     title: { type: String, required: true },
     artist: { type: String }, // For songs
     filename: { type: String }, // For uploaded files
