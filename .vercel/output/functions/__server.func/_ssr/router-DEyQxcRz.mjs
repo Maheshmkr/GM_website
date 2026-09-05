@@ -1,21 +1,21 @@
 import { o as __toESM } from "../_runtime.mjs";
-import { t as cn } from "./utils-C_uf36nf.mjs";
-import { a as require_react, o as require_jsx_runtime, r as QueryClientProvider } from "../_libs/react+tanstack__react-query.mjs";
-import { F as Heart, O as LogOut, S as Pause, T as Menu, c as Sparkles, k as LogIn, l as SkipForward, t as X, u as SkipBack, v as Play } from "../_libs/lucide-react.mjs";
+import { i as letters, n as girlfriend } from "./site-_zOoiwhn.mjs";
+import { a as require_jsx_runtime, o as require_react, r as QueryClientProvider } from "../_libs/react+tanstack__react-query.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
+import { i as useMusic, n as formatTime, t as MusicProvider } from "./MusicProvider-RkXNWREC.mjs";
+import { t as cn } from "./utils-C_uf36nf.mjs";
+import { F as Heart, O as LogOut, S as Pause, T as Menu, c as Sparkles, k as LogIn, l as SkipForward, t as X, u as SkipBack, v as Play } from "../_libs/lucide-react.mjs";
 import { _ as useLoaderData, c as HeadContent, d as createRouter, f as Outlet, g as Link, h as createRootRouteWithContext, j as redirect, l as useLocation, m as createFileRoute, p as lazyRouteComponent, s as Scripts, v as useRouter } from "../_libs/@tanstack/react-router+[...].mjs";
 import { t as require_mongoose } from "../_libs/mongoose+mpath+mquery+ms+sift.mjs";
 import { _ as validateMediaUpload, a as createSessionCookie, b as dbConnect, c as getAuthSession, d as mutationRateLimiter, f as parseTimeString, g as uploadRateLimiter, h as sanitizePlainText, i as createRateLimitResponse, l as hashPassword, m as sanitizeMongoInput, n as checkRateLimit, o as createSessionToken, p as requireAdmin, r as createClearSessionCookie, s as extractAndNormalizeSpotifyTrackUrl, t as authRateLimiter, u as isValidObjectId, v as verifyPassword } from "./ssr.mjs";
 import { c as createServerFn, i as TSS_SERVER_FUNCTION } from "./createServerFn-CIHAFgYl.mjs";
-import { i as letters, n as girlfriend } from "./site-_zOoiwhn.mjs";
-import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-CzM9Wt4H.mjs";
-import { n as formatTime, r as useMusic, t as MusicProvider } from "./MusicProvider-BUUOaqNr.mjs";
+import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-Vr5u5U2_.mjs";
 import { a as stringType, i as objectType, n as enumType, r as literalType, t as booleanType } from "../_libs/zod.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-CkYDYPac.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-DEyQxcRz.js
 var import_mongoose = /* @__PURE__ */ __toESM(require_mongoose());
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-DI1cigqD.css";
+var styles_default = "/assets/styles-CFSpHmux.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -504,7 +504,7 @@ function RootComponent() {
 		] })
 	});
 }
-var $$splitComponentImporter$8 = () => import("./routes-3PVDolgL.mjs");
+var $$splitComponentImporter$8 = () => import("./routes-CVrlJJx2.mjs");
 var title$6 = "For You — A Little World Made Just For Us";
 var description$6 = "A private collection of our photos, videos, songs, letters and the timeline of our story — made with all my love.";
 var Route$31 = createFileRoute("/")({
@@ -525,7 +525,7 @@ var Route$31 = createFileRoute("/")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$8, "component")
 });
-var $$splitComponentImporter$7 = () => import("./admin-BfTegMTc.mjs");
+var $$splitComponentImporter$7 = () => import("./admin-CKVVqVJM.mjs");
 var Route$30 = createFileRoute("/admin")({ component: lazyRouteComponent($$splitComponentImporter$7, "component") });
 var $$splitComponentImporter$6 = () => import("./fun-wkuS3tR7.mjs");
 var title$5 = "Fun Zone ❤️ — Interactive Character Game";
@@ -600,7 +600,7 @@ var Route$26 = createFileRoute("/photos")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$3, "component")
 });
-var $$splitComponentImporter$2 = () => import("./songs-Dd3jvSVJ.mjs");
+var $$splitComponentImporter$2 = () => import("./songs-CGaSaG3L.mjs");
 var title$2 = "Songs That Remind Me of You";
 var description$2 = "Our playlist — the melodies that speak your name, from the first song we danced to onwards.";
 var Route$25 = createFileRoute("/songs")({
@@ -1150,6 +1150,8 @@ var Route$19 = createFileRoute("/api/songs")({ server: { handlers: {
 			const rawDescription = formData.get("description");
 			const rawDuration = formData.get("duration");
 			const rawMemoryDate = formData.get("memoryDate");
+			const rawStartTime = formData.get("startTime");
+			const rawEndTime = formData.get("endTime");
 			if (!file || !(file instanceof File)) return new Response(JSON.stringify({ error: "No audio file uploaded" }), {
 				status: 400,
 				headers: { "Content-Type": "application/json" }
@@ -1163,6 +1165,32 @@ var Route$19 = createFileRoute("/api/songs")({ server: { handlers: {
 			const description = sanitizePlainText(rawDescription, 1e3);
 			const duration = sanitizePlainText(rawDuration, 20) || "3:00";
 			const memoryDate = sanitizePlainText(rawMemoryDate, 20) || (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
+			let validatedStartTime = "0:00";
+			let validatedStartSeconds = 0;
+			let validatedEndTime;
+			let validatedEndSeconds;
+			if (rawStartTime && rawStartTime.trim()) {
+				const startParsed = parseTimeString(rawStartTime);
+				if (!startParsed.valid) return new Response(JSON.stringify({ error: startParsed.error || "Invalid start time format" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" }
+				});
+				validatedStartTime = startParsed.formatted || "0:00";
+				validatedStartSeconds = startParsed.seconds !== null ? startParsed.seconds : 0;
+			}
+			if (rawEndTime && rawEndTime.trim()) {
+				const endParsed = parseTimeString(rawEndTime);
+				if (!endParsed.valid) return new Response(JSON.stringify({ error: endParsed.error || "Invalid stop time format" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" }
+				});
+				validatedEndTime = endParsed.formatted || void 0;
+				validatedEndSeconds = endParsed.seconds !== null ? endParsed.seconds : void 0;
+				if (validatedEndSeconds !== void 0 && validatedEndSeconds <= validatedStartSeconds) return new Response(JSON.stringify({ error: "Stop time must be greater than start time" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" }
+				});
+			}
 			const audioArrayBuffer = await file.arrayBuffer();
 			const audioBuffer = Buffer.from(audioArrayBuffer);
 			const audioValidation = validateMediaUpload(audioBuffer, file.name, file.type, "song");
@@ -1216,7 +1244,11 @@ var Route$19 = createFileRoute("/api/songs")({ server: { handlers: {
 				fileId,
 				coverFileId,
 				duration,
-				memoryDate
+				memoryDate,
+				startTime: validatedStartTime,
+				startSeconds: validatedStartSeconds,
+				endTime: validatedEndTime,
+				endSeconds: validatedEndSeconds
 			});
 			await song.save();
 			return new Response(JSON.stringify(song), {

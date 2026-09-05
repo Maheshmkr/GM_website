@@ -1,11 +1,11 @@
 import { o as __toESM } from "../_runtime.mjs";
+import { a as require_jsx_runtime, i as useQueryClient, o as require_react } from "../_libs/react+tanstack__react-query.mjs";
+import { i as useMusic, n as formatTime, r as parseDuration } from "./MusicProvider-RkXNWREC.mjs";
 import { t as cn } from "./utils-C_uf36nf.mjs";
-import { a as require_react, i as useQueryClient, o as require_jsx_runtime } from "../_libs/react+tanstack__react-query.mjs";
 import { F as Heart, S as Pause, d as Shuffle, g as Repeat, l as SkipForward, m as Save, t as X, u as SkipBack, v as Play, x as PenLine, z as ExternalLink } from "../_libs/lucide-react.mjs";
 import { t as SectionHeading } from "./SectionHeading-BVG9eVYl.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
-import { n as formatTime, r as useMusic } from "./MusicProvider-BUUOaqNr.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/songs-Dd3jvSVJ.js
+//#region node_modules/.nitro/vite/services/ssr/assets/songs-CGaSaG3L.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function MusicPlayer() {
@@ -64,6 +64,14 @@ function MusicPlayer() {
 							className: "mt-2 text-xs text-primary",
 							children: current.note
 						}),
+						current.startTime && current.startTime !== "0:00" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+							className: "mt-1 text-xs text-primary/90 font-medium",
+							children: [
+								"🎵 Starts at ",
+								current.startTime,
+								current.endTime && ` • Ends at ${current.endTime}`
+							]
+						}),
 						current.source && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 							className: "mt-2",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
@@ -86,50 +94,56 @@ function MusicPlayer() {
 				const isSpotify = current.source === "spotify" || current.url && current.url.includes("spotify.com");
 				const spotifyMatch = isSpotify ? (current.url || current.audio || "").match(/(?:open\.spotify\.com\/(?:intl-[a-z]{2}\/)?track\/|spotify:track:)([a-zA-Z0-9]{22})/i) : null;
 				const spotifyTrackId = spotifyMatch ? spotifyMatch[1] : null;
-				if (isSpotify) return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "mt-6 space-y-3",
-					children: [spotifyTrackId && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "rounded-2xl overflow-hidden border border-emerald-500/30 bg-black/40 shadow-lg",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("iframe", {
-							src: `https://open.spotify.com/embed/track/${spotifyTrackId}?utm_source=generator&theme=0`,
-							width: "100%",
-							height: "152",
-							frameBorder: "0",
-							allow: "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture",
-							loading: "lazy",
-							title: current.title,
-							className: "w-full rounded-2xl"
-						})
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2 text-xs",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "space-y-0.5 text-muted-foreground",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "font-medium text-emerald-400 flex items-center gap-1.5",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["♫ ", current.title] })
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-								className: "text-[11px]",
-								children: [
-									"Starts at: ",
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "text-foreground font-semibold",
-										children: current.startTime || "0:00"
-									}),
-									current.endTime && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [" • Ends at: ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "text-foreground font-semibold",
-										children: current.endTime
-									})] })
-								]
+				if (isSpotify) {
+					const startSec = typeof current.startSeconds === "number" && current.startSeconds > 0 ? current.startSeconds : current.startTime ? parseDuration(current.startTime) : 0;
+					const timeParam = startSec > 0 ? `&time=${startSec}&t=${startSec}&start=${startSec}` : "";
+					const embedSrc = spotifyTrackId ? `https://open.spotify.com/embed/track/${spotifyTrackId}?utm_source=generator&theme=0${timeParam}` : "";
+					const spotifyOpenUrl = current.url ? startSec > 0 ? `${current.url}${current.url.includes("?") ? "&" : "?"}t=${startSec}` : current.url : "#";
+					return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "mt-6 space-y-3",
+						children: [spotifyTrackId && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "rounded-2xl overflow-hidden border border-emerald-500/30 bg-black/40 shadow-lg",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("iframe", {
+								src: embedSrc,
+								width: "100%",
+								height: "152",
+								frameBorder: "0",
+								allow: "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture",
+								loading: "lazy",
+								title: current.title,
+								className: "w-full rounded-2xl"
+							}, `${spotifyTrackId}-${startSec}`)
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2 text-xs",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "space-y-0.5 text-muted-foreground",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "font-medium text-emerald-400 flex items-center gap-1.5",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["♫ ", current.title] })
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+									className: "text-[11px]",
+									children: [
+										"Starts at: ",
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-foreground font-semibold",
+											children: current.startTime || "0:00"
+										}),
+										current.endTime && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [" • Ends at: ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-foreground font-semibold",
+											children: current.endTime
+										})] })
+									]
+								})]
+							}), current.url && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+								href: spotifyOpenUrl,
+								target: "_blank",
+								rel: "noopener noreferrer",
+								className: "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-600/90 hover:bg-emerald-500 text-white font-medium text-xs transition-colors shadow-sm cursor-pointer shrink-0",
+								children: ["Open in Spotify ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ExternalLink, { className: "size-3" })]
 							})]
-						}), current.url && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
-							href: current.url,
-							target: "_blank",
-							rel: "noopener noreferrer",
-							className: "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-600/90 hover:bg-emerald-500 text-white font-medium text-xs transition-colors shadow-sm cursor-pointer shrink-0",
-							children: ["Open in Spotify ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ExternalLink, { className: "size-3" })]
 						})]
-					})]
-				});
+					});
+				}
 				const isDrive = current.source === "google-drive" || current.url && current.url.includes("drive.google.com");
 				const driveMatch = isDrive ? (current.url || current.audio || "").match(/(?:\/file\/d\/|[?&]id=)([a-zA-Z0-9_-]{20,})/i) : null;
 				const driveFileId = driveMatch ? driveMatch[1] : null;
@@ -238,10 +252,17 @@ function MusicPlayer() {
 								children: s.title
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 								className: "block truncate text-xs text-muted-foreground flex items-center gap-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: s.artist }), s.source && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: cn("text-[9px] px-1.5 py-0.2 rounded font-medium border", s.source === "spotify" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" : s.source === "google-drive" ? "bg-blue-500/20 text-blue-400 border-blue-500/30" : "bg-secondary/80 text-muted-foreground border-border/40"),
-									children: s.source === "spotify" ? "Spotify" : s.source === "google-drive" ? "Drive" : "Upload"
-								})]
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: s.artist }),
+									s.startTime && s.startTime !== "0:00" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+										className: "text-[9px] text-primary/90 font-medium",
+										children: ["starts ", s.startTime]
+									}),
+									s.source && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: cn("text-[9px] px-1.5 py-0.2 rounded font-medium border", s.source === "spotify" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" : s.source === "google-drive" ? "bg-blue-500/20 text-blue-400 border-blue-500/30" : "bg-secondary/80 text-muted-foreground border-border/40"),
+										children: s.source === "spotify" ? "Spotify" : s.source === "google-drive" ? "Drive" : "Upload"
+									})
+								]
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {

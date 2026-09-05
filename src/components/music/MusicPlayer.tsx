@@ -16,7 +16,7 @@ import {
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { formatTime, useMusic } from "./MusicProvider";
+import { formatTime, parseDuration, useMusic } from "./MusicProvider";
 import { cn } from "@/lib/utils";
 
 export function MusicPlayer() {
@@ -111,6 +111,14 @@ export function MusicPlayer() {
             )}
             {current.note && <p className="mt-2 text-xs text-primary">{current.note}</p>}
             
+            {/* Starts At info (for custom timestamped songs) */}
+            {current.startTime && current.startTime !== "0:00" && (
+              <p className="mt-1 text-xs text-primary/90 font-medium">
+                🎵 Starts at {current.startTime}
+                {current.endTime && ` • Ends at ${current.endTime}`}
+              </p>
+            )}
+
             {/* Source Badge */}
             {current.source && (
               <div className="mt-2">
@@ -160,12 +168,31 @@ export function MusicPlayer() {
           const spotifyTrackId = spotifyMatch ? spotifyMatch[1] : null;
 
           if (isSpotify) {
+            const startSec =
+              typeof current.startSeconds === "number" && current.startSeconds > 0
+                ? current.startSeconds
+                : current.startTime
+                  ? parseDuration(current.startTime)
+                  : 0;
+
+            const timeParam = startSec > 0 ? `&time=${startSec}&t=${startSec}&start=${startSec}` : "";
+            const embedSrc = spotifyTrackId
+              ? `https://open.spotify.com/embed/track/${spotifyTrackId}?utm_source=generator&theme=0${timeParam}`
+              : "";
+
+            const spotifyOpenUrl = current.url
+              ? (startSec > 0
+                  ? `${current.url}${current.url.includes("?") ? "&" : "?"}t=${startSec}`
+                  : current.url)
+              : "#";
+
             return (
               <div className="mt-6 space-y-3">
                 {spotifyTrackId && (
                   <div className="rounded-2xl overflow-hidden border border-emerald-500/30 bg-black/40 shadow-lg">
                     <iframe
-                      src={`https://open.spotify.com/embed/track/${spotifyTrackId}?utm_source=generator&theme=0`}
+                      key={`${spotifyTrackId}-${startSec}`}
+                      src={embedSrc}
                       width="100%"
                       height="152"
                       frameBorder="0"
@@ -192,7 +219,7 @@ export function MusicPlayer() {
 
                   {current.url && (
                     <a
-                      href={current.url}
+                      href={spotifyOpenUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-600/90 hover:bg-emerald-500 text-white font-medium text-xs transition-colors shadow-sm cursor-pointer shrink-0"
@@ -320,6 +347,11 @@ export function MusicPlayer() {
                   </span>
                   <span className="block truncate text-xs text-muted-foreground flex items-center gap-2">
                     <span>{s.artist}</span>
+                    {s.startTime && s.startTime !== "0:00" && (
+                      <span className="text-[9px] text-primary/90 font-medium">
+                        starts {s.startTime}
+                      </span>
+                    )}
                     {s.source && (
                       <span
                         className={cn(

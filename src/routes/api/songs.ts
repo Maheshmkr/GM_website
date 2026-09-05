@@ -9,6 +9,7 @@ import {
   uploadRateLimiter,
   createRateLimitResponse,
   sanitizePlainText,
+  parseTimeString,
 } from "@/lib/security";
 import mongoose from "mongoose";
 
@@ -56,6 +57,8 @@ export const Route = createFileRoute("/api/songs")({
           const rawDescription = formData.get("description") as string | null;
           const rawDuration = formData.get("duration") as string | null;
           const rawMemoryDate = formData.get("memoryDate") as string | null;
+          const rawStartTime = formData.get("startTime") as string | null;
+          const rawEndTime = formData.get("endTime") as string | null;
 
           if (!file || !(file instanceof File)) {
             return new Response(JSON.stringify({ error: "No audio file uploaded" }), {
@@ -77,6 +80,46 @@ export const Route = createFileRoute("/api/songs")({
           const description = sanitizePlainText(rawDescription, 1000);
           const duration = sanitizePlainText(rawDuration, 20) || "3:00";
           const memoryDate = sanitizePlainText(rawMemoryDate, 20) || new Date().toISOString().split("T")[0];
+
+          // Validate Start and End Time
+          let validatedStartTime = "0:00";
+          let validatedStartSeconds = 0;
+          let validatedEndTime: string | undefined;
+          let validatedEndSeconds: number | undefined;
+
+          if (rawStartTime && rawStartTime.trim()) {
+            const startParsed = parseTimeString(rawStartTime);
+            if (!startParsed.valid) {
+              return new Response(
+                JSON.stringify({ error: startParsed.error || "Invalid start time format" }),
+                { status: 400, headers: { "Content-Type": "application/json" } }
+              );
+            }
+            validatedStartTime = startParsed.formatted || "0:00";
+            validatedStartSeconds = startParsed.seconds !== null ? startParsed.seconds : 0;
+          }
+
+          if (rawEndTime && rawEndTime.trim()) {
+            const endParsed = parseTimeString(rawEndTime);
+            if (!endParsed.valid) {
+              return new Response(
+                JSON.stringify({ error: endParsed.error || "Invalid stop time format" }),
+                { status: 400, headers: { "Content-Type": "application/json" } }
+              );
+            }
+            validatedEndTime = endParsed.formatted || undefined;
+            validatedEndSeconds = endParsed.seconds !== null ? endParsed.seconds : undefined;
+
+            if (
+              validatedEndSeconds !== undefined &&
+              validatedEndSeconds <= validatedStartSeconds
+            ) {
+              return new Response(
+                JSON.stringify({ error: "Stop time must be greater than start time" }),
+                { status: 400, headers: { "Content-Type": "application/json" } }
+              );
+            }
+          }
 
           // 3. Audio Binary Magic Bytes & Security Validation
           const audioArrayBuffer = await file.arrayBuffer();
@@ -153,6 +196,10 @@ export const Route = createFileRoute("/api/songs")({
             coverFileId,
             duration,
             memoryDate,
+            startTime: validatedStartTime,
+            startSeconds: validatedStartSeconds,
+            endTime: validatedEndTime,
+            endSeconds: validatedEndSeconds,
           });
           await song.save();
 

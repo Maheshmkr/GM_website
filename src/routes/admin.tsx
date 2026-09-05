@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { SectionHeading } from "@/components/SectionHeading";
 import { Reveal } from "@/components/Reveal";
+import { parseDuration } from "@/components/music/MusicProvider";
 import { readJsonResponse } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -732,6 +733,7 @@ function SongsManager({
   // Spotify Modal & Form State
   const [isSpotifyModalOpen, setIsSpotifyModalOpen] = useState(false);
   const [editingSpotifyId, setEditingSpotifyId] = useState<string | null>(null);
+  const [editingSongSource, setEditingSongSource] = useState<string>("spotify");
   const [spotifyUrl, setSpotifyUrl] = useState("");
   const [spotifyTitle, setSpotifyTitle] = useState("");
   const [spotifyArtist, setSpotifyArtist] = useState("");
@@ -784,6 +786,7 @@ function SongsManager({
     formData.append("artist", uploadArtist);
     formData.append("description", uploadDescription);
     formData.append("duration", uploadDuration);
+    formData.append("startTime", "0:00");
     formData.append("memoryDate", uploadDate);
 
     try {
@@ -819,9 +822,10 @@ function SongsManager({
     }
   };
 
-  // Open Spotify Modal for Add
+  // Open Modal for Add Spotify
   const handleOpenAddSpotify = () => {
     setEditingSpotifyId(null);
+    setEditingSongSource("spotify");
     setSpotifyUrl("");
     setSpotifyTitle("");
     setSpotifyArtist("");
@@ -831,9 +835,10 @@ function SongsManager({
     setIsSpotifyModalOpen(true);
   };
 
-  // Open Spotify Modal for Edit
-  const handleOpenEditSpotify = (song: any) => {
+  // Open Modal for Edit (Any Song)
+  const handleOpenEditSong = (song: any) => {
     setEditingSpotifyId(song._id);
+    setEditingSongSource(song.source || (song.fileId ? "upload" : "spotify"));
     setSpotifyUrl(song.url || "");
     setSpotifyTitle(song.title || "");
     setSpotifyArtist(song.artist || "");
@@ -867,10 +872,10 @@ function SongsManager({
     }
   };
 
-  // Save Spotify Song (Create or Edit)
+  // Save Song (Create Spotify or Edit Any Song)
   const handleSaveSpotify = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!spotifyUrl.trim()) {
+    if (editingSongSource === "spotify" && !editingSpotifyId && !spotifyUrl.trim()) {
       toast.error("Please paste a Spotify URL");
       return;
     }
@@ -886,26 +891,30 @@ function SongsManager({
     setSavingSpotify(true);
     try {
       if (editingSpotifyId) {
-        // Edit existing Spotify song
+        // Edit existing song
+        const payload: any = {
+          title: spotifyTitle,
+          artist: spotifyArtist,
+          memoryDate: spotifyDate,
+          startTime: spotifyStartTime,
+          endTime: spotifyEndTime || undefined,
+        };
+        if (spotifyUrl.trim()) {
+          payload.url = spotifyUrl.trim();
+        }
+
         const res = await fetch(`/api/media/edit/${editingSpotifyId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            url: spotifyUrl,
-            title: spotifyTitle,
-            artist: spotifyArtist,
-            memoryDate: spotifyDate,
-            startTime: spotifyStartTime,
-            endTime: spotifyEndTime || undefined,
-          }),
+          body: JSON.stringify(payload),
         });
 
         const data = await res.json();
         if (!res.ok) {
-          throw new Error(data.error || "Failed to update Spotify song");
+          throw new Error(data.error || "Failed to update song");
         }
 
-        toast.success("Spotify song updated successfully!");
+        toast.success("Song updated successfully!");
       } else {
         // Create new Spotify song
         const res = await fetch("/api/media/url", {
@@ -1112,6 +1121,7 @@ function SongsManager({
                 />
               </div>
             </div>
+
             <div>
               <label className="block text-xs font-semibold text-muted-foreground mb-1">
                 Note / Description
@@ -1319,37 +1329,49 @@ function SongsManager({
                     </span>
 
                     <div className="flex items-center gap-1.5">
-                      {isSpotify && s.url && (
+                      {isSpotify && s.url ? (
+                        (() => {
+                          const startSec =
+                            typeof s.startSeconds === "number" && s.startSeconds > 0
+                              ? s.startSeconds
+                              : s.startTime
+                                ? parseDuration(s.startTime)
+                                : 0;
+                          const spotifyLink =
+                            startSec > 0
+                              ? `${s.url}${s.url.includes("?") ? "&" : "?"}t=${startSec}`
+                              : s.url;
+                          return (
+                            <a
+                              href={spotifyLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-full px-2.5 py-1 transition-colors"
+                              title="Open in Spotify"
+                            >
+                              Open in Spotify <ExternalLink className="size-3" />
+                            </a>
+                          );
+                        })()
+                      ) : (
                         <a
-                          href={s.url}
+                          href={s.source === "upload" ? `/api/media/file/${s.fileId}` : s.url}
                           target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-full px-2.5 py-1 transition-colors"
-                          title="Open in Spotify"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 border border-primary/30 rounded-full px-2.5 py-1 transition-colors"
+                          title="Listen / Preview Audio"
                         >
-                          Open in Spotify <ExternalLink className="size-3" />
+                          <Play className="size-3" /> Listen
                         </a>
                       )}
 
-                      {isSpotify ? (
-                        <button
-                          onClick={() => handleOpenEditSpotify(s)}
-                          className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-colors cursor-pointer"
-                          title="Edit Spotify Song"
-                        >
-                          <Edit2 className="size-3.5" />
-                        </button>
-                      ) : (
-                        <a
-                          href={s.source === "upload" ? `/api/media/${s.fileId}` : s.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-colors cursor-pointer"
-                          title="Open Source"
-                        >
-                          <ExternalLink className="size-3.5" />
-                        </a>
-                      )}
+                      <button
+                        onClick={() => handleOpenEditSong(s)}
+                        className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-colors cursor-pointer"
+                        title="Edit Song"
+                      >
+                        <Edit2 className="size-3.5" />
+                      </button>
 
                       <button
                         onClick={() => {
@@ -1371,14 +1393,18 @@ function SongsManager({
         )}
       </div>
 
-      {/* Spotify Add / Edit Modal */}
+      {/* Song Add / Edit Modal */}
       {isSpotifyModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
           <div className="w-full max-w-lg bg-surface border border-emerald-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto space-y-6">
             <div className="flex items-center justify-between pb-2 border-b border-border/40">
               <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                 <Music4 className="size-5 text-emerald-400" />
-                {editingSpotifyId ? "Edit Spotify Song" : "Add Spotify Link"}
+                {editingSpotifyId
+                  ? editingSongSource === "upload"
+                    ? "Edit Uploaded Song"
+                    : "Edit Spotify Song"
+                  : "Add Spotify Link"}
               </h3>
               <button
                 type="button"
@@ -1390,19 +1416,24 @@ function SongsManager({
             </div>
 
             <form onSubmit={handleSaveSpotify} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
-                  Spotify URL <span className="text-emerald-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="Paste Spotify song link (e.g. https://open.spotify.com/track/3lxEwB58zfc7BJcf0RZICP)"
-                  value={spotifyUrl}
-                  onChange={(e) => handleSpotifyUrlChange(e.target.value)}
-                  className="w-full text-xs sm:text-sm bg-surface/80 border border-border/80 rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-mono"
-                  required
-                />
-              </div>
+              {editingSongSource === "spotify" && (
+                <div>
+                  <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+                    Spotify URL <span className="text-emerald-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Paste Spotify song link (e.g. https://open.spotify.com/track/3lxEwB58zfc7BJcf0RZICP)"
+                    value={spotifyUrl}
+                    onChange={(e) => handleSpotifyUrlChange(e.target.value)}
+                    className="w-full text-xs sm:text-sm bg-surface/80 border border-border/80 rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-mono"
+                    required={!editingSpotifyId}
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    💡 Spotify controls external playback behavior. For exact timestamp playback on this site, you can also upload the audio file directly.
+                  </p>
+                </div>
+              )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>

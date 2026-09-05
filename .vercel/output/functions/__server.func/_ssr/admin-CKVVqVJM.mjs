@@ -1,11 +1,12 @@
 import { o as __toESM } from "../_runtime.mjs";
 import { t as readJsonResponse } from "./api-BUT7_u4b.mjs";
+import { a as require_jsx_runtime, i as useQueryClient, n as useQuery, o as require_react, t as useMutation } from "../_libs/react+tanstack__react-query.mjs";
+import { r as parseDuration } from "./MusicProvider-RkXNWREC.mjs";
 import { t as cn } from "./utils-C_uf36nf.mjs";
-import { a as require_react, i as useQueryClient, n as useQuery, o as require_jsx_runtime, t as useMutation } from "../_libs/react+tanstack__react-query.mjs";
 import { A as Lock, C as Music, D as Mail, E as MapPin, F as Heart, G as Camera, H as CircleCheck, I as Film, K as Calendar, L as Eye, M as Link, N as KeyRound, P as Image, R as EyeOff, V as Clock, _ as Plus, a as Upload, b as Pen, c as Sparkles, f as Shield, j as LoaderCircle, o as Trash2, p as ShieldCheck, r as Users, t as X, v as Play, w as Music4, z as ExternalLink } from "../_libs/lucide-react.mjs";
 import { t as SectionHeading } from "./SectionHeading-BVG9eVYl.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/admin-BfTegMTc.js
+//#region node_modules/.nitro/vite/services/ssr/assets/admin-CKVVqVJM.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function AdminPage() {
@@ -636,6 +637,7 @@ function SongsManager({ songs, isLoading, queryClient }) {
 	const [uploading, setUploading] = (0, import_react.useState)(false);
 	const [isSpotifyModalOpen, setIsSpotifyModalOpen] = (0, import_react.useState)(false);
 	const [editingSpotifyId, setEditingSpotifyId] = (0, import_react.useState)(null);
+	const [editingSongSource, setEditingSongSource] = (0, import_react.useState)("spotify");
 	const [spotifyUrl, setSpotifyUrl] = (0, import_react.useState)("");
 	const [spotifyTitle, setSpotifyTitle] = (0, import_react.useState)("");
 	const [spotifyArtist, setSpotifyArtist] = (0, import_react.useState)("");
@@ -680,6 +682,7 @@ function SongsManager({ songs, isLoading, queryClient }) {
 		formData.append("artist", uploadArtist);
 		formData.append("description", uploadDescription);
 		formData.append("duration", uploadDuration);
+		formData.append("startTime", "0:00");
 		formData.append("memoryDate", uploadDate);
 		try {
 			const res = await fetch("/api/songs", {
@@ -710,6 +713,7 @@ function SongsManager({ songs, isLoading, queryClient }) {
 	};
 	const handleOpenAddSpotify = () => {
 		setEditingSpotifyId(null);
+		setEditingSongSource("spotify");
 		setSpotifyUrl("");
 		setSpotifyTitle("");
 		setSpotifyArtist("");
@@ -718,8 +722,9 @@ function SongsManager({ songs, isLoading, queryClient }) {
 		setSpotifyDate((/* @__PURE__ */ new Date()).toISOString().split("T")[0]);
 		setIsSpotifyModalOpen(true);
 	};
-	const handleOpenEditSpotify = (song) => {
+	const handleOpenEditSong = (song) => {
 		setEditingSpotifyId(song._id);
+		setEditingSongSource(song.source || (song.fileId ? "upload" : "spotify"));
 		setSpotifyUrl(song.url || "");
 		setSpotifyTitle(song.title || "");
 		setSpotifyArtist(song.artist || "");
@@ -742,7 +747,7 @@ function SongsManager({ songs, isLoading, queryClient }) {
 	};
 	const handleSaveSpotify = async (e) => {
 		e.preventDefault();
-		if (!spotifyUrl.trim()) {
+		if (editingSongSource === "spotify" && !editingSpotifyId && !spotifyUrl.trim()) {
 			toast.error("Please paste a Spotify URL");
 			return;
 		}
@@ -757,21 +762,22 @@ function SongsManager({ songs, isLoading, queryClient }) {
 		setSavingSpotify(true);
 		try {
 			if (editingSpotifyId) {
+				const payload = {
+					title: spotifyTitle,
+					artist: spotifyArtist,
+					memoryDate: spotifyDate,
+					startTime: spotifyStartTime,
+					endTime: spotifyEndTime || void 0
+				};
+				if (spotifyUrl.trim()) payload.url = spotifyUrl.trim();
 				const res = await fetch(`/api/media/edit/${editingSpotifyId}`, {
 					method: "PUT",
 					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({
-						url: spotifyUrl,
-						title: spotifyTitle,
-						artist: spotifyArtist,
-						memoryDate: spotifyDate,
-						startTime: spotifyStartTime,
-						endTime: spotifyEndTime || void 0
-					})
+					body: JSON.stringify(payload)
 				});
 				const data = await res.json();
-				if (!res.ok) throw new Error(data.error || "Failed to update Spotify song");
-				toast.success("Spotify song updated successfully!");
+				if (!res.ok) throw new Error(data.error || "Failed to update song");
+				toast.success("Song updated successfully!");
 			} else {
 				const res = await fetch("/api/media/url", {
 					method: "POST",
@@ -1111,26 +1117,30 @@ function SongsManager({ songs, isLoading, queryClient }) {
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "flex items-center gap-1.5",
 									children: [
-										isSpotify && s.url && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
-											href: s.url,
-											target: "_blank",
-											rel: "noopener noreferrer",
-											className: "inline-flex items-center gap-1 text-[11px] font-medium text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-full px-2.5 py-1 transition-colors",
-											title: "Open in Spotify",
-											children: ["Open in Spotify ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ExternalLink, { className: "size-3" })]
-										}),
-										isSpotify ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-											onClick: () => handleOpenEditSpotify(s),
-											className: "p-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-colors cursor-pointer",
-											title: "Edit Spotify Song",
-											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pen, { className: "size-3.5" })
-										}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-											href: s.source === "upload" ? `/api/media/${s.fileId}` : s.url,
+										isSpotify && s.url ? (() => {
+											const startSec = typeof s.startSeconds === "number" && s.startSeconds > 0 ? s.startSeconds : s.startTime ? parseDuration(s.startTime) : 0;
+											const spotifyLink = startSec > 0 ? `${s.url}${s.url.includes("?") ? "&" : "?"}t=${startSec}` : s.url;
+											return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+												href: spotifyLink,
+												target: "_blank",
+												rel: "noopener noreferrer",
+												className: "inline-flex items-center gap-1 text-[11px] font-medium text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-full px-2.5 py-1 transition-colors",
+												title: "Open in Spotify",
+												children: ["Open in Spotify ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ExternalLink, { className: "size-3" })]
+											});
+										})() : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+											href: s.source === "upload" ? `/api/media/file/${s.fileId}` : s.url,
 											target: "_blank",
 											rel: "noreferrer",
+											className: "inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 border border-primary/30 rounded-full px-2.5 py-1 transition-colors",
+											title: "Listen / Preview Audio",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Play, { className: "size-3" }), " Listen"]
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+											onClick: () => handleOpenEditSong(s),
 											className: "p-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-colors cursor-pointer",
-											title: "Open Source",
-											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ExternalLink, { className: "size-3.5" })
+											title: "Edit Song",
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pen, { className: "size-3.5" })
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 											onClick: () => {
@@ -1155,7 +1165,7 @@ function SongsManager({ songs, isLoading, queryClient }) {
 						className: "flex items-center justify-between pb-2 border-b border-border/40",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
 							className: "text-lg font-bold text-foreground flex items-center gap-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Music4, { className: "size-5 text-emerald-400" }), editingSpotifyId ? "Edit Spotify Song" : "Add Spotify Link"]
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Music4, { className: "size-5 text-emerald-400" }), editingSpotifyId ? editingSongSource === "upload" ? "Edit Uploaded Song" : "Edit Spotify Song" : "Add Spotify Link"]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 							type: "button",
 							onClick: () => setIsSpotifyModalOpen(false),
@@ -1166,20 +1176,27 @@ function SongsManager({ songs, isLoading, queryClient }) {
 						onSubmit: handleSaveSpotify,
 						className: "space-y-4",
 						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
-								className: "block text-xs font-semibold text-muted-foreground mb-1.5",
-								children: ["Spotify URL ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-emerald-400",
-									children: "*"
-								})]
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-								type: "text",
-								placeholder: "Paste Spotify song link (e.g. https://open.spotify.com/track/3lxEwB58zfc7BJcf0RZICP)",
-								value: spotifyUrl,
-								onChange: (e) => handleSpotifyUrlChange(e.target.value),
-								className: "w-full text-xs sm:text-sm bg-surface/80 border border-border/80 rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-mono",
-								required: true
-							})] }),
+							editingSongSource === "spotify" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+									className: "block text-xs font-semibold text-muted-foreground mb-1.5",
+									children: ["Spotify URL ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "text-emerald-400",
+										children: "*"
+									})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "text",
+									placeholder: "Paste Spotify song link (e.g. https://open.spotify.com/track/3lxEwB58zfc7BJcf0RZICP)",
+									value: spotifyUrl,
+									onChange: (e) => handleSpotifyUrlChange(e.target.value),
+									className: "w-full text-xs sm:text-sm bg-surface/80 border border-border/80 rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-mono",
+									required: !editingSpotifyId
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-[10px] text-muted-foreground mt-1",
+									children: "💡 Spotify controls external playback behavior. For exact timestamp playback on this site, you can also upload the audio file directly."
+								})
+							] }),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "grid grid-cols-1 sm:grid-cols-2 gap-3",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {

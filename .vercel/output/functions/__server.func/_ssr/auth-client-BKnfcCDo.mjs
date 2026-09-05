@@ -1,6 +1,6 @@
 import { y as verifySessionToken } from "./ssr.mjs";
 import { c as createServerFn, i as TSS_SERVER_FUNCTION } from "./createServerFn-CIHAFgYl.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/auth-client-CMbsyi1k.js
+//#region node_modules/.nitro/vite/services/ssr/assets/auth-client-BKnfcCDo.js
 var createServerRpc = (serverFnMeta, splitImportFn) => {
 	const url = "/_serverFn/" + serverFnMeta.id;
 	return Object.assign(splitImportFn, {
@@ -15,7 +15,7 @@ var getSession_createServerFn_handler = createServerRpc({
 	filename: "src/lib/auth-client.ts"
 }, (opts) => getSession.__executeServer(opts));
 var getSession = createServerFn({ method: "GET" }).handler(getSession_createServerFn_handler, async () => {
-	const { getCookie } = await import("./server-DXY1CydE.mjs");
+	const { getCookie } = await import("./server-syPJohUn.mjs");
 	const sessionCookie = getCookie("auth_session");
 	const session = verifySessionToken(sessionCookie);
 	return {

@@ -1,1 +1,0 @@
-import{r as e}from"./heart-CJLjDj4v.js";import{t}from"./SectionHeading-BmL1yZsm.js";import{t as n}from"./Letters-BSvD_wSO.js";var r=e();function i(){return(0,r.jsxs)(`section`,{className:`section-shell py-10 lg:py-16`,children:[(0,r.jsx)(t,{title:`Letters For You`,subtitle:`Words I wish I could say every day.`}),(0,r.jsx)(n,{})]})}export{i as component};

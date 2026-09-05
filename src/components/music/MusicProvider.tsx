@@ -36,9 +36,18 @@ type MusicState = {
 
 const MusicContext = createContext<MusicState | null>(null);
 
-function parseDuration(value: string) {
-  const [m, s] = value.split(":").map(Number);
-  return (m || 0) * 60 + (s || 0);
+export function parseDuration(value?: string | number | null): number {
+  if (value === undefined || value === null) return 0;
+  if (typeof value === "number") return value;
+  const clean = value.trim();
+  const parts = clean.split(":").map(Number);
+  if (parts.length === 3) {
+    return (parts[0] || 0) * 3600 + (parts[1] || 0) * 60 + (parts[2] || 0);
+  }
+  if (parts.length === 2) {
+    return (parts[0] || 0) * 60 + (parts[1] || 0);
+  }
+  return Number(clean) || 0;
 }
 
 export function MusicProvider({ children }: { children: ReactNode }) {
@@ -93,9 +102,9 @@ export function MusicProvider({ children }: { children: ReactNode }) {
           source: s.source || (s.fileId ? "upload" : "url"),
           url: s.url,
           startTime: s.startTime,
-          startSeconds: s.startSeconds,
+          startSeconds: typeof s.startSeconds === "number" ? s.startSeconds : (s.startTime ? parseDuration(s.startTime) : 0),
           endTime: s.endTime,
-          endSeconds: s.endSeconds,
+          endSeconds: typeof s.endSeconds === "number" ? s.endSeconds : (s.endTime ? parseDuration(s.endTime) : undefined),
           rawDate: displayDate.split("T")[0],
           date: displayDate
             ? new Date(displayDate).toLocaleDateString("en-GB", {
@@ -128,19 +137,43 @@ export function MusicProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setDuration(parseDuration(current.duration));
-    setProgress(0);
+    const startSec =
+      typeof current.startSeconds === "number" && current.startSeconds > 0
+        ? current.startSeconds
+        : current.startTime
+          ? parseDuration(current.startTime)
+          : 0;
+    setProgress(startSec);
   }, [current]);
 
   const next = useCallback(() => {
-    setIndex((i) =>
-      shuffle ? Math.floor(Math.random() * playlist.length) : (i + 1) % playlist.length,
-    );
-    setProgress(0);
+    setIndex((i) => {
+      const nextIdx = shuffle ? Math.floor(Math.random() * playlist.length) : (i + 1) % playlist.length;
+      const targetSong = playlist[nextIdx];
+      const startSec =
+        targetSong?.startSeconds !== undefined && targetSong?.startSeconds > 0
+          ? targetSong.startSeconds
+          : targetSong?.startTime
+            ? parseDuration(targetSong.startTime)
+            : 0;
+      setProgress(startSec);
+      return nextIdx;
+    });
   }, [shuffle, playlist]);
 
   const prev = useCallback(() => {
-    setIndex((i) => (i - 1 + playlist.length) % playlist.length);
-    setProgress(0);
+    setIndex((i) => {
+      const prevIdx = (i - 1 + playlist.length) % playlist.length;
+      const targetSong = playlist[prevIdx];
+      const startSec =
+        targetSong?.startSeconds !== undefined && targetSong?.startSeconds > 0
+          ? targetSong.startSeconds
+          : targetSong?.startTime
+            ? parseDuration(targetSong.startTime)
+            : 0;
+      setProgress(startSec);
+      return prevIdx;
+    });
   }, [playlist]);
 
   /* Ticker: drives the progress bar. Uses the real audio element when the
@@ -149,14 +182,36 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     if (!playing) return;
     const id = window.setInterval(() => {
       const el = audioRef.current;
+      const startSec =
+        typeof current.startSeconds === "number" && current.startSeconds > 0
+          ? current.startSeconds
+          : current.startTime
+            ? parseDuration(current.startTime)
+            : 0;
+      const endSec =
+        typeof current.endSeconds === "number" && current.endSeconds > 0
+          ? current.endSeconds
+          : current.endTime
+            ? parseDuration(current.endTime)
+            : undefined;
+
       if (el && !el.error && el.readyState > 0 && el.duration) {
         setProgress(el.currentTime);
         setDuration(el.duration);
+        if (endSec && el.currentTime >= endSec) {
+          if (repeat) {
+            el.currentTime = startSec;
+            setProgress(startSec);
+          } else {
+            next();
+          }
+        }
         return;
       }
       setProgress((p) => {
-        if (p + 0.5 >= duration) {
-          if (repeat) return 0;
+        const targetLimit = endSec || duration;
+        if (p + 0.5 >= targetLimit) {
+          if (repeat) return startSec;
           next();
           return 0;
         }
@@ -164,23 +219,53 @@ export function MusicProvider({ children }: { children: ReactNode }) {
       });
     }, 500);
     return () => window.clearInterval(id);
-  }, [playing, duration, repeat, next]);
+  }, [playing, duration, repeat, next, current]);
 
   useEffect(() => {
     const el = audioRef.current;
     if (!el) return;
-    if (playing) void el.play().catch(() => undefined);
-    else el.pause();
-  }, [playing, index]);
-
-  const play = useCallback((i?: number) => {
-    if (typeof i === "number") {
-      setIndex(i);
-      setProgress(0);
+    const startSec =
+      typeof current.startSeconds === "number" && current.startSeconds > 0
+        ? current.startSeconds
+        : current.startTime
+          ? parseDuration(current.startTime)
+          : 0;
+    if (playing) {
+      if (startSec > 0 && el.currentTime < startSec) {
+        try {
+          el.currentTime = startSec;
+        } catch (_) {}
+      }
+      void el.play().catch(() => undefined);
+    } else {
+      el.pause();
     }
-    setHasStarted(true);
-    setPlaying(true);
-  }, []);
+  }, [playing, index, current]);
+
+  const play = useCallback(
+    (i?: number) => {
+      if (typeof i === "number") {
+        setIndex(i);
+        const targetSong = playlist[i];
+        const startSec =
+          targetSong?.startSeconds !== undefined && targetSong?.startSeconds > 0
+            ? targetSong.startSeconds
+            : targetSong?.startTime
+              ? parseDuration(targetSong.startTime)
+              : 0;
+        setProgress(startSec);
+        const el = audioRef.current;
+        if (el && !el.error) {
+          try {
+            el.currentTime = startSec;
+          } catch (_) {}
+        }
+      }
+      setHasStarted(true);
+      setPlaying(true);
+    },
+    [playlist],
+  );
 
   const value = useMemo<MusicState>(
     () => ({
@@ -197,7 +282,25 @@ export function MusicProvider({ children }: { children: ReactNode }) {
       play,
       toggle: () => {
         setHasStarted(true);
-        setPlaying((p) => !p);
+        setPlaying((p) => {
+          const nextPlaying = !p;
+          if (nextPlaying) {
+            const el = audioRef.current;
+            const startSec =
+              typeof current.startSeconds === "number" && current.startSeconds > 0
+                ? current.startSeconds
+                : current.startTime
+                  ? parseDuration(current.startTime)
+                  : 0;
+            if (el && el.ended) {
+              try {
+                el.currentTime = startSec;
+                setProgress(startSec);
+              } catch (_) {}
+            }
+          }
+          return nextPlaying;
+        });
       },
       next,
       prev,
@@ -234,8 +337,69 @@ export function MusicProvider({ children }: { children: ReactNode }) {
       <audio
         ref={audioRef}
         src={current.audio}
-        preload="none"
-        onEnded={() => (repeat ? play(index) : next())}
+        preload="metadata"
+        onLoadedMetadata={() => {
+          const el = audioRef.current;
+          if (!el) return;
+          const startSec =
+            typeof current.startSeconds === "number" && current.startSeconds > 0
+              ? current.startSeconds
+              : current.startTime
+                ? parseDuration(current.startTime)
+                : 0;
+          if (startSec > 0 && el.currentTime < startSec) {
+            try {
+              el.currentTime = startSec;
+            } catch (_) {}
+          }
+        }}
+        onTimeUpdate={() => {
+          const el = audioRef.current;
+          if (el && !el.error) {
+            setProgress(el.currentTime);
+            const endSec =
+              typeof current.endSeconds === "number" && current.endSeconds > 0
+                ? current.endSeconds
+                : current.endTime
+                  ? parseDuration(current.endTime)
+                  : undefined;
+            if (endSec && el.currentTime >= endSec) {
+              if (repeat) {
+                const startSec =
+                  typeof current.startSeconds === "number" && current.startSeconds > 0
+                    ? current.startSeconds
+                    : current.startTime
+                      ? parseDuration(current.startTime)
+                      : 0;
+                try {
+                  el.currentTime = startSec;
+                } catch (_) {}
+                setProgress(startSec);
+              } else {
+                next();
+              }
+            }
+          }
+        }}
+        onEnded={() => {
+          if (repeat) {
+            const startSec =
+              typeof current.startSeconds === "number" && current.startSeconds > 0
+                ? current.startSeconds
+                : current.startTime
+                  ? parseDuration(current.startTime)
+                  : 0;
+            if (audioRef.current) {
+              try {
+                audioRef.current.currentTime = startSec;
+              } catch (_) {}
+            }
+            setProgress(startSec);
+            play(index);
+          } else {
+            next();
+          }
+        }}
       />
     </MusicContext.Provider>
   );

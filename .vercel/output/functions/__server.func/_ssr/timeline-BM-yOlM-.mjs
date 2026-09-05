@@ -1,4 +1,4 @@
-import { o as require_jsx_runtime } from "../_libs/react+tanstack__react-query.mjs";
+import { a as require_jsx_runtime } from "../_libs/react+tanstack__react-query.mjs";
 import { t as SectionHeading } from "./SectionHeading-BVG9eVYl.mjs";
 import { n as Timeline, t as Surprise } from "./Surprise-DK17wOmU.mjs";
 //#region node_modules/.nitro/vite/services/ssr/assets/timeline-BM-yOlM-.js
