@@ -1,30 +1,38 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
 import { dbConnect } from "@/lib/db";
 import { User } from "@/lib/models";
-import crypto from "crypto";
+import {
+  requireAdmin,
+  hashPassword,
+  checkRateLimit,
+  mutationRateLimiter,
+  createRateLimitResponse,
+  sanitizeMongoInput,
+  sanitizePlainText,
+} from "@/lib/security";
+
+const CreateUserSchema = z.object({
+  username: z.string().min(3, "Username must be at least 3 characters").max(30),
+  password: z.string().min(6, "Password must be at least 6 characters").max(100),
+  role: z.enum(["user"]).optional(), // Disallow client-specified admin role creation to prevent privilege escalation
+});
 
 export const Route = createFileRoute("/api/users")({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        try {
-          // Verify admin role
-          const cookieHeader = request.headers.get("cookie") || "";
-          const cookies = cookieHeader.split(";").reduce((acc: Record<string, string>, cookie) => {
-            const [name, value] = cookie.trim().split("=");
-            if (name && value) acc[name] = value;
-            return acc;
-          }, {});
-          const role = cookies["auth_role"];
-          if (role !== "admin") {
-            return new Response(JSON.stringify({ error: "Unauthorized" }), {
-              status: 403,
-              headers: { "Content-Type": "application/json" },
-            });
-          }
+        // 1. Authorization: Admin check
+        const auth = requireAdmin(request);
+        if ("errorResponse" in auth) {
+          return auth.errorResponse;
+        }
 
+        try {
           await dbConnect();
-          const users = await User.find({}, { password: 0 }).sort({ createdAt: -1 });
+          const users = await User.find({}, { password: 0, __v: 0 }).sort({ createdAt: -1 });
+
           return new Response(JSON.stringify(users), {
             headers: { "Content-Type": "application/json" },
           });
@@ -37,50 +45,48 @@ export const Route = createFileRoute("/api/users")({
         }
       },
       POST: async ({ request }) => {
+        // 1. Authorization: Admin check
+        const auth = requireAdmin(request);
+        if ("errorResponse" in auth) {
+          return auth.errorResponse;
+        }
+
+        // 2. Rate Limiting
+        const rateCheck = checkRateLimit(request, mutationRateLimiter);
+        if (!rateCheck.allowed) {
+          return createRateLimitResponse(rateCheck.retryAfterSeconds);
+        }
+
         try {
-          // Verify admin role
-          const cookieHeader = request.headers.get("cookie") || "";
-          const cookies = cookieHeader.split(";").reduce((acc: Record<string, string>, cookie) => {
-            const [name, value] = cookie.trim().split("=");
-            if (name && value) acc[name] = value;
-            return acc;
-          }, {});
-          const role = cookies["auth_role"];
-          if (role !== "admin") {
-            return new Response(JSON.stringify({ error: "Unauthorized" }), {
-              status: 403,
-              headers: { "Content-Type": "application/json" },
-            });
-          }
-
-          const body = await request.json();
-          const { username, password } = body;
-
-          if (!username || typeof username !== "string" || !username.trim()) {
-            return new Response(JSON.stringify({ error: "Username is required" }), {
+          const rawBody = await request.json().catch(() => null);
+          if (!rawBody || typeof rawBody !== "object") {
+            return new Response(JSON.stringify({ error: "Invalid JSON payload" }), {
               status: 400,
               headers: { "Content-Type": "application/json" },
             });
           }
 
-          if (!password || typeof password !== "string" || !password.trim()) {
-            return new Response(JSON.stringify({ error: "Password is required" }), {
+          // 3. Zod schema validation
+          const parsed = CreateUserSchema.safeParse(sanitizeMongoInput(rawBody));
+          if (!parsed.success) {
+            return new Response(
+              JSON.stringify({ error: parsed.error.issues[0]?.message || "Validation failed" }),
+              { status: 400, headers: { "Content-Type": "application/json" } }
+            );
+          }
+
+          const { username, password } = parsed.data;
+          const cleanUsername = sanitizePlainText(username, 30).toLowerCase();
+
+          // Reject reserved usernames
+          if (cleanUsername === "admin" || cleanUsername === "root" || cleanUsername === "administrator") {
+            return new Response(JSON.stringify({ error: "This username is reserved" }), {
               status: 400,
               headers: { "Content-Type": "application/json" },
             });
           }
-
-          const cleanUsername = username.trim();
 
           await dbConnect();
-
-          // Check if username is "admin" to avoid conflicts with global env admin account
-          if (cleanUsername.toLowerCase() === "admin") {
-            return new Response(JSON.stringify({ error: "Username 'admin' is reserved" }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
-          }
 
           const existingUser = await User.findOne({ username: cleanUsername });
           if (existingUser) {
@@ -90,15 +96,15 @@ export const Route = createFileRoute("/api/users")({
             });
           }
 
-          const hashedPassword = crypto.createHash("sha256").update(password).digest("hex");
+          // Hash password with modern Scrypt + random salt
+          const hashedPassword = hashPassword(password);
 
           const newUser = await User.create({
             username: cleanUsername,
             password: hashedPassword,
-            role: "user",
+            role: "user", // Strictly enforce 'user' role
           });
 
-          // Return created user (exclude password from response)
           const responseUser = {
             _id: newUser._id,
             username: newUser.username,
@@ -107,6 +113,7 @@ export const Route = createFileRoute("/api/users")({
           };
 
           return new Response(JSON.stringify({ success: true, user: responseUser }), {
+            status: 201,
             headers: { "Content-Type": "application/json" },
           });
         } catch (error: any) {

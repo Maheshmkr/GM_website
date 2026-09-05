@@ -2,6 +2,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { dbConnect } from "@/lib/db";
 import { FunZoneStage } from "@/lib/models";
+import {
+  requireAdmin,
+  validateMediaUpload,
+  checkRateLimit,
+  mutationRateLimiter,
+  createRateLimitResponse,
+  sanitizePlainText,
+} from "@/lib/security";
 import mongoose from "mongoose";
 
 const STAGE_TITLES: Record<number, string> = {
@@ -18,7 +26,7 @@ export const Route = createFileRoute("/api/fun/stages")({
       GET: async () => {
         try {
           await dbConnect();
-          const stages = await FunZoneStage.find({}).sort({ stage: 1 });
+          const stages = await FunZoneStage.find({}).select("-__v").sort({ stage: 1 });
 
           const stageData = stages.map((s) => ({
             _id: s._id,
@@ -37,126 +45,76 @@ export const Route = createFileRoute("/api/fun/stages")({
           });
         } catch (error: any) {
           console.error("Error fetching fun zone stages:", error);
-          return new Response(
-            JSON.stringify({ error: "Internal server error" }),
-            {
-              status: 500,
-              headers: { "Content-Type": "application/json" },
-            }
-          );
+          return new Response(JSON.stringify({ error: "Internal server error" }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+          });
         }
       },
       POST: async ({ request }) => {
+        // 1. Authorization: Admin check
+        const auth = requireAdmin(request);
+        if ("errorResponse" in auth) {
+          return auth.errorResponse;
+        }
+
+        // 2. Rate Limiting
+        const rateCheck = checkRateLimit(request, mutationRateLimiter);
+        if (!rateCheck.allowed) {
+          return createRateLimitResponse(rateCheck.retryAfterSeconds);
+        }
+
         try {
-          // Verify admin authorization
-          const cookieHeader = request.headers.get("cookie") || "";
-          const cookies = cookieHeader
-            .split(";")
-            .reduce((acc: Record<string, string>, cookie) => {
-              const [name, value] = cookie.trim().split("=");
-              if (name && value) acc[name] = value;
-              return acc;
-            }, {});
-          const role = cookies["auth_role"];
-
-          if (role !== "admin") {
-            return new Response(JSON.stringify({ error: "Unauthorized" }), {
-              status: 403,
-              headers: { "Content-Type": "application/json" },
-            });
-          }
-
           await dbConnect();
           const formData = await request.formData();
           const file = formData.get("file") as File | null;
           const stageStr = formData.get("stage") as string | null;
 
           if (!stageStr) {
-            return new Response(
-              JSON.stringify({ error: "Stage number is required" }),
-              {
-                status: 400,
-                headers: { "Content-Type": "application/json" },
-              }
-            );
+            return new Response(JSON.stringify({ error: "Stage number is required" }), {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            });
           }
 
           const stageNum = parseInt(stageStr, 10);
           if (isNaN(stageNum) || stageNum < 1 || stageNum > 5) {
-            return new Response(
-              JSON.stringify({ error: "Stage must be a number between 1 and 5" }),
-              {
-                status: 400,
-                headers: { "Content-Type": "application/json" },
-              }
-            );
+            return new Response(JSON.stringify({ error: "Stage must be a number between 1 and 5" }), {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            });
           }
 
-          if (!file) {
-            return new Response(
-              JSON.stringify({ error: "No image file provided" }),
-              {
-                status: 400,
-                headers: { "Content-Type": "application/json" },
-              }
-            );
+          if (!file || !(file instanceof File)) {
+            return new Response(JSON.stringify({ error: "No image file provided" }), {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            });
           }
 
-          // Validate MIME type
-          const allowedMimeTypes = [
-            "image/jpeg",
-            "image/png",
-            "image/webp",
-            "image/gif",
-          ];
-          if (!allowedMimeTypes.includes(file.type)) {
-            return new Response(
-              JSON.stringify({
-                error: `Invalid MIME type: ${file.type}. Allowed: JPEG, PNG, WEBP, GIF.`,
-              }),
-              { status: 400, headers: { "Content-Type": "application/json" } }
-            );
-          }
+          // 3. Binary Magic Bytes Validation
+          const arrayBuffer = await file.arrayBuffer();
+          const buffer = Buffer.from(arrayBuffer);
 
-          // Validate extension
-          const ext = file.name.split(".").pop()?.toLowerCase();
-          const allowedExtensions = ["jpg", "jpeg", "png", "webp", "gif"];
-          if (!ext || !allowedExtensions.includes(ext)) {
-            return new Response(
-              JSON.stringify({
-                error: `Invalid file extension. Allowed: jpg, jpeg, png, webp, gif.`,
-              }),
-              { status: 400, headers: { "Content-Type": "application/json" } }
-            );
-          }
-
-          // Validate size (10MB limit)
-          const MAX_SIZE = 10 * 1024 * 1024;
-          if (file.size > MAX_SIZE) {
-            return new Response(
-              JSON.stringify({
-                error: `File size exceeds the limit of 10MB (actual: ${(file.size / 1024 / 1024).toFixed(2)}MB)`,
-              }),
-              { status: 400, headers: { "Content-Type": "application/json" } }
-            );
+          const validation = validateMediaUpload(buffer, file.name, file.type, "image");
+          if (!validation.valid) {
+            return new Response(JSON.stringify({ error: validation.error }), {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            });
           }
 
           const db = mongoose.connection.db;
           if (!db) {
-            return new Response(
-              JSON.stringify({ error: "Database connection failed" }),
-              {
-                status: 500,
-                headers: { "Content-Type": "application/json" },
-              }
-            );
+            return new Response(JSON.stringify({ error: "Database connection unavailable" }), {
+              status: 500,
+              headers: { "Content-Type": "application/json" },
+            });
           }
 
-          const bucket = new mongoose.mongo.GridFSBucket(db, {
-            bucketName: "media",
-          });
+          const bucket = new mongoose.mongo.GridFSBucket(db, { bucketName: "media" });
 
-          // Check for existing stage to clean up previous file
+          // 4. Cleanup previous file if replacing
           const existingStage = await FunZoneStage.findOne({ stage: stageNum });
           if (existingStage && existingStage.fileId) {
             try {
@@ -166,25 +124,20 @@ export const Route = createFileRoute("/api/fun/stages")({
             }
           }
 
-          // Upload binary to GridFS
-          const arrayBuffer = await file.arrayBuffer();
-          const buffer = Buffer.from(arrayBuffer);
-
-          const fileId = await new Promise<mongoose.Types.ObjectId>(
-            (resolve, reject) => {
-              const uploadStream = bucket.openUploadStream(file.name, {
-                contentType: file.type,
-              });
-              uploadStream.on("finish", () => {
-                resolve(uploadStream.id as mongoose.Types.ObjectId);
-              });
-              uploadStream.on("error", (err) => {
-                reject(err);
-              });
-              uploadStream.write(buffer);
-              uploadStream.end();
-            }
-          );
+          // 5. Upload binary to GridFS
+          const fileId = await new Promise<mongoose.Types.ObjectId>((resolve, reject) => {
+            const uploadStream = bucket.openUploadStream(validation.safeFilename, {
+              contentType: validation.detectedMimeType || "image/jpeg",
+            });
+            uploadStream.on("finish", () => {
+              resolve(uploadStream.id as mongoose.Types.ObjectId);
+            });
+            uploadStream.on("error", (err) => {
+              reject(err);
+            });
+            uploadStream.write(buffer);
+            uploadStream.end();
+          });
 
           const title = STAGE_TITLES[stageNum] || `Stage ${stageNum}`;
 
@@ -192,10 +145,10 @@ export const Route = createFileRoute("/api/fun/stages")({
             { stage: stageNum },
             {
               stage: stageNum,
-              title,
-              filename: file.name,
-              mimeType: file.type,
-              fileSize: file.size,
+              title: sanitizePlainText(title, 100),
+              filename: validation.safeFilename,
+              mimeType: validation.detectedMimeType || "image/jpeg",
+              fileSize: buffer.length,
               fileId,
             },
             { upsert: true, new: true, setDefaultsOnInsert: true }
@@ -223,101 +176,70 @@ export const Route = createFileRoute("/api/fun/stages")({
           );
         } catch (error: any) {
           console.error("Error uploading fun zone stage image:", error);
-          return new Response(
-            JSON.stringify({ error: "Internal server error" }),
-            {
-              status: 500,
-              headers: { "Content-Type": "application/json" },
-            }
-          );
+          return new Response(JSON.stringify({ error: "Internal server error" }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+          });
         }
       },
       DELETE: async ({ request }) => {
+        // 1. Authorization: Admin check
+        const auth = requireAdmin(request);
+        if ("errorResponse" in auth) {
+          return auth.errorResponse;
+        }
+
         try {
-          // Verify admin authorization
-          const cookieHeader = request.headers.get("cookie") || "";
-          const cookies = cookieHeader
-            .split(";")
-            .reduce((acc: Record<string, string>, cookie) => {
-              const [name, value] = cookie.trim().split("=");
-              if (name && value) acc[name] = value;
-              return acc;
-            }, {});
-          const role = cookies["auth_role"];
-
-          if (role !== "admin") {
-            return new Response(JSON.stringify({ error: "Unauthorized" }), {
-              status: 403,
-              headers: { "Content-Type": "application/json" },
-            });
-          }
-
           await dbConnect();
           const url = new URL(request.url);
           const stageStr = url.searchParams.get("stage");
 
           if (!stageStr) {
-            return new Response(
-              JSON.stringify({ error: "Stage parameter is required" }),
-              {
-                status: 400,
-                headers: { "Content-Type": "application/json" },
-              }
-            );
+            return new Response(JSON.stringify({ error: "Stage parameter is required" }), {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            });
           }
 
           const stageNum = parseInt(stageStr, 10);
           if (isNaN(stageNum) || stageNum < 1 || stageNum > 5) {
-            return new Response(
-              JSON.stringify({ error: "Invalid stage number (must be 1-5)" }),
-              {
-                status: 400,
-                headers: { "Content-Type": "application/json" },
-              }
-            );
+            return new Response(JSON.stringify({ error: "Invalid stage number (must be 1-5)" }), {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            });
           }
 
           const db = mongoose.connection.db;
           if (!db) {
-            return new Response(
-              JSON.stringify({ error: "Database connection failed" }),
-              {
-                status: 500,
-                headers: { "Content-Type": "application/json" },
-              }
-            );
+            return new Response(JSON.stringify({ error: "Database connection unavailable" }), {
+              status: 500,
+              headers: { "Content-Type": "application/json" },
+            });
           }
 
           const existingStage = await FunZoneStage.findOne({ stage: stageNum });
           if (!existingStage) {
             return new Response(
               JSON.stringify({ error: `Stage ${stageNum} image not found in database` }),
-              {
-                status: 404,
-                headers: { "Content-Type": "application/json" },
-              }
+              { status: 404, headers: { "Content-Type": "application/json" } }
             );
           }
 
-          // Delete file binary from GridFS
           if (existingStage.fileId) {
             try {
-              const bucket = new mongoose.mongo.GridFSBucket(db, {
-                bucketName: "media",
-              });
+              const bucket = new mongoose.mongo.GridFSBucket(db, { bucketName: "media" });
               await bucket.delete(new mongoose.Types.ObjectId(existingStage.fileId));
             } catch (cleanupErr) {
               console.warn("Could not delete stage file from GridFS:", cleanupErr);
             }
           }
 
-          // Delete stage document from MongoDB
           await FunZoneStage.deleteOne({ stage: stageNum });
 
           return new Response(
             JSON.stringify({
               success: true,
-              message: `Stage ${stageNum} image deleted successfully from database and storage`,
+              message: `Stage ${stageNum} image deleted successfully`,
               stage: stageNum,
             }),
             {
@@ -327,13 +249,10 @@ export const Route = createFileRoute("/api/fun/stages")({
           );
         } catch (error: any) {
           console.error("Error deleting fun zone stage image:", error);
-          return new Response(
-            JSON.stringify({ error: "Internal server error" }),
-            {
-              status: 500,
-              headers: { "Content-Type": "application/json" },
-            }
-          );
+          return new Response(JSON.stringify({ error: "Internal server error" }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+          });
         }
       },
     },

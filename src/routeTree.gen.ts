@@ -18,6 +18,7 @@ import { Route as PhotosRouteImport } from './routes/photos'
 import { Route as SongsRouteImport } from './routes/songs'
 import { Route as TimelineRouteImport } from './routes/timeline'
 import { Route as VideosRouteImport } from './routes/videos'
+import { Route as ApiLettersRouteImport } from './routes/api/letters'
 import { Route as ApiMediaRouteImport } from './routes/api/media'
 import { Route as ApiPhotosRouteImport } from './routes/api/photos'
 import { Route as ApiSongsRouteImport } from './routes/api/songs'
@@ -28,6 +29,7 @@ import { Route as ApiAuthLoginRouteImport } from './routes/api/auth.login'
 import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth.logout'
 import { Route as ApiAuthSessionRouteImport } from './routes/api/auth.session'
 import { Route as ApiFunStagesRouteImport } from './routes/api/fun.stages'
+import { Route as ApiLettersIdRouteImport } from './routes/api/letters.$id'
 import { Route as ApiMediaIdRouteImport } from './routes/api/media.$id'
 import { Route as ApiMediaUploadRouteImport } from './routes/api/media.upload'
 import { Route as ApiMediaUrlRouteImport } from './routes/api/media.url'
@@ -84,6 +86,11 @@ const VideosRoute = VideosRouteImport.update({
   path: '/videos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiLettersRoute = ApiLettersRouteImport.update({
+  id: '/api/letters',
+  path: '/api/letters',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiMediaRoute = ApiMediaRouteImport.update({
   id: '/api/media',
   path: '/api/media',
@@ -133,6 +140,11 @@ const ApiFunStagesRoute = ApiFunStagesRouteImport.update({
   id: '/api/fun/stages',
   path: '/api/fun/stages',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ApiLettersIdRoute = ApiLettersIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiLettersRoute,
 } as any)
 const ApiMediaIdRoute = ApiMediaIdRouteImport.update({
   id: '/$id',
@@ -195,6 +207,7 @@ export interface FileRoutesByFullPath {
   '/songs': typeof SongsRoute
   '/timeline': typeof TimelineRoute
   '/videos': typeof VideosRoute
+  '/api/letters': typeof ApiLettersRouteWithChildren
   '/api/media': typeof ApiMediaRouteWithChildren
   '/api/photos': typeof ApiPhotosRouteWithChildren
   '/api/songs': typeof ApiSongsRouteWithChildren
@@ -205,6 +218,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/logout': typeof ApiAuthLogoutRoute
   '/api/auth/session': typeof ApiAuthSessionRoute
   '/api/fun/stages': typeof ApiFunStagesRoute
+  '/api/letters/$id': typeof ApiLettersIdRoute
   '/api/media/$id': typeof ApiMediaIdRoute
   '/api/media/upload': typeof ApiMediaUploadRoute
   '/api/media/url': typeof ApiMediaUrlRoute
@@ -226,6 +240,7 @@ export interface FileRoutesByTo {
   '/songs': typeof SongsRoute
   '/timeline': typeof TimelineRoute
   '/videos': typeof VideosRoute
+  '/api/letters': typeof ApiLettersRouteWithChildren
   '/api/media': typeof ApiMediaRouteWithChildren
   '/api/photos': typeof ApiPhotosRouteWithChildren
   '/api/songs': typeof ApiSongsRouteWithChildren
@@ -236,6 +251,7 @@ export interface FileRoutesByTo {
   '/api/auth/logout': typeof ApiAuthLogoutRoute
   '/api/auth/session': typeof ApiAuthSessionRoute
   '/api/fun/stages': typeof ApiFunStagesRoute
+  '/api/letters/$id': typeof ApiLettersIdRoute
   '/api/media/$id': typeof ApiMediaIdRoute
   '/api/media/upload': typeof ApiMediaUploadRoute
   '/api/media/url': typeof ApiMediaUrlRoute
@@ -258,6 +274,7 @@ export interface FileRoutesById {
   '/songs': typeof SongsRoute
   '/timeline': typeof TimelineRoute
   '/videos': typeof VideosRoute
+  '/api/letters': typeof ApiLettersRouteWithChildren
   '/api/media': typeof ApiMediaRouteWithChildren
   '/api/photos': typeof ApiPhotosRouteWithChildren
   '/api/songs': typeof ApiSongsRouteWithChildren
@@ -268,6 +285,7 @@ export interface FileRoutesById {
   '/api/auth/logout': typeof ApiAuthLogoutRoute
   '/api/auth/session': typeof ApiAuthSessionRoute
   '/api/fun/stages': typeof ApiFunStagesRoute
+  '/api/letters/$id': typeof ApiLettersIdRoute
   '/api/media/$id': typeof ApiMediaIdRoute
   '/api/media/upload': typeof ApiMediaUploadRoute
   '/api/media/url': typeof ApiMediaUrlRoute
@@ -291,6 +309,7 @@ export interface FileRouteTypes {
     | '/songs'
     | '/timeline'
     | '/videos'
+    | '/api/letters'
     | '/api/media'
     | '/api/photos'
     | '/api/songs'
@@ -301,6 +320,7 @@ export interface FileRouteTypes {
     | '/api/auth/logout'
     | '/api/auth/session'
     | '/api/fun/stages'
+    | '/api/letters/$id'
     | '/api/media/$id'
     | '/api/media/upload'
     | '/api/media/url'
@@ -322,6 +342,7 @@ export interface FileRouteTypes {
     | '/songs'
     | '/timeline'
     | '/videos'
+    | '/api/letters'
     | '/api/media'
     | '/api/photos'
     | '/api/songs'
@@ -332,6 +353,7 @@ export interface FileRouteTypes {
     | '/api/auth/logout'
     | '/api/auth/session'
     | '/api/fun/stages'
+    | '/api/letters/$id'
     | '/api/media/$id'
     | '/api/media/upload'
     | '/api/media/url'
@@ -353,6 +375,7 @@ export interface FileRouteTypes {
     | '/songs'
     | '/timeline'
     | '/videos'
+    | '/api/letters'
     | '/api/media'
     | '/api/photos'
     | '/api/songs'
@@ -363,6 +386,7 @@ export interface FileRouteTypes {
     | '/api/auth/logout'
     | '/api/auth/session'
     | '/api/fun/stages'
+    | '/api/letters/$id'
     | '/api/media/$id'
     | '/api/media/upload'
     | '/api/media/url'
@@ -385,6 +409,7 @@ export interface RootRouteChildren {
   SongsRoute: typeof SongsRoute
   TimelineRoute: typeof TimelineRoute
   VideosRoute: typeof VideosRoute
+  ApiLettersRoute: typeof ApiLettersRouteWithChildren
   ApiMediaRoute: typeof ApiMediaRouteWithChildren
   ApiPhotosRoute: typeof ApiPhotosRouteWithChildren
   ApiSongsRoute: typeof ApiSongsRouteWithChildren
@@ -462,6 +487,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VideosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/letters': {
+      id: '/api/letters'
+      path: '/api/letters'
+      fullPath: '/api/letters'
+      preLoaderRoute: typeof ApiLettersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/media': {
       id: '/api/media'
       path: '/api/media'
@@ -531,6 +563,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/fun/stages'
       preLoaderRoute: typeof ApiFunStagesRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/api/letters/$id': {
+      id: '/api/letters/$id'
+      path: '/$id'
+      fullPath: '/api/letters/$id'
+      preLoaderRoute: typeof ApiLettersIdRouteImport
+      parentRoute: typeof ApiLettersRoute
     }
     '/api/media/$id': {
       id: '/api/media/$id'
@@ -604,6 +643,18 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface ApiLettersRouteChildren {
+  ApiLettersIdRoute: typeof ApiLettersIdRoute
+}
+
+const ApiLettersRouteChildren: ApiLettersRouteChildren = {
+  ApiLettersIdRoute: ApiLettersIdRoute,
+}
+
+const ApiLettersRouteWithChildren = ApiLettersRoute._addFileChildren(
+  ApiLettersRouteChildren,
+)
 
 interface ApiMediaRouteChildren {
   ApiMediaIdRoute: typeof ApiMediaIdRoute
@@ -695,6 +746,7 @@ const rootRouteChildren: RootRouteChildren = {
   SongsRoute: SongsRoute,
   TimelineRoute: TimelineRoute,
   VideosRoute: VideosRoute,
+  ApiLettersRoute: ApiLettersRouteWithChildren,
   ApiMediaRoute: ApiMediaRouteWithChildren,
   ApiPhotosRoute: ApiPhotosRouteWithChildren,
   ApiSongsRoute: ApiSongsRouteWithChildren,

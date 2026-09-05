@@ -1,33 +1,33 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute } from "@tanstack/react-router";
 import { dbConnect } from "@/lib/db";
 import { User } from "@/lib/models";
-import mongoose from "mongoose";
+import { requireAdmin, isValidObjectId } from "@/lib/security";
 
 export const Route = createFileRoute("/api/users/$id")({
   server: {
     handlers: {
       DELETE: async ({ params, request }) => {
+        // 1. Authorization: Admin check
+        const auth = requireAdmin(request);
+        if ("errorResponse" in auth) {
+          return auth.errorResponse;
+        }
+
         try {
-          // Verify admin role
-          const cookieHeader = request.headers.get("cookie") || "";
-          const cookies = cookieHeader.split(";").reduce((acc: Record<string, string>, cookie) => {
-            const [name, value] = cookie.trim().split("=");
-            if (name && value) acc[name] = value;
-            return acc;
-          }, {});
-          const role = cookies["auth_role"];
-          if (role !== "admin") {
-            return new Response(JSON.stringify({ error: "Unauthorized" }), {
-              status: 403,
+          await dbConnect();
+          const { id } = params;
+
+          if (!isValidObjectId(id)) {
+            return new Response(JSON.stringify({ error: "Invalid user ID format" }), {
+              status: 400,
               headers: { "Content-Type": "application/json" },
             });
           }
 
-          await dbConnect();
-          const { id } = params;
-
-          if (!mongoose.Types.ObjectId.isValid(id)) {
-            return new Response(JSON.stringify({ error: "Invalid user ID format" }), {
+          // Prevent self-deletion if session userId matches
+          if (auth.session.userId === id) {
+            return new Response(JSON.stringify({ error: "Cannot delete your own active user account" }), {
               status: 400,
               headers: { "Content-Type": "application/json" },
             });

@@ -25,6 +25,7 @@ import {
   Upload,
   Image as ImageIcon,
   CheckCircle2,
+  Mail,
 } from "lucide-react";
 import { SectionHeading } from "@/components/SectionHeading";
 import { Reveal } from "@/components/Reveal";
@@ -35,7 +36,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Tab = "photos" | "videos" | "songs" | "timeline" | "fun" | "users";
+type Tab = "photos" | "videos" | "songs" | "timeline" | "letters" | "fun" | "users";
 
 function AdminPage() {
   const [activeTab, setActiveTab] = useState<Tab>("photos");
@@ -102,11 +103,26 @@ function AdminPage() {
     },
   });
 
+  const { data: letters = [], isLoading: loadingLetters } = useQuery({
+    queryKey: ["letters"],
+    queryFn: async () => {
+      try {
+        const res = await fetch("/api/letters");
+        const payload = await readJsonResponse(res);
+        if (!payload.ok) return [];
+        return Array.isArray(payload.data) ? payload.data : [];
+      } catch (err) {
+        console.error("Error fetching letters:", err);
+        return [];
+      }
+    },
+  });
+
   return (
     <section className="section-shell py-10 lg:py-16 min-h-screen">
       <SectionHeading
         title="Admin Management Dashboard"
-        subtitle="Manage the memories, songs, videos, and journey timeline stored in MongoDB."
+        subtitle="Manage the memories, songs, videos, letters, and journey timeline stored in MongoDB."
       />
 
       {/* Tabs */}
@@ -117,6 +133,7 @@ function AdminPage() {
             { id: "videos", label: "Videos", icon: Film },
             { id: "songs", label: "Songs", icon: Music },
             { id: "timeline", label: "Timeline", icon: Calendar },
+            { id: "letters", label: "Letters 💌", icon: Mail },
             { id: "fun", label: "Fun Zone Images", icon: Sparkles },
             { id: "users", label: "Users", icon: Users },
           ] as const
@@ -154,6 +171,13 @@ function AdminPage() {
           <TimelineManager
             timeline={timeline}
             isLoading={loadingTimeline}
+            queryClient={queryClient}
+          />
+        )}
+        {activeTab === "letters" && (
+          <LettersManager
+            letters={letters}
+            isLoading={loadingLetters}
             queryClient={queryClient}
           />
         )}
@@ -2339,6 +2363,465 @@ function FunZoneManager({ queryClient }: { queryClient: any }) {
               </div>
             );
           })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ==========================================
+   LETTERS MANAGER COMPONENT
+   ========================================== */
+interface LetterItem {
+  _id?: string;
+  title: string;
+  preview: string;
+  body: string;
+  date: string;
+  category?: string;
+  favorite?: boolean;
+  createdAt?: string;
+}
+
+function LettersManager({
+  letters,
+  isLoading,
+  queryClient,
+}: {
+  letters: LetterItem[];
+  isLoading: boolean;
+  queryClient: any;
+}) {
+  const [showModal, setShowModal] = useState(false);
+  const [editingLetter, setEditingLetter] = useState<LetterItem | null>(null);
+  const [title, setTitle] = useState("");
+  const [preview, setPreview] = useState("");
+  const [body, setBody] = useState("");
+  const [date, setDate] = useState("");
+  const [category, setCategory] = useState("Love");
+  const [favorite, setFavorite] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [readingLetter, setReadingLetter] = useState<LetterItem | null>(null);
+
+  const openAddModal = () => {
+    setEditingLetter(null);
+    setTitle("");
+    setPreview("");
+    setBody("");
+    setDate(
+      new Date().toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    );
+    setCategory("Love");
+    setFavorite(false);
+    setShowModal(true);
+  };
+
+  const openEditModal = (letter: LetterItem) => {
+    setEditingLetter(letter);
+    setTitle(letter.title);
+    setPreview(letter.preview);
+    setBody(letter.body);
+    setDate(letter.date);
+    setCategory(letter.category || "Love");
+    setFavorite(!!letter.favorite);
+    setShowModal(true);
+  };
+
+  const handleSaveLetter = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !preview.trim() || !body.trim()) {
+      toast.error("Please fill in the title, preview teaser, and letter body.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      if (editingLetter && editingLetter._id) {
+        // Update existing letter
+        const res = await fetch(`/api/letters/${editingLetter._id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: title.trim(),
+            preview: preview.trim(),
+            body: body.trim(),
+            date: date.trim() || "Forever",
+            category: category.trim() || "Love",
+            favorite,
+          }),
+        });
+        const payload = await readJsonResponse(res);
+        if (!payload.ok) throw new Error(payload.error || "Failed to update letter");
+        toast.success("Letter updated with love 💌");
+      } else {
+        // Create new letter
+        const res = await fetch("/api/letters", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: title.trim(),
+            preview: preview.trim(),
+            body: body.trim(),
+            date: date.trim() || "Forever",
+            category: category.trim() || "Love",
+            favorite,
+          }),
+        });
+        const payload = await readJsonResponse(res);
+        if (!payload.ok) throw new Error(payload.error || "Failed to save letter");
+        toast.success("New love letter created 💖");
+      }
+
+      setShowModal(false);
+      queryClient.invalidateQueries({ queryKey: ["letters"] });
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Something went wrong saving the letter.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteLetter = async (letter: LetterItem) => {
+    if (!letter._id) {
+      toast.info("Static sample letters are preserved in site data.");
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to delete the letter "${letter.title}"?`)) {
+      return;
+    }
+
+    setDeletingId(letter._id);
+    try {
+      const res = await fetch(`/api/letters/${letter._id}`, {
+        method: "DELETE",
+      });
+      const payload = await readJsonResponse(res);
+      if (!payload.ok) throw new Error(payload.error || "Failed to delete letter");
+      toast.success("Letter deleted from database.");
+      queryClient.invalidateQueries({ queryKey: ["letters"] });
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to delete letter.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  return (
+    <div className="space-y-8">
+      {/* Header controls */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-xl font-bold flex items-center gap-2 text-foreground">
+            <Mail className="size-5 text-primary" /> Love Letters & Open-When Notes
+          </h2>
+          <p className="text-xs text-muted-foreground mt-1">
+            Write heartfelt words, open-when notes, and sweet messages for your special one.
+          </p>
+        </div>
+
+        <button
+          onClick={openAddModal}
+          className="btn-love px-4 py-2 rounded-2xl text-xs sm:text-sm font-semibold flex items-center gap-2 cursor-pointer shadow-lg hover:scale-105 transition-all"
+        >
+          <Plus className="size-4" />
+          <span>Write New Letter</span>
+        </button>
+      </div>
+
+      {/* Loading state */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-16 text-muted-foreground gap-2">
+          <Loader2 className="size-5 animate-spin text-primary" />
+          <span className="text-sm">Loading heartfelt letters...</span>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!isLoading && letters.length === 0 && (
+        <div className="text-center py-16 glass rounded-3xl border border-white/10 space-y-4">
+          <div className="size-14 rounded-2xl bg-primary/10 text-primary grid place-items-center mx-auto">
+            <Mail className="size-7" />
+          </div>
+          <h3 className="font-semibold text-lg">No Letters Yet</h3>
+          <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+            Write your very first letter to fill this space with your loving memories.
+          </p>
+          <button
+            onClick={openAddModal}
+            className="btn-love px-5 py-2.5 rounded-full text-xs font-semibold inline-flex items-center gap-2 cursor-pointer"
+          >
+            <Plus className="size-4" /> Write First Letter
+          </button>
+        </div>
+      )}
+
+      {/* Grid of Letters */}
+      {!isLoading && letters.length > 0 && (
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {letters.map((letter, idx) => (
+            <div
+              key={letter._id || `letter-${idx}`}
+              className="glass glass-hover rounded-3xl p-6 flex flex-col justify-between border border-border relative group shadow-sm hover:shadow-xl transition-all"
+            >
+              {/* Top row: Icon, Category badge, Favorite indicator */}
+              <div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="grid size-10 place-items-center rounded-2xl bg-[var(--gradient-love)] text-primary-foreground shadow-md">
+                    <Mail className="size-4" />
+                  </span>
+
+                  <div className="flex items-center gap-1.5">
+                    {letter.favorite && (
+                      <span className="size-7 rounded-full bg-primary/15 text-primary grid place-items-center">
+                        <Heart className="size-3.5 fill-current" />
+                      </span>
+                    )}
+                    <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-surface/50 border border-border text-muted-foreground">
+                      {letter.category || "Love"}
+                    </span>
+                  </div>
+                </div>
+
+                <h3 className="mt-4 text-base font-bold text-foreground leading-snug line-clamp-1">
+                  {letter.title}
+                </h3>
+                <p className="mt-2 text-xs text-muted-foreground line-clamp-3 leading-relaxed">
+                  {letter.preview}
+                </p>
+              </div>
+
+              {/* Bottom row: Date & Action buttons */}
+              <div className="mt-6 pt-4 border-t border-border/50 flex items-center justify-between">
+                <span className="text-[11px] text-muted-foreground font-medium">
+                  {letter.date}
+                </span>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setReadingLetter(letter)}
+                    className="glass hover:bg-primary/20 text-primary size-8 rounded-full grid place-items-center cursor-pointer transition-all hover:scale-105"
+                    title="Read Letter"
+                  >
+                    <ExternalLink className="size-3.5" />
+                  </button>
+
+                  <button
+                    onClick={() => openEditModal(letter)}
+                    className="glass hover:bg-white/20 size-8 rounded-full grid place-items-center text-foreground cursor-pointer transition-all hover:scale-105"
+                    title="Edit Letter"
+                  >
+                    <Edit2 className="size-3.5" />
+                  </button>
+
+                  <button
+                    onClick={() => handleDeleteLetter(letter)}
+                    disabled={deletingId === letter._id}
+                    className="glass hover:bg-destructive/20 text-destructive size-8 rounded-full grid place-items-center cursor-pointer transition-all hover:scale-105 disabled:opacity-50"
+                    title="Delete Letter"
+                  >
+                    {deletingId === letter._id ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : (
+                      <Trash2 className="size-3.5" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Modal: Write / Edit Letter */}
+      {showModal && (
+        <div
+          className="fixed inset-0 z-[70] grid place-items-center bg-background/90 p-4 backdrop-blur-xl animate-fade-in"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setShowModal(false)}
+        >
+          <div
+            className="glass animate-letter-open relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl p-6 sm:p-8 border border-border shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-border/50 pb-4 mb-5">
+              <div className="flex items-center gap-2">
+                <span className="size-8 rounded-xl bg-[var(--gradient-love)] text-primary-foreground grid place-items-center">
+                  <Mail className="size-4" />
+                </span>
+                <h3 className="text-lg font-bold text-foreground">
+                  {editingLetter ? "Edit Love Letter" : "Write New Love Letter"}
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowModal(false)}
+                className="glass size-8 rounded-full grid place-items-center text-muted-foreground hover:text-foreground cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveLetter} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+                  Letter Title *
+                </label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="e.g. Open When You Miss Me"
+                  className="w-full px-4 py-2.5 text-sm bg-surface/40 border border-border rounded-2xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+                  Preview Teaser *
+                </label>
+                <input
+                  type="text"
+                  value={preview}
+                  onChange={(e) => setPreview(e.target.value)}
+                  placeholder="e.g. Just close your eyes for a second and take a breath..."
+                  className="w-full px-4 py-2.5 text-sm bg-surface/40 border border-border rounded-2xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+                  Full Letter Body *
+                </label>
+                <textarea
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  placeholder="Write your long, sweet message here. Separate paragraphs with double newlines..."
+                  rows={6}
+                  className="w-full px-4 py-2.5 text-sm bg-surface/40 border border-border rounded-2xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 font-sans"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+                    Date Display
+                  </label>
+                  <input
+                    type="text"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    placeholder="e.g. May 12, 2024"
+                    className="w-full px-4 py-2.5 text-sm bg-surface/40 border border-border rounded-2xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+                    Category
+                  </label>
+                  <input
+                    type="text"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    placeholder="e.g. Love, Open When..."
+                    className="w-full px-4 py-2.5 text-sm bg-surface/40 border border-border rounded-2xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 pt-1">
+                <input
+                  type="checkbox"
+                  id="letter-favorite"
+                  checked={favorite}
+                  onChange={(e) => setFavorite(e.target.checked)}
+                  className="size-4 rounded accent-primary cursor-pointer"
+                />
+                <label
+                  htmlFor="letter-favorite"
+                  className="text-xs font-medium text-foreground cursor-pointer flex items-center gap-1.5"
+                >
+                  <Heart className="size-3.5 text-primary fill-primary/30" /> Mark as Highlight / Favorite
+                </label>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-4 border-t border-border/50">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="glass px-4 py-2.5 rounded-2xl text-xs font-semibold text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="btn-love px-5 py-2.5 rounded-2xl text-xs font-semibold flex items-center gap-2 cursor-pointer shadow-lg disabled:opacity-50"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="size-3.5 animate-spin" /> Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Heart className="size-3.5 fill-current" /> Save Letter
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Read Full Letter */}
+      {readingLetter && (
+        <div
+          className="fixed inset-0 z-[70] grid place-items-center bg-background/90 p-4 backdrop-blur-xl animate-fade-in"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setReadingLetter(null)}
+        >
+          <div
+            className="glass animate-letter-open relative max-h-[85vh] w-full max-w-xl overflow-y-auto rounded-3xl p-7 sm:p-9 border border-border shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-xs uppercase tracking-[0.25em] text-primary font-bold">
+              {readingLetter.category || "Words from my heart"}
+            </p>
+            <h3 className="mt-2 text-2xl font-bold text-foreground">
+              {readingLetter.title}
+            </h3>
+
+            <div className="relative mt-5 space-y-4 text-sm leading-relaxed text-muted-foreground">
+              {readingLetter.body.split("\n\n").map((p, idx) => (
+                <p key={idx}>{p}</p>
+              ))}
+            </div>
+
+            <div className="mt-8 pt-4 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground">
+              <span>{readingLetter.date}</span>
+              <span className="text-primary font-semibold">Always yours ♡</span>
+            </div>
+
+            <button
+              onClick={() => setReadingLetter(null)}
+              className="glass absolute right-4 top-4 size-9 rounded-full grid place-items-center text-muted-foreground hover:text-foreground cursor-pointer"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -10,20 +10,20 @@ export const Route = createFileRoute("/api/media")({
         try {
           await dbConnect();
           const url = new URL(request.url);
-          const type = url.searchParams.get("type");
+          const rawType = url.searchParams.get("type");
 
           const filter: any = {};
-          if (type) {
-            filter.type = type;
+          if (rawType && ["image", "video", "song"].includes(rawType)) {
+            filter.type = rawType;
           }
 
-          const items = await MediaItem.find(filter).sort({ createdAt: -1 });
-          return new Response(
-            JSON.stringify(items),
-            {
-              headers: { "Content-Type": "application/json" },
-            },
-          );
+          const items = await MediaItem.find(filter)
+            .select("-__v")
+            .sort({ createdAt: -1 });
+
+          return new Response(JSON.stringify(items), {
+            headers: { "Content-Type": "application/json" },
+          });
         } catch (error: any) {
           console.error("Error fetching media:", error);
           return new Response(JSON.stringify({ error: "Internal server error" }), {

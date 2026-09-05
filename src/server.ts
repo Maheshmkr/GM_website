@@ -7,6 +7,7 @@ dotenv.config();
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { dbConnect } from "./lib/db";
+import { handleCors, getSecurityHeaders } from "./lib/security";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -51,16 +52,46 @@ function isH3SwallowedErrorBody(body: string): boolean {
 
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    // 1. Handle CORS preflight requests
+    const corsResult = handleCors(request);
+    if (corsResult.isPreflight) {
+      return new Response(null, {
+        status: 204,
+        headers: corsResult.headers,
+      });
+    }
+
     try {
       await dbConnect(); // Establish DB connection before accepting requests
       const handler = await getServerEntry();
-      const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      const rawResponse = await handler.fetch(request, env, ctx);
+      const response = await normalizeCatastrophicSsrResponse(rawResponse);
+
+      // 2. Inject security headers and CORS headers into every response
+      const newHeaders = new Headers(response.headers);
+      const secHeaders = getSecurityHeaders();
+      for (const [key, val] of Object.entries(secHeaders)) {
+        if (!newHeaders.has(key)) {
+          newHeaders.set(key, val);
+        }
+      }
+      for (const [key, val] of Object.entries(corsResult.headers)) {
+        newHeaders.set(key, val);
+      }
+
+      return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: newHeaders,
+      });
     } catch (error) {
-      console.error(error);
+      console.error("Server execution error:", error);
       return new Response(renderErrorPage(), {
         status: 500,
-        headers: { "content-type": "text/html; charset=utf-8" },
+        headers: {
+          "content-type": "text/html; charset=utf-8",
+          ...getSecurityHeaders(),
+        },
       });
     }
   },

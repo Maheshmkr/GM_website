@@ -1,44 +1,53 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute } from "@tanstack/react-router";
 import { dbConnect } from "@/lib/db";
-import { Video } from "@/lib/models";
+import { MediaItem, Video } from "@/lib/models";
+import { requireAdmin, isValidObjectId } from "@/lib/security";
 import mongoose from "mongoose";
 
 export const Route = createFileRoute("/api/videos/$id")({
   server: {
     handlers: {
-      DELETE: async ({ params }) => {
+      DELETE: async ({ params, request }) => {
+        // 1. Authorization: Admin check
+        const auth = requireAdmin(request);
+        if ("errorResponse" in auth) {
+          return auth.errorResponse;
+        }
+
         try {
           await dbConnect();
           const { id } = params;
 
-          if (!mongoose.Types.ObjectId.isValid(id)) {
-            return new Response(JSON.stringify({ error: "Invalid document ID format" }), {
+          // 2. Strict ID validation
+          if (!isValidObjectId(id)) {
+            return new Response(JSON.stringify({ error: "Invalid video ID format" }), {
               status: 400,
               headers: { "Content-Type": "application/json" },
             });
           }
 
-          const video = await Video.findById(id);
-          if (!video) {
+          const item = (await MediaItem.findById(id)) || (await Video.findById(id));
+          if (!item) {
             return new Response(JSON.stringify({ error: "Video not found" }), {
               status: 404,
               headers: { "Content-Type": "application/json" },
             });
           }
 
-          // Delete binary file from GridFS
+          // 3. Delete binary file from GridFS
           const db = mongoose.connection.db;
-          if (db && video.fileId) {
+          if (db && item.fileId) {
             const bucket = new mongoose.mongo.GridFSBucket(db, { bucketName: "media" });
             try {
-              await bucket.delete(video.fileId);
+              await bucket.delete(new mongoose.Types.ObjectId(item.fileId));
             } catch (err) {
-              console.warn("GridFS file delete failed (it may have been deleted already):", err);
+              console.warn("GridFS file deletion warning (may already be deleted):", err);
             }
           }
 
-          // Delete metadata document
+          // 4. Delete metadata document
+          await MediaItem.findByIdAndDelete(id);
           await Video.findByIdAndDelete(id);
 
           return new Response(JSON.stringify({ success: true }), {

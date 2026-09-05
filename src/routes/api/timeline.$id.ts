@@ -2,18 +2,30 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { dbConnect } from "@/lib/db";
 import { Timeline } from "@/lib/models";
+import {
+  requireAdmin,
+  isValidObjectId,
+  validateMediaUpload,
+  sanitizePlainText,
+} from "@/lib/security";
 import mongoose from "mongoose";
 
 export const Route = createFileRoute("/api/timeline/$id")({
   server: {
     handlers: {
       PUT: async ({ request, params }) => {
+        // 1. Authorization: Admin check
+        const auth = requireAdmin(request);
+        if ("errorResponse" in auth) {
+          return auth.errorResponse;
+        }
+
         try {
           await dbConnect();
           const { id } = params;
 
-          if (!mongoose.Types.ObjectId.isValid(id)) {
-            return new Response(JSON.stringify({ error: "Invalid document ID format" }), {
+          if (!isValidObjectId(id)) {
+            return new Response(JSON.stringify({ error: "Invalid timeline ID format" }), {
               status: 400,
               headers: { "Content-Type": "application/json" },
             });
@@ -28,12 +40,12 @@ export const Route = createFileRoute("/api/timeline/$id")({
           }
 
           const formData = await request.formData();
-          const title = formData.get("title") as string | null;
-          const description = formData.get("description") as string | null;
-          const date = formData.get("date") as string | null;
-          const memoryDate = formData.get("memoryDate") as string | null;
-          const location = formData.get("location") as string | null;
-          const icon = formData.get("icon") as string | null;
+          const rawTitle = formData.get("title") as string | null;
+          const rawDescription = formData.get("description") as string | null;
+          const rawDate = formData.get("date") as string | null;
+          const rawMemoryDate = formData.get("memoryDate") as string | null;
+          const rawLocation = formData.get("location") as string | null;
+          const rawIcon = formData.get("icon") as string | null;
           const highlight = formData.get("highlight") === "true";
 
           const imageFile = formData.get("imageFile") as File | null;
@@ -41,107 +53,107 @@ export const Route = createFileRoute("/api/timeline/$id")({
           const deleteImage = formData.get("deleteImage") === "true";
           const deleteVideo = formData.get("deleteVideo") === "true";
 
-          if (title) milestone.title = title;
-          if (description !== null) milestone.description = description;
-          if (date) {
-            milestone.date = date;
-          } else if (memoryDate) {
-            milestone.date = new Date(memoryDate).toLocaleDateString("en-GB", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-            });
+          if (rawTitle !== null) {
+            const cleanTitle = sanitizePlainText(rawTitle, 150);
+            if (cleanTitle) milestone.title = cleanTitle;
           }
-          if (memoryDate) {
-            milestone.memoryDate = memoryDate;
+          if (rawDescription !== null) milestone.description = sanitizePlainText(rawDescription, 1000);
+          if (rawDate !== null) milestone.date = sanitizePlainText(rawDate, 50);
+          if (rawMemoryDate !== null) milestone.memoryDate = sanitizePlainText(rawMemoryDate, 20);
+          if (rawLocation !== null) milestone.location = sanitizePlainText(rawLocation, 100);
+          if (rawIcon !== null) {
+            const validIcons = ["heart", "coffee", "sparkles", "plane", "star"];
+            if (validIcons.includes(rawIcon)) milestone.icon = rawIcon;
           }
-          if (location !== null) milestone.location = location;
-          if (icon) milestone.icon = icon;
           milestone.highlight = highlight;
 
           const db = mongoose.connection.db;
           if (!db) {
-            return new Response(JSON.stringify({ error: "Database connection failed" }), {
+            return new Response(JSON.stringify({ error: "Database connection unavailable" }), {
               status: 500,
               headers: { "Content-Type": "application/json" },
             });
           }
           const bucket = new mongoose.mongo.GridFSBucket(db, { bucketName: "media" });
 
-          // Handle Image deletion or update
-          if (deleteImage || (imageFile && imageFile.size > 0)) {
+          // 2. Handle Image deletion or replacement
+          if (deleteImage || (imageFile && imageFile instanceof File && imageFile.size > 0)) {
             if (milestone.imageFileId) {
               try {
-                await bucket.delete(milestone.imageFileId);
+                await bucket.delete(new mongoose.Types.ObjectId(milestone.imageFileId));
               } catch (err) {
-                console.warn("GridFS old image delete failed:", err);
+                console.warn("GridFS old image delete warning:", err);
               }
               milestone.imageFileId = undefined;
             }
           }
 
-          if (imageFile && imageFile.size > 0) {
-            const allowedImageMimeTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-            if (
-              allowedImageMimeTypes.includes(imageFile.type) ||
-              imageFile.name.match(/\.(jpg|jpeg|png|webp|gif)$/i)
-            ) {
-              const imageArrayBuffer = await imageFile.arrayBuffer();
-              const imageBuffer = Buffer.from(imageArrayBuffer);
+          if (imageFile && imageFile instanceof File && imageFile.size > 0) {
+            const imageArrayBuffer = await imageFile.arrayBuffer();
+            const imageBuffer = Buffer.from(imageArrayBuffer);
 
-              const imageFileId = await new Promise<mongoose.Types.ObjectId>((resolve, reject) => {
-                const uploadStream = bucket.openUploadStream(imageFile.name, {
-                  contentType: imageFile.type || "image/jpeg",
-                });
-                uploadStream.on("finish", () => {
-                  resolve(uploadStream.id as mongoose.Types.ObjectId);
-                });
-                uploadStream.on("error", (err) => {
-                  reject(err);
-                });
-                uploadStream.write(imageBuffer);
-                uploadStream.end();
+            const imageValidation = validateMediaUpload(imageBuffer, imageFile.name, imageFile.type, "image");
+            if (!imageValidation.valid) {
+              return new Response(JSON.stringify({ error: imageValidation.error }), {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
               });
-              milestone.imageFileId = imageFileId;
             }
+
+            const imageFileId = await new Promise<mongoose.Types.ObjectId>((resolve, reject) => {
+              const uploadStream = bucket.openUploadStream(imageValidation.safeFilename, {
+                contentType: imageValidation.detectedMimeType || "image/jpeg",
+              });
+              uploadStream.on("finish", () => {
+                resolve(uploadStream.id as mongoose.Types.ObjectId);
+              });
+              uploadStream.on("error", (err) => {
+                reject(err);
+              });
+              uploadStream.write(imageBuffer);
+              uploadStream.end();
+            });
+            milestone.imageFileId = imageFileId;
           }
 
-          // Handle Video deletion or update
-          if (deleteVideo || (videoFile && videoFile.size > 0)) {
+          // 3. Handle Video deletion or replacement
+          if (deleteVideo || (videoFile && videoFile instanceof File && videoFile.size > 0)) {
             if (milestone.videoFileId) {
               try {
-                await bucket.delete(milestone.videoFileId);
+                await bucket.delete(new mongoose.Types.ObjectId(milestone.videoFileId));
               } catch (err) {
-                console.warn("GridFS old video delete failed:", err);
+                console.warn("GridFS old video delete warning:", err);
               }
               milestone.videoFileId = undefined;
             }
           }
 
-          if (videoFile && videoFile.size > 0) {
-            const allowedVideoMimeTypes = ["video/mp4", "video/webm", "video/quicktime"];
-            if (
-              allowedVideoMimeTypes.includes(videoFile.type) ||
-              videoFile.name.match(/\.(mp4|webm|mov)$/i)
-            ) {
-              const videoArrayBuffer = await videoFile.arrayBuffer();
-              const videoBuffer = Buffer.from(videoArrayBuffer);
+          if (videoFile && videoFile instanceof File && videoFile.size > 0) {
+            const videoArrayBuffer = await videoFile.arrayBuffer();
+            const videoBuffer = Buffer.from(videoArrayBuffer);
 
-              const videoFileId = await new Promise<mongoose.Types.ObjectId>((resolve, reject) => {
-                const uploadStream = bucket.openUploadStream(videoFile.name, {
-                  contentType: videoFile.type || "video/mp4",
-                });
-                uploadStream.on("finish", () => {
-                  resolve(uploadStream.id as mongoose.Types.ObjectId);
-                });
-                uploadStream.on("error", (err) => {
-                  reject(err);
-                });
-                uploadStream.write(videoBuffer);
-                uploadStream.end();
+            const videoValidation = validateMediaUpload(videoBuffer, videoFile.name, videoFile.type, "video");
+            if (!videoValidation.valid) {
+              return new Response(JSON.stringify({ error: videoValidation.error }), {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
               });
-              milestone.videoFileId = videoFileId;
             }
+
+            const videoFileId = await new Promise<mongoose.Types.ObjectId>((resolve, reject) => {
+              const uploadStream = bucket.openUploadStream(videoValidation.safeFilename, {
+                contentType: videoValidation.detectedMimeType || "video/mp4",
+              });
+              uploadStream.on("finish", () => {
+                resolve(uploadStream.id as mongoose.Types.ObjectId);
+              });
+              uploadStream.on("error", (err) => {
+                reject(err);
+              });
+              uploadStream.write(videoBuffer);
+              uploadStream.end();
+            });
+            milestone.videoFileId = videoFileId;
           }
 
           await milestone.save();
@@ -157,13 +169,19 @@ export const Route = createFileRoute("/api/timeline/$id")({
           });
         }
       },
-      DELETE: async ({ params }) => {
+      DELETE: async ({ params, request }) => {
+        // 1. Authorization: Admin check
+        const auth = requireAdmin(request);
+        if ("errorResponse" in auth) {
+          return auth.errorResponse;
+        }
+
         try {
           await dbConnect();
           const { id } = params;
 
-          if (!mongoose.Types.ObjectId.isValid(id)) {
-            return new Response(JSON.stringify({ error: "Invalid document ID format" }), {
+          if (!isValidObjectId(id)) {
+            return new Response(JSON.stringify({ error: "Invalid timeline ID format" }), {
               status: 400,
               headers: { "Content-Type": "application/json" },
             });
@@ -181,26 +199,23 @@ export const Route = createFileRoute("/api/timeline/$id")({
           if (db) {
             const bucket = new mongoose.mongo.GridFSBucket(db, { bucketName: "media" });
 
-            // Delete attached image from GridFS
             if (milestone.imageFileId) {
               try {
-                await bucket.delete(milestone.imageFileId);
+                await bucket.delete(new mongoose.Types.ObjectId(milestone.imageFileId));
               } catch (err) {
-                console.warn("GridFS image delete failed:", err);
+                console.warn("GridFS image delete warning:", err);
               }
             }
 
-            // Delete attached video from GridFS
             if (milestone.videoFileId) {
               try {
-                await bucket.delete(milestone.videoFileId);
+                await bucket.delete(new mongoose.Types.ObjectId(milestone.videoFileId));
               } catch (err) {
-                console.warn("GridFS video delete failed:", err);
+                console.warn("GridFS video delete warning:", err);
               }
             }
           }
 
-          // Delete metadata document
           await Timeline.findByIdAndDelete(id);
 
           return new Response(JSON.stringify({ success: true }), {

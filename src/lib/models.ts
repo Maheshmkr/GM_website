@@ -145,4 +145,20 @@ export const FunZoneStage =
   mongoose.models.FunZoneStage ||
   mongoose.model("FunZoneStage", FunZoneStageSchema, "funZoneStages");
 
+// Define Letter schema
+const LetterSchema = new Schema(
+  {
+    title: { type: String, required: true },
+    preview: { type: String, required: true },
+    body: { type: String, required: true },
+    date: { type: String, required: true },
+    category: { type: String, default: "Love" },
+    favorite: { type: Boolean, default: false },
+  },
+  { timestamps: true }
+);
+
+export const Letter =
+  mongoose.models.Letter || mongoose.model("Letter", LetterSchema, "letters");
+
 

@@ -2,10 +2,10 @@ import { o as __toESM } from "../_runtime.mjs";
 import { t as readJsonResponse } from "./api-BUT7_u4b.mjs";
 import { t as cn } from "./utils-C_uf36nf.mjs";
 import { a as require_react, i as useQueryClient, n as useQuery, o as require_jsx_runtime, t as useMutation } from "../_libs/react+tanstack__react-query.mjs";
-import { A as Link, B as Camera, I as Clock, L as CircleCheck, M as Heart, N as Film, P as ExternalLink, S as Music4, V as Calendar, a as Upload, c as Sparkles, g as Play, h as Plus, j as Image, k as LoaderCircle, o as Trash2, r as Users, t as X, v as Pen, w as MapPin, x as Music } from "../_libs/lucide-react.mjs";
+import { A as Link, B as Camera, I as Clock, L as CircleCheck, M as Heart, N as Film, P as ExternalLink, S as Music4, T as Mail, V as Calendar, a as Upload, c as Sparkles, g as Play, h as Plus, j as Image, k as LoaderCircle, o as Trash2, r as Users, t as X, v as Pen, w as MapPin, x as Music } from "../_libs/lucide-react.mjs";
 import { t as SectionHeading } from "./SectionHeading-BVG9eVYl.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/admin-p5vyf-dy.js
+//#region node_modules/.nitro/vite/services/ssr/assets/admin-DvbZeKcs.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function AdminPage() {
@@ -67,12 +67,26 @@ function AdminPage() {
 			}
 		}
 	});
+	const { data: letters = [], isLoading: loadingLetters } = useQuery({
+		queryKey: ["letters"],
+		queryFn: async () => {
+			try {
+				const res = await fetch("/api/letters");
+				const payload = await readJsonResponse(res);
+				if (!payload.ok) return [];
+				return Array.isArray(payload.data) ? payload.data : [];
+			} catch (err) {
+				console.error("Error fetching letters:", err);
+				return [];
+			}
+		}
+	});
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 		className: "section-shell py-10 lg:py-16 min-h-screen",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SectionHeading, {
 				title: "Admin Management Dashboard",
-				subtitle: "Manage the memories, songs, videos, and journey timeline stored in MongoDB."
+				subtitle: "Manage the memories, songs, videos, letters, and journey timeline stored in MongoDB."
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "mt-10 flex flex-wrap justify-center gap-2",
@@ -96,6 +110,11 @@ function AdminPage() {
 						id: "timeline",
 						label: "Timeline",
 						icon: Calendar
+					},
+					{
+						id: "letters",
+						label: "Letters 💌",
+						icon: Mail
 					},
 					{
 						id: "fun",
@@ -137,6 +156,11 @@ function AdminPage() {
 					activeTab === "timeline" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TimelineManager, {
 						timeline,
 						isLoading: loadingTimeline,
+						queryClient
+					}),
+					activeTab === "letters" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LettersManager, {
+						letters,
+						isLoading: loadingLetters,
 						queryClient
 					}),
 					activeTab === "fun" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FunZoneManager, { queryClient }),
@@ -1982,6 +2006,373 @@ function FunZoneManager({ queryClient }) {
 			}, config.stage);
 		})
 	})] });
+}
+function LettersManager({ letters, isLoading, queryClient }) {
+	const [showModal, setShowModal] = (0, import_react.useState)(false);
+	const [editingLetter, setEditingLetter] = (0, import_react.useState)(null);
+	const [title, setTitle] = (0, import_react.useState)("");
+	const [preview, setPreview] = (0, import_react.useState)("");
+	const [body, setBody] = (0, import_react.useState)("");
+	const [date, setDate] = (0, import_react.useState)("");
+	const [category, setCategory] = (0, import_react.useState)("Love");
+	const [favorite, setFavorite] = (0, import_react.useState)(false);
+	const [isSubmitting, setIsSubmitting] = (0, import_react.useState)(false);
+	const [deletingId, setDeletingId] = (0, import_react.useState)(null);
+	const [readingLetter, setReadingLetter] = (0, import_react.useState)(null);
+	const openAddModal = () => {
+		setEditingLetter(null);
+		setTitle("");
+		setPreview("");
+		setBody("");
+		setDate((/* @__PURE__ */ new Date()).toLocaleDateString("en-US", {
+			month: "short",
+			day: "numeric",
+			year: "numeric"
+		}));
+		setCategory("Love");
+		setFavorite(false);
+		setShowModal(true);
+	};
+	const openEditModal = (letter) => {
+		setEditingLetter(letter);
+		setTitle(letter.title);
+		setPreview(letter.preview);
+		setBody(letter.body);
+		setDate(letter.date);
+		setCategory(letter.category || "Love");
+		setFavorite(!!letter.favorite);
+		setShowModal(true);
+	};
+	const handleSaveLetter = async (e) => {
+		e.preventDefault();
+		if (!title.trim() || !preview.trim() || !body.trim()) {
+			toast.error("Please fill in the title, preview teaser, and letter body.");
+			return;
+		}
+		setIsSubmitting(true);
+		try {
+			if (editingLetter && editingLetter._id) {
+				const res = await fetch(`/api/letters/${editingLetter._id}`, {
+					method: "PUT",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						title: title.trim(),
+						preview: preview.trim(),
+						body: body.trim(),
+						date: date.trim() || "Forever",
+						category: category.trim() || "Love",
+						favorite
+					})
+				});
+				const payload = await readJsonResponse(res);
+				if (!payload.ok) throw new Error(payload.error || "Failed to update letter");
+				toast.success("Letter updated with love 💌");
+			} else {
+				const res = await fetch("/api/letters", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						title: title.trim(),
+						preview: preview.trim(),
+						body: body.trim(),
+						date: date.trim() || "Forever",
+						category: category.trim() || "Love",
+						favorite
+					})
+				});
+				const payload = await readJsonResponse(res);
+				if (!payload.ok) throw new Error(payload.error || "Failed to save letter");
+				toast.success("New love letter created 💖");
+			}
+			setShowModal(false);
+			queryClient.invalidateQueries({ queryKey: ["letters"] });
+		} catch (err) {
+			console.error(err);
+			toast.error(err.message || "Something went wrong saving the letter.");
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
+	const handleDeleteLetter = async (letter) => {
+		if (!letter._id) {
+			toast.info("Static sample letters are preserved in site data.");
+			return;
+		}
+		if (!confirm(`Are you sure you want to delete the letter "${letter.title}"?`)) return;
+		setDeletingId(letter._id);
+		try {
+			const res = await fetch(`/api/letters/${letter._id}`, { method: "DELETE" });
+			const payload = await readJsonResponse(res);
+			if (!payload.ok) throw new Error(payload.error || "Failed to delete letter");
+			toast.success("Letter deleted from database.");
+			queryClient.invalidateQueries({ queryKey: ["letters"] });
+		} catch (err) {
+			console.error(err);
+			toast.error(err.message || "Failed to delete letter.");
+		} finally {
+			setDeletingId(null);
+		}
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "space-y-8",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", {
+					className: "text-xl font-bold flex items-center gap-2 text-foreground",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mail, { className: "size-5 text-primary" }), " Love Letters & Open-When Notes"]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "text-xs text-muted-foreground mt-1",
+					children: "Write heartfelt words, open-when notes, and sweet messages for your special one."
+				})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+					onClick: openAddModal,
+					className: "btn-love px-4 py-2 rounded-2xl text-xs sm:text-sm font-semibold flex items-center gap-2 cursor-pointer shadow-lg hover:scale-105 transition-all",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "size-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Write New Letter" })]
+				})]
+			}),
+			isLoading && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex items-center justify-center py-16 text-muted-foreground gap-2",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-5 animate-spin text-primary" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "text-sm",
+					children: "Loading heartfelt letters..."
+				})]
+			}),
+			!isLoading && letters.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "text-center py-16 glass rounded-3xl border border-white/10 space-y-4",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "size-14 rounded-2xl bg-primary/10 text-primary grid place-items-center mx-auto",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mail, { className: "size-7" })
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+						className: "font-semibold text-lg",
+						children: "No Letters Yet"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-sm text-muted-foreground max-w-sm mx-auto",
+						children: "Write your very first letter to fill this space with your loving memories."
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						onClick: openAddModal,
+						className: "btn-love px-5 py-2.5 rounded-full text-xs font-semibold inline-flex items-center gap-2 cursor-pointer",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "size-4" }), " Write First Letter"]
+					})
+				]
+			}),
+			!isLoading && letters.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "grid gap-5 sm:grid-cols-2 lg:grid-cols-3",
+				children: letters.map((letter, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "glass glass-hover rounded-3xl p-6 flex flex-col justify-between border border-border relative group shadow-sm hover:shadow-xl transition-all",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center justify-between gap-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "grid size-10 place-items-center rounded-2xl bg-[var(--gradient-love)] text-primary-foreground shadow-md",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mail, { className: "size-4" })
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-1.5",
+								children: [letter.favorite && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "size-7 rounded-full bg-primary/15 text-primary grid place-items-center",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Heart, { className: "size-3.5 fill-current" })
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-[11px] font-semibold px-2.5 py-1 rounded-full bg-surface/50 border border-border text-muted-foreground",
+									children: letter.category || "Love"
+								})]
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+							className: "mt-4 text-base font-bold text-foreground leading-snug line-clamp-1",
+							children: letter.title
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "mt-2 text-xs text-muted-foreground line-clamp-3 leading-relaxed",
+							children: letter.preview
+						})
+					] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "mt-6 pt-4 border-t border-border/50 flex items-center justify-between",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-[11px] text-muted-foreground font-medium",
+							children: letter.date
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center gap-1.5",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									onClick: () => setReadingLetter(letter),
+									className: "glass hover:bg-primary/20 text-primary size-8 rounded-full grid place-items-center cursor-pointer transition-all hover:scale-105",
+									title: "Read Letter",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ExternalLink, { className: "size-3.5" })
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									onClick: () => openEditModal(letter),
+									className: "glass hover:bg-white/20 size-8 rounded-full grid place-items-center text-foreground cursor-pointer transition-all hover:scale-105",
+									title: "Edit Letter",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pen, { className: "size-3.5" })
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									onClick: () => handleDeleteLetter(letter),
+									disabled: deletingId === letter._id,
+									className: "glass hover:bg-destructive/20 text-destructive size-8 rounded-full grid place-items-center cursor-pointer transition-all hover:scale-105 disabled:opacity-50",
+									title: "Delete Letter",
+									children: deletingId === letter._id ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-3.5 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "size-3.5" })
+								})
+							]
+						})]
+					})]
+				}, letter._id || `letter-${idx}`))
+			}),
+			showModal && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "fixed inset-0 z-[70] grid place-items-center bg-background/90 p-4 backdrop-blur-xl animate-fade-in",
+				role: "dialog",
+				"aria-modal": "true",
+				onClick: () => setShowModal(false),
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "glass animate-letter-open relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl p-6 sm:p-8 border border-border shadow-2xl",
+					onClick: (e) => e.stopPropagation(),
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center justify-between border-b border-border/50 pb-4 mb-5",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center gap-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "size-8 rounded-xl bg-[var(--gradient-love)] text-primary-foreground grid place-items-center",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mail, { className: "size-4" })
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+								className: "text-lg font-bold text-foreground",
+								children: editingLetter ? "Edit Love Letter" : "Write New Love Letter"
+							})]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							onClick: () => setShowModal(false),
+							className: "glass size-8 rounded-full grid place-items-center text-muted-foreground hover:text-foreground cursor-pointer",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "size-4" })
+						})]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+						onSubmit: handleSaveLetter,
+						className: "space-y-4",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+								className: "block text-xs font-semibold text-muted-foreground mb-1.5",
+								children: "Letter Title *"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								type: "text",
+								value: title,
+								onChange: (e) => setTitle(e.target.value),
+								placeholder: "e.g. Open When You Miss Me",
+								className: "w-full px-4 py-2.5 text-sm bg-surface/40 border border-border rounded-2xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30",
+								required: true
+							})] }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+								className: "block text-xs font-semibold text-muted-foreground mb-1.5",
+								children: "Preview Teaser *"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								type: "text",
+								value: preview,
+								onChange: (e) => setPreview(e.target.value),
+								placeholder: "e.g. Just close your eyes for a second and take a breath...",
+								className: "w-full px-4 py-2.5 text-sm bg-surface/40 border border-border rounded-2xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30",
+								required: true
+							})] }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+								className: "block text-xs font-semibold text-muted-foreground mb-1.5",
+								children: "Full Letter Body *"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", {
+								value: body,
+								onChange: (e) => setBody(e.target.value),
+								placeholder: "Write your long, sweet message here. Separate paragraphs with double newlines...",
+								rows: 6,
+								className: "w-full px-4 py-2.5 text-sm bg-surface/40 border border-border rounded-2xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 font-sans",
+								required: true
+							})] }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "grid grid-cols-2 gap-3",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+									className: "block text-xs font-semibold text-muted-foreground mb-1.5",
+									children: "Date Display"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "text",
+									value: date,
+									onChange: (e) => setDate(e.target.value),
+									placeholder: "e.g. May 12, 2024",
+									className: "w-full px-4 py-2.5 text-sm bg-surface/40 border border-border rounded-2xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+								})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+									className: "block text-xs font-semibold text-muted-foreground mb-1.5",
+									children: "Category"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "text",
+									value: category,
+									onChange: (e) => setCategory(e.target.value),
+									placeholder: "e.g. Love, Open When...",
+									className: "w-full px-4 py-2.5 text-sm bg-surface/40 border border-border rounded-2xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+								})] })]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-2 pt-1",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "checkbox",
+									id: "letter-favorite",
+									checked: favorite,
+									onChange: (e) => setFavorite(e.target.checked),
+									className: "size-4 rounded accent-primary cursor-pointer"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+									htmlFor: "letter-favorite",
+									className: "text-xs font-medium text-foreground cursor-pointer flex items-center gap-1.5",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Heart, { className: "size-3.5 text-primary fill-primary/30" }), " Mark as Highlight / Favorite"]
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center justify-end gap-2 pt-4 border-t border-border/50",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									type: "button",
+									onClick: () => setShowModal(false),
+									className: "glass px-4 py-2.5 rounded-2xl text-xs font-semibold text-muted-foreground hover:text-foreground cursor-pointer",
+									children: "Cancel"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									type: "submit",
+									disabled: isSubmitting,
+									className: "btn-love px-5 py-2.5 rounded-2xl text-xs font-semibold flex items-center gap-2 cursor-pointer shadow-lg disabled:opacity-50",
+									children: isSubmitting ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-3.5 animate-spin" }), " Saving..."] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Heart, { className: "size-3.5 fill-current" }), " Save Letter"] })
+								})]
+							})
+						]
+					})]
+				})
+			}),
+			readingLetter && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "fixed inset-0 z-[70] grid place-items-center bg-background/90 p-4 backdrop-blur-xl animate-fade-in",
+				role: "dialog",
+				"aria-modal": "true",
+				onClick: () => setReadingLetter(null),
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "glass animate-letter-open relative max-h-[85vh] w-full max-w-xl overflow-y-auto rounded-3xl p-7 sm:p-9 border border-border shadow-2xl",
+					onClick: (e) => e.stopPropagation(),
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-xs uppercase tracking-[0.25em] text-primary font-bold",
+							children: readingLetter.category || "Words from my heart"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+							className: "mt-2 text-2xl font-bold text-foreground",
+							children: readingLetter.title
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "relative mt-5 space-y-4 text-sm leading-relaxed text-muted-foreground",
+							children: readingLetter.body.split("\n\n").map((p, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: p }, idx))
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "mt-8 pt-4 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: readingLetter.date }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-primary font-semibold",
+								children: "Always yours ♡"
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							onClick: () => setReadingLetter(null),
+							className: "glass absolute right-4 top-4 size-9 rounded-full grid place-items-center text-muted-foreground hover:text-foreground cursor-pointer",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "size-4" })
+						})
+					]
+				})
+			})
+		]
+	});
 }
 //#endregion
 export { AdminPage as component };

@@ -2,6 +2,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { dbConnect } from "@/lib/db";
 import { Timeline } from "@/lib/models";
+import {
+  requireAdmin,
+  validateMediaUpload,
+  checkRateLimit,
+  mutationRateLimiter,
+  createRateLimitResponse,
+  sanitizePlainText,
+} from "@/lib/security";
 import mongoose from "mongoose";
 
 export const Route = createFileRoute("/api/timeline")({
@@ -10,7 +18,10 @@ export const Route = createFileRoute("/api/timeline")({
       GET: async () => {
         try {
           await dbConnect();
-          const milestones = await Timeline.find().sort({ memoryDate: 1, date: 1, createdAt: 1 }); // chronological order
+          const milestones = await Timeline.find()
+            .select("-__v")
+            .sort({ memoryDate: 1, date: 1, createdAt: 1 });
+
           return new Response(JSON.stringify(milestones), {
             headers: { "Content-Type": "application/json" },
           });
@@ -23,112 +34,125 @@ export const Route = createFileRoute("/api/timeline")({
         }
       },
       POST: async ({ request }) => {
+        // 1. Authorization: Admin check
+        const auth = requireAdmin(request);
+        if ("errorResponse" in auth) {
+          return auth.errorResponse;
+        }
+
+        // 2. Rate Limiting
+        const rateCheck = checkRateLimit(request, mutationRateLimiter);
+        if (!rateCheck.allowed) {
+          return createRateLimitResponse(rateCheck.retryAfterSeconds);
+        }
+
         try {
           await dbConnect();
           const formData = await request.formData();
-          const title = formData.get("title") as string | null;
-          const description = formData.get("description") as string | null;
-          const date = formData.get("date") as string | null;
-          const memoryDate = formData.get("memoryDate") as string | null;
-          const location = formData.get("location") as string | null;
-          const icon = formData.get("icon") as string | null;
+          const rawTitle = formData.get("title") as string | null;
+          const rawDescription = formData.get("description") as string | null;
+          const rawDate = formData.get("date") as string | null;
+          const rawMemoryDate = formData.get("memoryDate") as string | null;
+          const rawLocation = formData.get("location") as string | null;
+          const rawIcon = formData.get("icon") as string | null;
           const highlight = formData.get("highlight") === "true";
 
           const imageFile = formData.get("imageFile") as File | null;
           const videoFile = formData.get("videoFile") as File | null;
 
-          if (!title || !date) {
-            return new Response(JSON.stringify({ error: "Title and Date are required" }), {
+          const title = sanitizePlainText(rawTitle, 150);
+          const date = sanitizePlainText(rawDate, 50);
+
+          if (!title) {
+            return new Response(JSON.stringify({ error: "Title is required" }), {
               status: 400,
               headers: { "Content-Type": "application/json" },
             });
           }
 
+          const description = sanitizePlainText(rawDescription, 1000);
+          const memoryDate = sanitizePlainText(rawMemoryDate, 20) || (date && !isNaN(Date.parse(date)) ? new Date(date).toISOString().split("T")[0] : undefined);
+          const location = sanitizePlainText(rawLocation, 100);
+          const validIcons = ["heart", "coffee", "sparkles", "plane", "star"];
+          const icon = validIcons.includes(rawIcon || "") ? rawIcon : "heart";
+
           const db = mongoose.connection.db;
           if (!db) {
-            return new Response(JSON.stringify({ error: "Database connection failed" }), {
+            return new Response(JSON.stringify({ error: "Database connection unavailable" }), {
               status: 500,
               headers: { "Content-Type": "application/json" },
             });
           }
           const bucket = new mongoose.mongo.GridFSBucket(db, { bucketName: "media" });
 
-          // Upload Image if present
+          // 3. Upload Image if present with Magic Bytes validation
           let imageFileId: mongoose.Types.ObjectId | undefined;
-          if (imageFile && imageFile.size > 0) {
-            const allowedImageMimeTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-            if (
-              allowedImageMimeTypes.includes(imageFile.type) ||
-              imageFile.name.match(/\.(jpg|jpeg|png|webp|gif)$/i)
-            ) {
-              const imageArrayBuffer = await imageFile.arrayBuffer();
-              const imageBuffer = Buffer.from(imageArrayBuffer);
+          if (imageFile && imageFile instanceof File && imageFile.size > 0) {
+            const imageArrayBuffer = await imageFile.arrayBuffer();
+            const imageBuffer = Buffer.from(imageArrayBuffer);
 
-              imageFileId = await new Promise<mongoose.Types.ObjectId>((resolve, reject) => {
-                const uploadStream = bucket.openUploadStream(imageFile.name, {
-                  contentType: imageFile.type || "image/jpeg",
-                });
-                uploadStream.on("finish", () => {
-                  resolve(uploadStream.id as mongoose.Types.ObjectId);
-                });
-                uploadStream.on("error", (err) => {
-                  reject(err);
-                });
-                uploadStream.write(imageBuffer);
-                uploadStream.end();
+            const imageValidation = validateMediaUpload(imageBuffer, imageFile.name, imageFile.type, "image");
+            if (!imageValidation.valid) {
+              return new Response(JSON.stringify({ error: imageValidation.error }), {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
               });
             }
+
+            imageFileId = await new Promise<mongoose.Types.ObjectId>((resolve, reject) => {
+              const uploadStream = bucket.openUploadStream(imageValidation.safeFilename, {
+                contentType: imageValidation.detectedMimeType || "image/jpeg",
+              });
+              uploadStream.on("finish", () => {
+                resolve(uploadStream.id as mongoose.Types.ObjectId);
+              });
+              uploadStream.on("error", (err) => {
+                reject(err);
+              });
+              uploadStream.write(imageBuffer);
+              uploadStream.end();
+            });
           }
 
-          // Upload Video if present
+          // 4. Upload Video if present with Magic Bytes validation
           let videoFileId: mongoose.Types.ObjectId | undefined;
-          if (videoFile && videoFile.size > 0) {
-            const allowedVideoMimeTypes = ["video/mp4", "video/webm", "video/quicktime"];
-            if (
-              allowedVideoMimeTypes.includes(videoFile.type) ||
-              videoFile.name.match(/\.(mp4|webm|mov)$/i)
-            ) {
-              const videoArrayBuffer = await videoFile.arrayBuffer();
-              const videoBuffer = Buffer.from(videoArrayBuffer);
+          if (videoFile && videoFile instanceof File && videoFile.size > 0) {
+            const videoArrayBuffer = await videoFile.arrayBuffer();
+            const videoBuffer = Buffer.from(videoArrayBuffer);
 
-              videoFileId = await new Promise<mongoose.Types.ObjectId>((resolve, reject) => {
-                const uploadStream = bucket.openUploadStream(videoFile.name, {
-                  contentType: videoFile.type || "video/mp4",
-                });
-                uploadStream.on("finish", () => {
-                  resolve(uploadStream.id as mongoose.Types.ObjectId);
-                });
-                uploadStream.on("error", (err) => {
-                  reject(err);
-                });
-                uploadStream.write(videoBuffer);
-                uploadStream.end();
+            const videoValidation = validateMediaUpload(videoBuffer, videoFile.name, videoFile.type, "video");
+            if (!videoValidation.valid) {
+              return new Response(JSON.stringify({ error: videoValidation.error }), {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
               });
             }
+
+            videoFileId = await new Promise<mongoose.Types.ObjectId>((resolve, reject) => {
+              const uploadStream = bucket.openUploadStream(videoValidation.safeFilename, {
+                contentType: videoValidation.detectedMimeType || "video/mp4",
+              });
+              uploadStream.on("finish", () => {
+                resolve(uploadStream.id as mongoose.Types.ObjectId);
+              });
+              uploadStream.on("error", (err) => {
+                reject(err);
+              });
+              uploadStream.write(videoBuffer);
+              uploadStream.end();
+            });
           }
 
-          // Save Timeline item
+          // 5. Save Timeline milestone
           const milestone = new Timeline({
             title,
-            description: description || "",
-            date:
-              date ||
-              (memoryDate
-                ? new Date(memoryDate).toLocaleDateString("en-GB", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })
-                : ""),
-            memoryDate:
-              memoryDate ||
-              (date && !isNaN(Date.parse(date))
-                ? new Date(date).toISOString().split("T")[0]
-                : undefined),
-            location: location || "",
+            description,
+            date: date || (memoryDate ? new Date(memoryDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : ""),
+            memoryDate,
+            location,
             imageFileId,
             videoFileId,
-            icon: icon || "heart",
+            icon,
             highlight,
           });
           await milestone.save();

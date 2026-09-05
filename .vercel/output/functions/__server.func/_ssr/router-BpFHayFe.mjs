@@ -4,18 +4,18 @@ import { a as require_react, o as require_jsx_runtime, r as QueryClientProvider 
 import { C as Menu, D as LogIn, E as LogOut, M as Heart, b as Pause, c as Sparkles, g as Play, l as SkipForward, t as X, u as SkipBack } from "../_libs/lucide-react.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import { _ as useLoaderData, c as HeadContent, d as createRouter, f as Outlet, g as Link, h as createRootRouteWithContext, j as redirect, l as useLocation, m as createFileRoute, p as lazyRouteComponent, s as Scripts, v as useRouter } from "../_libs/@tanstack/react-router+[...].mjs";
-import { c as createServerFn, i as TSS_SERVER_FUNCTION } from "./createServerFn-CIHAFgYl.mjs";
-import { n as girlfriend } from "./site-_zOoiwhn.mjs";
 import { t as require_mongoose } from "../_libs/mongoose+mpath+mquery+ms+sift.mjs";
-import { t as dbConnect } from "./ssr.mjs";
-import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-CIY7ALnQ.mjs";
+import { a as createSessionCookie, c as hashPassword, d as requireAdmin, f as sanitizeMongoInput, g as verifyPassword, h as validateMediaUpload, i as createRateLimitResponse, l as isValidObjectId, m as uploadRateLimiter, n as checkRateLimit, o as createSessionToken, p as sanitizePlainText, r as createClearSessionCookie, s as getAuthSession, t as authRateLimiter, u as mutationRateLimiter, v as dbConnect } from "./ssr.mjs";
+import { c as createServerFn, i as TSS_SERVER_FUNCTION } from "./createServerFn-CIHAFgYl.mjs";
+import { i as letters, n as girlfriend } from "./site-_zOoiwhn.mjs";
+import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-D5amRCfg.mjs";
 import { n as formatTime, r as useMusic, t as MusicProvider } from "./MusicProvider-CexXRw5f.mjs";
-import crypto from "crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-BNvjIxqC.js
+import { i as stringType, n as enumType, r as objectType, t as booleanType } from "../_libs/zod.mjs";
+//#region node_modules/.nitro/vite/services/ssr/assets/router-BpFHayFe.js
 var import_mongoose = /* @__PURE__ */ __toESM(require_mongoose());
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-DBYljTOA.css";
+var styles_default = "/assets/styles-UGWeI36y.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -417,7 +417,7 @@ function ErrorComponent({ error, reset }) {
 		})
 	});
 }
-var Route$29 = createRootRouteWithContext()({
+var Route$31 = createRootRouteWithContext()({
 	loader: async ({ location }) => {
 		if (location.pathname === "/login" || location.pathname.startsWith("/api/") || location.pathname.includes(".")) return { role: null };
 		const { role } = await getSession();
@@ -482,7 +482,7 @@ function RootShell({ children }) {
 	});
 }
 function RootComponent() {
-	const { queryClient } = Route$29.useRouteContext();
+	const { queryClient } = Route$31.useRouteContext();
 	if (useLocation().pathname === "/login") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(QueryClientProvider, {
 		client: queryClient,
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Ambience, {}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", {
@@ -504,10 +504,10 @@ function RootComponent() {
 		] })
 	});
 }
-var $$splitComponentImporter$8 = () => import("./routes-D20lSYMu.mjs");
+var $$splitComponentImporter$8 = () => import("./routes-CKmu2OzX.mjs");
 var title$6 = "For You — A Little World Made Just For Us";
 var description$6 = "A private collection of our photos, videos, songs, letters and the timeline of our story — made with all my love.";
-var Route$28 = createFileRoute("/")({
+var Route$30 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: title$6 },
 		{
@@ -525,12 +525,12 @@ var Route$28 = createFileRoute("/")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$8, "component")
 });
-var $$splitComponentImporter$7 = () => import("./admin-p5vyf-dy.mjs");
-var Route$27 = createFileRoute("/admin")({ component: lazyRouteComponent($$splitComponentImporter$7, "component") });
+var $$splitComponentImporter$7 = () => import("./admin-DvbZeKcs.mjs");
+var Route$29 = createFileRoute("/admin")({ component: lazyRouteComponent($$splitComponentImporter$7, "component") });
 var $$splitComponentImporter$6 = () => import("./fun-wkuS3tR7.mjs");
 var title$5 = "Fun Zone ❤️ — Interactive Character Game";
 var description$5 = "Playful interactive cartoon reactions! Select an action like Stone, Hand, Punch, Hit, Slap or Love and tap the picture for fun visual effects.";
-var Route$26 = createFileRoute("/fun")({
+var Route$28 = createFileRoute("/fun")({
 	head: () => ({ meta: [
 		{ title: title$5 },
 		{
@@ -548,10 +548,10 @@ var Route$26 = createFileRoute("/fun")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$6, "component")
 });
-var $$splitComponentImporter$5 = () => import("./letters-D-rYiPjL.mjs");
+var $$splitComponentImporter$5 = () => import("./letters-CmueGxn_.mjs");
 var title$4 = "Letters For You — Open When...";
 var description$4 = "Open-when letters written for your low days, your proud days and the days you miss me. Words from my heart.";
-var Route$25 = createFileRoute("/letters")({
+var Route$27 = createFileRoute("/letters")({
 	head: () => ({ meta: [
 		{ title: title$4 },
 		{
@@ -570,7 +570,7 @@ var Route$25 = createFileRoute("/letters")({
 	component: lazyRouteComponent($$splitComponentImporter$5, "component")
 });
 var $$splitComponentImporter$4 = () => import("./login-nqSf7xLp.mjs");
-var Route$24 = createFileRoute("/login")({
+var Route$26 = createFileRoute("/login")({
 	loader: async () => {
 		const { role } = await getSession();
 		if (role === "admin") throw redirect({ to: "/admin" });
@@ -582,7 +582,7 @@ var Route$24 = createFileRoute("/login")({
 var $$splitComponentImporter$3 = () => import("./photos-BO0Kt4e2.mjs");
 var title$3 = "Our Beautiful Memories — Photos";
 var description$3 = "Every picture holds a special moment with you: our trips, dates, candid smiles and the days I never want to forget.";
-var Route$23 = createFileRoute("/photos")({
+var Route$25 = createFileRoute("/photos")({
 	head: () => ({ meta: [
 		{ title: title$3 },
 		{
@@ -603,7 +603,7 @@ var Route$23 = createFileRoute("/photos")({
 var $$splitComponentImporter$2 = () => import("./songs-DnoZ_WkY.mjs");
 var title$2 = "Songs That Remind Me of You";
 var description$2 = "Our playlist — the melodies that speak your name, from the first song we danced to onwards.";
-var Route$22 = createFileRoute("/songs")({
+var Route$24 = createFileRoute("/songs")({
 	head: () => ({ meta: [
 		{ title: title$2 },
 		{
@@ -624,7 +624,7 @@ var Route$22 = createFileRoute("/songs")({
 var $$splitComponentImporter$1 = () => import("./timeline-BM-yOlM-.mjs");
 var title$1 = "Our Journey Timeline";
 var description$1 = "From the day we met to the adventures still ahead — a timeline of our beautiful journey together.";
-var Route$21 = createFileRoute("/timeline")({
+var Route$23 = createFileRoute("/timeline")({
 	head: () => ({ meta: [
 		{ title: title$1 },
 		{
@@ -645,7 +645,7 @@ var Route$21 = createFileRoute("/timeline")({
 var $$splitComponentImporter = () => import("./videos-CfSrdCHo.mjs");
 var title = "Our Videos — Moments In Motion";
 var description = "Little moments captured in motion: sunset dates, your laugh, our first trip and the candid clips I keep rewatching.";
-var Route$20 = createFileRoute("/videos")({
+var Route$22 = createFileRoute("/videos")({
 	head: () => ({ meta: [
 		{ title },
 		{
@@ -919,13 +919,104 @@ var FunZoneStageSchema = new import_mongoose.Schema({
 	}
 }, { timestamps: true });
 var FunZoneStage = import_mongoose.default.models.FunZoneStage || import_mongoose.default.model("FunZoneStage", FunZoneStageSchema, "funZoneStages");
-var Route$19 = createFileRoute("/api/media")({ server: { handlers: { GET: async ({ request }) => {
+var LetterSchema$1 = new import_mongoose.Schema({
+	title: {
+		type: String,
+		required: true
+	},
+	preview: {
+		type: String,
+		required: true
+	},
+	body: {
+		type: String,
+		required: true
+	},
+	date: {
+		type: String,
+		required: true
+	},
+	category: {
+		type: String,
+		default: "Love"
+	},
+	favorite: {
+		type: Boolean,
+		default: false
+	}
+}, { timestamps: true });
+var Letter = import_mongoose.default.models.Letter || import_mongoose.default.model("Letter", LetterSchema$1, "letters");
+var LetterSchema = objectType({
+	title: stringType().min(1, "Title is required").max(200),
+	preview: stringType().min(1, "Preview is required").max(500),
+	body: stringType().min(1, "Body is required").max(1e4),
+	date: stringType().min(1, "Date is required").max(50),
+	category: stringType().max(50).optional(),
+	favorite: booleanType().optional()
+});
+var Route$21 = createFileRoute("/api/letters")({ server: { handlers: {
+	GET: async () => {
+		try {
+			await dbConnect();
+			const dbLetters = await Letter.find().select("-__v").sort({ createdAt: -1 });
+			if (dbLetters.length === 0) return new Response(JSON.stringify(letters), { headers: { "Content-Type": "application/json" } });
+			return new Response(JSON.stringify(dbLetters), { headers: { "Content-Type": "application/json" } });
+		} catch (error) {
+			console.error("Error fetching letters:", error);
+			return new Response(JSON.stringify(letters), { headers: { "Content-Type": "application/json" } });
+		}
+	},
+	POST: async ({ request }) => {
+		const auth = requireAdmin(request);
+		if ("errorResponse" in auth) return auth.errorResponse;
+		const rateCheck = checkRateLimit(request, mutationRateLimiter);
+		if (!rateCheck.allowed) return createRateLimitResponse(rateCheck.retryAfterSeconds);
+		try {
+			await dbConnect();
+			const rawBody = await request.json().catch(() => null);
+			if (!rawBody || typeof rawBody !== "object") return new Response(JSON.stringify({ error: "Invalid JSON payload" }), {
+				status: 400,
+				headers: { "Content-Type": "application/json" }
+			});
+			const parsed = LetterSchema.safeParse(sanitizeMongoInput(rawBody));
+			if (!parsed.success) return new Response(JSON.stringify({ error: parsed.error.issues[0]?.message || "Validation failed" }), {
+				status: 400,
+				headers: { "Content-Type": "application/json" }
+			});
+			const { title, preview, body, date, category, favorite } = parsed.data;
+			const letter = new Letter({
+				title: sanitizePlainText(title, 200),
+				preview: sanitizePlainText(preview, 500),
+				body: sanitizePlainText(body, 1e4),
+				date: sanitizePlainText(date, 50),
+				category: sanitizePlainText(category || "Love", 50),
+				favorite: !!favorite
+			});
+			await letter.save();
+			return new Response(JSON.stringify(letter), {
+				status: 201,
+				headers: { "Content-Type": "application/json" }
+			});
+		} catch (error) {
+			console.error("Error creating letter:", error);
+			return new Response(JSON.stringify({ error: "Internal server error" }), {
+				status: 500,
+				headers: { "Content-Type": "application/json" }
+			});
+		}
+	}
+} } });
+var Route$20 = createFileRoute("/api/media")({ server: { handlers: { GET: async ({ request }) => {
 	try {
 		await dbConnect();
-		const type = new URL(request.url).searchParams.get("type");
+		const rawType = new URL(request.url).searchParams.get("type");
 		const filter = {};
-		if (type) filter.type = type;
-		const items = await MediaItem.find(filter).sort({ createdAt: -1 });
+		if (rawType && [
+			"image",
+			"video",
+			"song"
+		].includes(rawType)) filter.type = rawType;
+		const items = await MediaItem.find(filter).select("-__v").sort({ createdAt: -1 });
 		return new Response(JSON.stringify(items), { headers: { "Content-Type": "application/json" } });
 	} catch (error) {
 		console.error("Error fetching media:", error);
@@ -935,11 +1026,11 @@ var Route$19 = createFileRoute("/api/media")({ server: { handlers: { GET: async 
 		});
 	}
 } } } });
-var Route$18 = createFileRoute("/api/photos")({ server: { handlers: {
+var Route$19 = createFileRoute("/api/photos")({ server: { handlers: {
 	GET: async () => {
 		try {
 			await dbConnect();
-			const photos = await MediaItem.find({ type: "image" }).sort({ createdAt: -1 });
+			const photos = await MediaItem.find({ type: "image" }).select("-__v").sort({ createdAt: -1 });
 			return new Response(JSON.stringify(photos), { headers: { "Content-Type": "application/json" } });
 		} catch (error) {
 			console.error("Error fetching photos:", error);
@@ -950,56 +1041,46 @@ var Route$18 = createFileRoute("/api/photos")({ server: { handlers: {
 		}
 	},
 	POST: async ({ request }) => {
+		const auth = requireAdmin(request);
+		if ("errorResponse" in auth) return auth.errorResponse;
+		const rateCheck = checkRateLimit(request, uploadRateLimiter);
+		if (!rateCheck.allowed) return createRateLimitResponse(rateCheck.retryAfterSeconds);
 		try {
 			await dbConnect();
 			const formData = await request.formData();
 			const file = formData.get("file");
-			const title = formData.get("title");
-			const description = formData.get("description");
-			const category = formData.get("category");
+			const rawTitle = formData.get("title");
+			const rawDescription = formData.get("description");
+			const rawCategory = formData.get("category");
+			const rawMemoryDate = formData.get("memoryDate");
 			const favorite = formData.get("favorite") === "true";
-			if (!file) return new Response(JSON.stringify({ error: "No file uploaded" }), {
+			if (!file || !(file instanceof File)) return new Response(JSON.stringify({ error: "No image file uploaded" }), {
 				status: 400,
 				headers: { "Content-Type": "application/json" }
 			});
+			const title = sanitizePlainText(rawTitle, 150);
 			if (!title) return new Response(JSON.stringify({ error: "Title is required" }), {
 				status: 400,
 				headers: { "Content-Type": "application/json" }
 			});
-			if (![
-				"image/jpeg",
-				"image/png",
-				"image/webp",
-				"image/gif"
-			].includes(file.type)) return new Response(JSON.stringify({ error: `Invalid MIME type: ${file.type}. Allowed: JPEG, PNG, WEBP, GIF.` }), {
-				status: 400,
-				headers: { "Content-Type": "application/json" }
-			});
-			const ext = file.name.split(".").pop()?.toLowerCase();
-			if (!ext || ![
-				"jpg",
-				"jpeg",
-				"png",
-				"webp",
-				"gif"
-			].includes(ext)) return new Response(JSON.stringify({ error: `Invalid file extension. Allowed: jpg, jpeg, png, webp, gif.` }), {
-				status: 400,
-				headers: { "Content-Type": "application/json" }
-			});
-			if (file.size > 10485760) return new Response(JSON.stringify({ error: `File size exceeds the limit of 10MB (actual: ${(file.size / 1024 / 1024).toFixed(2)}MB)` }), {
-				status: 400,
-				headers: { "Content-Type": "application/json" }
-			});
+			const description = sanitizePlainText(rawDescription, 1e3);
+			const category = sanitizePlainText(rawCategory, 50) || "Favorites";
+			const memoryDate = sanitizePlainText(rawMemoryDate, 20) || (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
 			const arrayBuffer = await file.arrayBuffer();
 			const buffer = Buffer.from(arrayBuffer);
+			const validation = validateMediaUpload(buffer, file.name, file.type, "image");
+			if (!validation.valid) return new Response(JSON.stringify({ error: validation.error }), {
+				status: 400,
+				headers: { "Content-Type": "application/json" }
+			});
 			const db = import_mongoose.default.connection.db;
-			if (!db) return new Response(JSON.stringify({ error: "Database connection failed" }), {
+			if (!db) return new Response(JSON.stringify({ error: "Database connection unavailable" }), {
 				status: 500,
 				headers: { "Content-Type": "application/json" }
 			});
 			const bucket = new import_mongoose.default.mongo.GridFSBucket(db, { bucketName: "media" });
 			const fileId = await new Promise((resolve, reject) => {
-				const uploadStream = bucket.openUploadStream(file.name, { contentType: file.type });
+				const uploadStream = bucket.openUploadStream(validation.safeFilename, { contentType: validation.detectedMimeType || "image/jpeg" });
 				uploadStream.on("finish", () => {
 					resolve(uploadStream.id);
 				});
@@ -1013,14 +1094,14 @@ var Route$18 = createFileRoute("/api/photos")({ server: { handlers: {
 				type: "image",
 				source: "upload",
 				title,
-				description: description || "",
-				filename: file.name,
-				mimeType: file.type,
-				fileSize: file.size,
+				description,
+				filename: validation.safeFilename,
+				mimeType: validation.detectedMimeType || "image/jpeg",
+				fileSize: buffer.length,
 				fileId,
-				category: category || "Favorites",
+				category,
 				favorite,
-				memoryDate: (/* @__PURE__ */ new Date()).toISOString().split("T")[0]
+				memoryDate
 			});
 			await photo.save();
 			return new Response(JSON.stringify(photo), {
@@ -1036,11 +1117,11 @@ var Route$18 = createFileRoute("/api/photos")({ server: { handlers: {
 		}
 	}
 } } });
-var Route$17 = createFileRoute("/api/songs")({ server: { handlers: {
+var Route$18 = createFileRoute("/api/songs")({ server: { handlers: {
 	GET: async () => {
 		try {
 			await dbConnect();
-			const songs = await MediaItem.find({ type: "song" }).sort({ createdAt: -1 });
+			const songs = await MediaItem.find({ type: "song" }).select("-__v").sort({ createdAt: -1 });
 			return new Response(JSON.stringify(songs), { headers: { "Content-Type": "application/json" } });
 		} catch (error) {
 			console.error("Error fetching songs:", error);
@@ -1051,49 +1132,48 @@ var Route$17 = createFileRoute("/api/songs")({ server: { handlers: {
 		}
 	},
 	POST: async ({ request }) => {
+		const auth = requireAdmin(request);
+		if ("errorResponse" in auth) return auth.errorResponse;
+		const rateCheck = checkRateLimit(request, uploadRateLimiter);
+		if (!rateCheck.allowed) return createRateLimitResponse(rateCheck.retryAfterSeconds);
 		try {
 			await dbConnect();
 			const formData = await request.formData();
 			const file = formData.get("file");
 			const coverFile = formData.get("coverFile");
-			const title = formData.get("title");
-			const artist = formData.get("artist");
-			const description = formData.get("description");
-			const duration = formData.get("duration");
-			const memoryDate = formData.get("memoryDate");
-			if (!file) return new Response(JSON.stringify({ error: "No audio file uploaded" }), {
+			const rawTitle = formData.get("title");
+			const rawArtist = formData.get("artist");
+			const rawDescription = formData.get("description");
+			const rawDuration = formData.get("duration");
+			const rawMemoryDate = formData.get("memoryDate");
+			if (!file || !(file instanceof File)) return new Response(JSON.stringify({ error: "No audio file uploaded" }), {
 				status: 400,
 				headers: { "Content-Type": "application/json" }
 			});
+			const title = sanitizePlainText(rawTitle, 150);
+			const artist = sanitizePlainText(rawArtist, 100);
 			if (!title || !artist) return new Response(JSON.stringify({ error: "Title and Artist are required" }), {
 				status: 400,
 				headers: { "Content-Type": "application/json" }
 			});
-			if (![
-				"audio/mpeg",
-				"audio/wav",
-				"audio/ogg",
-				"audio/webm",
-				"audio/mp3",
-				"audio/x-m4a"
-			].includes(file.type) && !file.name.endsWith(".mp3") && !file.name.endsWith(".m4a")) return new Response(JSON.stringify({ error: `Invalid audio MIME type: ${file.type}. Allowed: MP3, WAV, OGG, WEBM.` }), {
-				status: 400,
-				headers: { "Content-Type": "application/json" }
-			});
-			if (file.size > 20971520) return new Response(JSON.stringify({ error: `Audio file size exceeds the limit of 20MB` }), {
+			const description = sanitizePlainText(rawDescription, 1e3);
+			const duration = sanitizePlainText(rawDuration, 20) || "3:00";
+			const memoryDate = sanitizePlainText(rawMemoryDate, 20) || (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
+			const audioArrayBuffer = await file.arrayBuffer();
+			const audioBuffer = Buffer.from(audioArrayBuffer);
+			const audioValidation = validateMediaUpload(audioBuffer, file.name, file.type, "song");
+			if (!audioValidation.valid) return new Response(JSON.stringify({ error: audioValidation.error }), {
 				status: 400,
 				headers: { "Content-Type": "application/json" }
 			});
 			const db = import_mongoose.default.connection.db;
-			if (!db) return new Response(JSON.stringify({ error: "Database connection failed" }), {
+			if (!db) return new Response(JSON.stringify({ error: "Database connection unavailable" }), {
 				status: 500,
 				headers: { "Content-Type": "application/json" }
 			});
 			const bucket = new import_mongoose.default.mongo.GridFSBucket(db, { bucketName: "media" });
-			const audioArrayBuffer = await file.arrayBuffer();
-			const audioBuffer = Buffer.from(audioArrayBuffer);
 			const fileId = await new Promise((resolve, reject) => {
-				const uploadStream = bucket.openUploadStream(file.name, { contentType: file.type || "audio/mpeg" });
+				const uploadStream = bucket.openUploadStream(audioValidation.safeFilename, { contentType: audioValidation.detectedMimeType || "audio/mpeg" });
 				uploadStream.on("finish", () => {
 					resolve(uploadStream.id);
 				});
@@ -1104,41 +1184,35 @@ var Route$17 = createFileRoute("/api/songs")({ server: { handlers: {
 				uploadStream.end();
 			});
 			let coverFileId;
-			if (coverFile && coverFile.size > 0) {
-				if ([
-					"image/jpeg",
-					"image/png",
-					"image/webp",
-					"image/gif"
-				].includes(coverFile.type) || coverFile.name.match(/\.(jpg|jpeg|png|webp|gif)$/i)) {
-					const coverArrayBuffer = await coverFile.arrayBuffer();
-					const coverBuffer = Buffer.from(coverArrayBuffer);
-					coverFileId = await new Promise((resolve, reject) => {
-						const uploadStream = bucket.openUploadStream(coverFile.name, { contentType: coverFile.type || "image/jpeg" });
-						uploadStream.on("finish", () => {
-							resolve(uploadStream.id);
-						});
-						uploadStream.on("error", (err) => {
-							reject(err);
-						});
-						uploadStream.write(coverBuffer);
-						uploadStream.end();
+			if (coverFile && coverFile instanceof File && coverFile.size > 0) {
+				const coverArrayBuffer = await coverFile.arrayBuffer();
+				const coverBuffer = Buffer.from(coverArrayBuffer);
+				const coverValidation = validateMediaUpload(coverBuffer, coverFile.name, coverFile.type, "image");
+				if (coverValidation.valid) coverFileId = await new Promise((resolve, reject) => {
+					const uploadStream = bucket.openUploadStream(coverValidation.safeFilename, { contentType: coverValidation.detectedMimeType || "image/jpeg" });
+					uploadStream.on("finish", () => {
+						resolve(uploadStream.id);
 					});
-				}
+					uploadStream.on("error", (err) => {
+						reject(err);
+					});
+					uploadStream.write(coverBuffer);
+					uploadStream.end();
+				});
 			}
 			const song = new MediaItem({
 				type: "song",
 				source: "upload",
 				title,
 				artist,
-				description: description || "",
-				filename: file.name,
-				mimeType: file.type || "audio/mpeg",
-				fileSize: file.size,
+				description,
+				filename: audioValidation.safeFilename,
+				mimeType: audioValidation.detectedMimeType || "audio/mpeg",
+				fileSize: audioBuffer.length,
 				fileId,
 				coverFileId,
-				duration: duration || "3:00",
-				memoryDate: memoryDate || (/* @__PURE__ */ new Date()).toISOString().split("T")[0]
+				duration,
+				memoryDate
 			});
 			await song.save();
 			return new Response(JSON.stringify(song), {
@@ -1154,11 +1228,11 @@ var Route$17 = createFileRoute("/api/songs")({ server: { handlers: {
 		}
 	}
 } } });
-var Route$16 = createFileRoute("/api/timeline")({ server: { handlers: {
+var Route$17 = createFileRoute("/api/timeline")({ server: { handlers: {
 	GET: async () => {
 		try {
 			await dbConnect();
-			const milestones = await Timeline.find().sort({
+			const milestones = await Timeline.find().select("-__v").sort({
 				memoryDate: 1,
 				date: 1,
 				createdAt: 1
@@ -1173,86 +1247,99 @@ var Route$16 = createFileRoute("/api/timeline")({ server: { handlers: {
 		}
 	},
 	POST: async ({ request }) => {
+		const auth = requireAdmin(request);
+		if ("errorResponse" in auth) return auth.errorResponse;
+		const rateCheck = checkRateLimit(request, mutationRateLimiter);
+		if (!rateCheck.allowed) return createRateLimitResponse(rateCheck.retryAfterSeconds);
 		try {
 			await dbConnect();
 			const formData = await request.formData();
-			const title = formData.get("title");
-			const description = formData.get("description");
-			const date = formData.get("date");
-			const memoryDate = formData.get("memoryDate");
-			const location = formData.get("location");
-			const icon = formData.get("icon");
+			const rawTitle = formData.get("title");
+			const rawDescription = formData.get("description");
+			const rawDate = formData.get("date");
+			const rawMemoryDate = formData.get("memoryDate");
+			const rawLocation = formData.get("location");
+			const rawIcon = formData.get("icon");
 			const highlight = formData.get("highlight") === "true";
 			const imageFile = formData.get("imageFile");
 			const videoFile = formData.get("videoFile");
-			if (!title || !date) return new Response(JSON.stringify({ error: "Title and Date are required" }), {
+			const title = sanitizePlainText(rawTitle, 150);
+			const date = sanitizePlainText(rawDate, 50);
+			if (!title) return new Response(JSON.stringify({ error: "Title is required" }), {
 				status: 400,
 				headers: { "Content-Type": "application/json" }
 			});
+			const description = sanitizePlainText(rawDescription, 1e3);
+			const memoryDate = sanitizePlainText(rawMemoryDate, 20) || (date && !isNaN(Date.parse(date)) ? new Date(date).toISOString().split("T")[0] : void 0);
+			const location = sanitizePlainText(rawLocation, 100);
+			const icon = [
+				"heart",
+				"coffee",
+				"sparkles",
+				"plane",
+				"star"
+			].includes(rawIcon || "") ? rawIcon : "heart";
 			const db = import_mongoose.default.connection.db;
-			if (!db) return new Response(JSON.stringify({ error: "Database connection failed" }), {
+			if (!db) return new Response(JSON.stringify({ error: "Database connection unavailable" }), {
 				status: 500,
 				headers: { "Content-Type": "application/json" }
 			});
 			const bucket = new import_mongoose.default.mongo.GridFSBucket(db, { bucketName: "media" });
 			let imageFileId;
-			if (imageFile && imageFile.size > 0) {
-				if ([
-					"image/jpeg",
-					"image/png",
-					"image/webp",
-					"image/gif"
-				].includes(imageFile.type) || imageFile.name.match(/\.(jpg|jpeg|png|webp|gif)$/i)) {
-					const imageArrayBuffer = await imageFile.arrayBuffer();
-					const imageBuffer = Buffer.from(imageArrayBuffer);
-					imageFileId = await new Promise((resolve, reject) => {
-						const uploadStream = bucket.openUploadStream(imageFile.name, { contentType: imageFile.type || "image/jpeg" });
-						uploadStream.on("finish", () => {
-							resolve(uploadStream.id);
-						});
-						uploadStream.on("error", (err) => {
-							reject(err);
-						});
-						uploadStream.write(imageBuffer);
-						uploadStream.end();
+			if (imageFile && imageFile instanceof File && imageFile.size > 0) {
+				const imageArrayBuffer = await imageFile.arrayBuffer();
+				const imageBuffer = Buffer.from(imageArrayBuffer);
+				const imageValidation = validateMediaUpload(imageBuffer, imageFile.name, imageFile.type, "image");
+				if (!imageValidation.valid) return new Response(JSON.stringify({ error: imageValidation.error }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" }
+				});
+				imageFileId = await new Promise((resolve, reject) => {
+					const uploadStream = bucket.openUploadStream(imageValidation.safeFilename, { contentType: imageValidation.detectedMimeType || "image/jpeg" });
+					uploadStream.on("finish", () => {
+						resolve(uploadStream.id);
 					});
-				}
+					uploadStream.on("error", (err) => {
+						reject(err);
+					});
+					uploadStream.write(imageBuffer);
+					uploadStream.end();
+				});
 			}
 			let videoFileId;
-			if (videoFile && videoFile.size > 0) {
-				if ([
-					"video/mp4",
-					"video/webm",
-					"video/quicktime"
-				].includes(videoFile.type) || videoFile.name.match(/\.(mp4|webm|mov)$/i)) {
-					const videoArrayBuffer = await videoFile.arrayBuffer();
-					const videoBuffer = Buffer.from(videoArrayBuffer);
-					videoFileId = await new Promise((resolve, reject) => {
-						const uploadStream = bucket.openUploadStream(videoFile.name, { contentType: videoFile.type || "video/mp4" });
-						uploadStream.on("finish", () => {
-							resolve(uploadStream.id);
-						});
-						uploadStream.on("error", (err) => {
-							reject(err);
-						});
-						uploadStream.write(videoBuffer);
-						uploadStream.end();
+			if (videoFile && videoFile instanceof File && videoFile.size > 0) {
+				const videoArrayBuffer = await videoFile.arrayBuffer();
+				const videoBuffer = Buffer.from(videoArrayBuffer);
+				const videoValidation = validateMediaUpload(videoBuffer, videoFile.name, videoFile.type, "video");
+				if (!videoValidation.valid) return new Response(JSON.stringify({ error: videoValidation.error }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" }
+				});
+				videoFileId = await new Promise((resolve, reject) => {
+					const uploadStream = bucket.openUploadStream(videoValidation.safeFilename, { contentType: videoValidation.detectedMimeType || "video/mp4" });
+					uploadStream.on("finish", () => {
+						resolve(uploadStream.id);
 					});
-				}
+					uploadStream.on("error", (err) => {
+						reject(err);
+					});
+					uploadStream.write(videoBuffer);
+					uploadStream.end();
+				});
 			}
 			const milestone = new Timeline({
 				title,
-				description: description || "",
+				description,
 				date: date || (memoryDate ? new Date(memoryDate).toLocaleDateString("en-GB", {
 					day: "2-digit",
 					month: "short",
 					year: "numeric"
 				}) : ""),
-				memoryDate: memoryDate || (date && !isNaN(Date.parse(date)) ? new Date(date).toISOString().split("T")[0] : void 0),
-				location: location || "",
+				memoryDate,
+				location,
 				imageFileId,
 				videoFileId,
-				icon: icon || "heart",
+				icon,
 				highlight
 			});
 			await milestone.save();
@@ -1269,19 +1356,21 @@ var Route$16 = createFileRoute("/api/timeline")({ server: { handlers: {
 		}
 	}
 } } });
-var Route$15 = createFileRoute("/api/users")({ server: { handlers: {
+var CreateUserSchema = objectType({
+	username: stringType().min(3, "Username must be at least 3 characters").max(30),
+	password: stringType().min(6, "Password must be at least 6 characters").max(100),
+	role: enumType(["user"]).optional()
+});
+var Route$16 = createFileRoute("/api/users")({ server: { handlers: {
 	GET: async ({ request }) => {
+		const auth = requireAdmin(request);
+		if ("errorResponse" in auth) return auth.errorResponse;
 		try {
-			if ((request.headers.get("cookie") || "").split(";").reduce((acc, cookie) => {
-				const [name, value] = cookie.trim().split("=");
-				if (name && value) acc[name] = value;
-				return acc;
-			}, {})["auth_role"] !== "admin") return new Response(JSON.stringify({ error: "Unauthorized" }), {
-				status: 403,
-				headers: { "Content-Type": "application/json" }
-			});
 			await dbConnect();
-			const users = await User$1.find({}, { password: 0 }).sort({ createdAt: -1 });
+			const users = await User$1.find({}, {
+				password: 0,
+				__v: 0
+			}).sort({ createdAt: -1 });
 			return new Response(JSON.stringify(users), { headers: { "Content-Type": "application/json" } });
 		} catch (error) {
 			console.error("Error listing users:", error);
@@ -1292,35 +1381,33 @@ var Route$15 = createFileRoute("/api/users")({ server: { handlers: {
 		}
 	},
 	POST: async ({ request }) => {
+		const auth = requireAdmin(request);
+		if ("errorResponse" in auth) return auth.errorResponse;
+		const rateCheck = checkRateLimit(request, mutationRateLimiter);
+		if (!rateCheck.allowed) return createRateLimitResponse(rateCheck.retryAfterSeconds);
 		try {
-			if ((request.headers.get("cookie") || "").split(";").reduce((acc, cookie) => {
-				const [name, value] = cookie.trim().split("=");
-				if (name && value) acc[name] = value;
-				return acc;
-			}, {})["auth_role"] !== "admin") return new Response(JSON.stringify({ error: "Unauthorized" }), {
-				status: 403,
-				headers: { "Content-Type": "application/json" }
-			});
-			const { username, password } = await request.json();
-			if (!username || typeof username !== "string" || !username.trim()) return new Response(JSON.stringify({ error: "Username is required" }), {
+			const rawBody = await request.json().catch(() => null);
+			if (!rawBody || typeof rawBody !== "object") return new Response(JSON.stringify({ error: "Invalid JSON payload" }), {
 				status: 400,
 				headers: { "Content-Type": "application/json" }
 			});
-			if (!password || typeof password !== "string" || !password.trim()) return new Response(JSON.stringify({ error: "Password is required" }), {
+			const parsed = CreateUserSchema.safeParse(sanitizeMongoInput(rawBody));
+			if (!parsed.success) return new Response(JSON.stringify({ error: parsed.error.issues[0]?.message || "Validation failed" }), {
 				status: 400,
 				headers: { "Content-Type": "application/json" }
 			});
-			const cleanUsername = username.trim();
+			const { username, password } = parsed.data;
+			const cleanUsername = sanitizePlainText(username, 30).toLowerCase();
+			if (cleanUsername === "admin" || cleanUsername === "root" || cleanUsername === "administrator") return new Response(JSON.stringify({ error: "This username is reserved" }), {
+				status: 400,
+				headers: { "Content-Type": "application/json" }
+			});
 			await dbConnect();
-			if (cleanUsername.toLowerCase() === "admin") return new Response(JSON.stringify({ error: "Username 'admin' is reserved" }), {
-				status: 400,
-				headers: { "Content-Type": "application/json" }
-			});
 			if (await User$1.findOne({ username: cleanUsername })) return new Response(JSON.stringify({ error: "Username already exists" }), {
 				status: 400,
 				headers: { "Content-Type": "application/json" }
 			});
-			const hashedPassword = crypto.createHash("sha256").update(password).digest("hex");
+			const hashedPassword = hashPassword(password);
 			const newUser = await User$1.create({
 				username: cleanUsername,
 				password: hashedPassword,
@@ -1335,7 +1422,10 @@ var Route$15 = createFileRoute("/api/users")({ server: { handlers: {
 			return new Response(JSON.stringify({
 				success: true,
 				user: responseUser
-			}), { headers: { "Content-Type": "application/json" } });
+			}), {
+				status: 201,
+				headers: { "Content-Type": "application/json" }
+			});
 		} catch (error) {
 			console.error("Error creating user:", error);
 			return new Response(JSON.stringify({ error: "Internal server error" }), {
@@ -1345,11 +1435,11 @@ var Route$15 = createFileRoute("/api/users")({ server: { handlers: {
 		}
 	}
 } } });
-var Route$14 = createFileRoute("/api/videos")({ server: { handlers: {
+var Route$15 = createFileRoute("/api/videos")({ server: { handlers: {
 	GET: async () => {
 		try {
 			await dbConnect();
-			const videos = await MediaItem.find({ type: "video" }).sort({ createdAt: -1 });
+			const videos = await MediaItem.find({ type: "video" }).select("-__v").sort({ createdAt: -1 });
 			return new Response(JSON.stringify(videos), { headers: { "Content-Type": "application/json" } });
 		} catch (error) {
 			console.error("Error fetching videos:", error);
@@ -1360,54 +1450,46 @@ var Route$14 = createFileRoute("/api/videos")({ server: { handlers: {
 		}
 	},
 	POST: async ({ request }) => {
+		const auth = requireAdmin(request);
+		if ("errorResponse" in auth) return auth.errorResponse;
+		const rateCheck = checkRateLimit(request, uploadRateLimiter);
+		if (!rateCheck.allowed) return createRateLimitResponse(rateCheck.retryAfterSeconds);
 		try {
 			await dbConnect();
 			const formData = await request.formData();
 			const file = formData.get("file");
-			const title = formData.get("title");
-			const description = formData.get("description");
+			const rawTitle = formData.get("title");
+			const rawDescription = formData.get("description");
+			const rawDuration = formData.get("duration");
+			const rawMemoryDate = formData.get("memoryDate");
 			const favorite = formData.get("favorite") === "true";
-			const duration = formData.get("duration");
-			if (!file) return new Response(JSON.stringify({ error: "No file uploaded" }), {
+			if (!file || !(file instanceof File)) return new Response(JSON.stringify({ error: "No video file uploaded" }), {
 				status: 400,
 				headers: { "Content-Type": "application/json" }
 			});
+			const title = sanitizePlainText(rawTitle, 150);
 			if (!title) return new Response(JSON.stringify({ error: "Title is required" }), {
 				status: 400,
 				headers: { "Content-Type": "application/json" }
 			});
-			if (![
-				"video/mp4",
-				"video/webm",
-				"video/quicktime"
-			].includes(file.type)) return new Response(JSON.stringify({ error: `Invalid MIME type: ${file.type}. Allowed: MP4, WEBM, QuickTime.` }), {
-				status: 400,
-				headers: { "Content-Type": "application/json" }
-			});
-			const ext = file.name.split(".").pop()?.toLowerCase();
-			if (!ext || ![
-				"mp4",
-				"webm",
-				"mov",
-				"qt"
-			].includes(ext)) return new Response(JSON.stringify({ error: `Invalid file extension. Allowed: mp4, webm, mov, qt.` }), {
-				status: 400,
-				headers: { "Content-Type": "application/json" }
-			});
-			if (file.size > 104857600) return new Response(JSON.stringify({ error: `File size exceeds the limit of 100MB (actual: ${(file.size / 1024 / 1024).toFixed(2)}MB)` }), {
-				status: 400,
-				headers: { "Content-Type": "application/json" }
-			});
+			const description = sanitizePlainText(rawDescription, 1e3);
+			const duration = sanitizePlainText(rawDuration, 20) || "0:30";
+			const memoryDate = sanitizePlainText(rawMemoryDate, 20) || (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
 			const arrayBuffer = await file.arrayBuffer();
 			const buffer = Buffer.from(arrayBuffer);
+			const validation = validateMediaUpload(buffer, file.name, file.type, "video");
+			if (!validation.valid) return new Response(JSON.stringify({ error: validation.error }), {
+				status: 400,
+				headers: { "Content-Type": "application/json" }
+			});
 			const db = import_mongoose.default.connection.db;
-			if (!db) return new Response(JSON.stringify({ error: "Database connection failed" }), {
+			if (!db) return new Response(JSON.stringify({ error: "Database connection unavailable" }), {
 				status: 500,
 				headers: { "Content-Type": "application/json" }
 			});
 			const bucket = new import_mongoose.default.mongo.GridFSBucket(db, { bucketName: "media" });
 			const fileId = await new Promise((resolve, reject) => {
-				const uploadStream = bucket.openUploadStream(file.name, { contentType: file.type });
+				const uploadStream = bucket.openUploadStream(validation.safeFilename, { contentType: validation.detectedMimeType || "video/mp4" });
 				uploadStream.on("finish", () => {
 					resolve(uploadStream.id);
 				});
@@ -1421,14 +1503,14 @@ var Route$14 = createFileRoute("/api/videos")({ server: { handlers: {
 				type: "video",
 				source: "upload",
 				title,
-				description: description || "",
-				filename: file.name,
-				mimeType: file.type,
-				fileSize: file.size,
+				description,
+				filename: validation.safeFilename,
+				mimeType: validation.detectedMimeType || "video/mp4",
+				fileSize: buffer.length,
 				fileId,
 				favorite,
-				duration: duration || "0:30",
-				memoryDate: (/* @__PURE__ */ new Date()).toISOString().split("T")[0]
+				duration,
+				memoryDate
 			});
 			await video.save();
 			return new Response(JSON.stringify(video), {
@@ -1444,80 +1526,136 @@ var Route$14 = createFileRoute("/api/videos")({ server: { handlers: {
 		}
 	}
 } } });
-var Route$13 = createFileRoute("/api/auth/login")({ server: { handlers: { POST: async ({ request }) => {
+var LoginSchema = objectType({
+	username: stringType().max(100).optional(),
+	password: stringType().min(1, "Password is required").max(500)
+});
+var Route$14 = createFileRoute("/api/auth/login")({ server: { handlers: { POST: async ({ request }) => {
+	const rateCheck = checkRateLimit(request, authRateLimiter);
+	if (!rateCheck.allowed) {
+		console.warn("[AUTH] Login rate limit exceeded from client IP");
+		return createRateLimitResponse(rateCheck.retryAfterSeconds);
+	}
 	try {
-		const { username, password } = await request.json();
-		if (typeof password !== "string") return new Response(JSON.stringify({ error: "Invalid password format" }), {
+		const rawBody = await request.json().catch(() => null);
+		if (!rawBody || typeof rawBody !== "object") return new Response(JSON.stringify({
+			success: false,
+			error: "Invalid request payload"
+		}), {
 			status: 400,
 			headers: { "Content-Type": "application/json" }
 		});
-		const userPass = process.env["USER_PASSWORD"] || "beautiful";
+		const parseResult = LoginSchema.safeParse(sanitizeMongoInput(rawBody));
+		if (!parseResult.success) return new Response(JSON.stringify({
+			success: false,
+			error: "Invalid credentials format"
+		}), {
+			status: 400,
+			headers: { "Content-Type": "application/json" }
+		});
+		const { username, password } = parseResult.data;
+		const cleanUsername = username ? username.trim() : "";
 		const adminPass = process.env["ADMIN_PASSWORD"] || "admin123";
-		let role = null;
-		const cleanUsername = typeof username === "string" ? username.trim() : "";
-		if (cleanUsername.toLowerCase() === "admin" && password === adminPass) role = "admin";
-		else if (cleanUsername) {
+		const userPass = process.env["USER_PASSWORD"] || "beautiful";
+		const adminPassHash = process.env["ADMIN_PASSWORD_HASH"];
+		let matchedRole = null;
+		let matchedUsername = cleanUsername || "visitor";
+		let matchedUserId;
+		if (cleanUsername.toLowerCase() === "admin") {
+			if (adminPassHash ? verifyPassword(password, adminPassHash) : password === adminPass) {
+				matchedRole = "admin";
+				matchedUsername = "admin";
+			}
+		}
+		if (!matchedRole && cleanUsername) {
 			await dbConnect();
 			const user = await User$1.findOne({ username: cleanUsername });
-			if (user) {
-				const hashedPassword = crypto.createHash("sha256").update(password).digest("hex");
-				if (user.password === hashedPassword) role = user.role;
+			if (user && user.password) {
+				if (verifyPassword(password, user.password)) {
+					matchedRole = user.role || "user";
+					matchedUsername = user.username;
+					matchedUserId = user._id.toString();
+				}
 			}
-			if (!role) {
-				if (password === adminPass) role = "admin";
-				else if (password === userPass) role = "user";
+		}
+		if (!matchedRole) {
+			if (password === adminPass) {
+				matchedRole = "admin";
+				matchedUsername = "admin";
+			} else if (password === userPass) {
+				matchedRole = "user";
+				matchedUsername = cleanUsername || "beloved";
 			}
-		} else if (password === adminPass) role = "admin";
-		else if (password === userPass) role = "user";
-		if (role) return new Response(JSON.stringify({
-			success: true,
-			role
-		}), { headers: {
-			"Content-Type": "application/json",
-			"Set-Cookie": `auth_role=${role}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000; Secure`
-		} });
+		}
+		if (matchedRole) {
+			console.log(`[AUTH] Successful login for user '${matchedUsername}' as role '${matchedRole}'`);
+			const token = createSessionToken({
+				userId: matchedUserId,
+				username: matchedUsername,
+				role: matchedRole
+			});
+			const cookieHeader = createSessionCookie(token);
+			return new Response(JSON.stringify({
+				success: true,
+				role: matchedRole,
+				username: matchedUsername
+			}), {
+				status: 200,
+				headers: {
+					"Content-Type": "application/json",
+					"Set-Cookie": cookieHeader
+				}
+			});
+		}
+		console.warn(`[AUTH] Failed login attempt for identifier '${cleanUsername || "unknown"}'`);
 		return new Response(JSON.stringify({
 			success: false,
-			error: "Incorrect username or password"
+			error: "Invalid credentials"
 		}), {
 			status: 401,
 			headers: { "Content-Type": "application/json" }
 		});
 	} catch (error) {
-		console.error("Error logging in:", error);
+		console.error("[AUTH] Error processing login:", error);
+		return new Response(JSON.stringify({
+			success: false,
+			error: "Internal server error"
+		}), {
+			status: 500,
+			headers: { "Content-Type": "application/json" }
+		});
+	}
+} } } });
+var Route$13 = createFileRoute("/api/auth/logout")({ server: { handlers: { POST: async () => {
+	try {
+		const clearCookie = createClearSessionCookie();
+		return new Response(JSON.stringify({ success: true }), { headers: {
+			"Content-Type": "application/json",
+			"Set-Cookie": clearCookie
+		} });
+	} catch (error) {
+		console.error("Error logging out:", error);
 		return new Response(JSON.stringify({ error: "Internal server error" }), {
 			status: 500,
 			headers: { "Content-Type": "application/json" }
 		});
 	}
 } } } });
-var Route$12 = createFileRoute("/api/auth/logout")({ server: { handlers: { POST: async () => {
+var Route$12 = createFileRoute("/api/auth/session")({ server: { handlers: { GET: async ({ request }) => {
 	try {
-		return new Response(JSON.stringify({ success: true }), { headers: {
-			"Content-Type": "application/json",
-			"Set-Cookie": "auth_role=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0"
-		} });
-	} catch (error) {
-		console.error("Error logging out:", error);
-		return new Response(JSON.stringify({ error: error.message || String(error) }), {
-			status: 500,
-			headers: { "Content-Type": "application/json" }
-		});
-	}
-} } } });
-var Route$11 = createFileRoute("/api/auth/session")({ server: { handlers: { GET: async ({ request }) => {
-	try {
-		const role = (request.headers.get("cookie") || "").split(";").reduce((acc, cookie) => {
-			const [name, value] = cookie.trim().split("=");
-			if (name && value) acc[name] = value;
-			return acc;
-		}, {})["auth_role"] || null;
-		return new Response(JSON.stringify({ role }), { headers: { "Content-Type": "application/json" } });
+		const session = getAuthSession(request);
+		return new Response(JSON.stringify({
+			authenticated: !!session,
+			role: session?.role || null,
+			username: session?.username || null,
+			userId: session?.userId || null
+		}), { headers: { "Content-Type": "application/json" } });
 	} catch (error) {
 		console.error("Error getting auth session:", error);
 		return new Response(JSON.stringify({
+			authenticated: false,
 			role: null,
-			error: error.message
+			error: "Failed to retrieve session"
 		}), {
 			status: 500,
 			headers: { "Content-Type": "application/json" }
@@ -1531,11 +1669,11 @@ var STAGE_TITLES = {
 	4: "Stage 4 — Bandage",
 	5: "Stage 5 — Maximum Injury"
 };
-var Route$10 = createFileRoute("/api/fun/stages")({ server: { handlers: {
+var Route$11 = createFileRoute("/api/fun/stages")({ server: { handlers: {
 	GET: async () => {
 		try {
 			await dbConnect();
-			const stageData = (await FunZoneStage.find({}).sort({ stage: 1 })).map((s) => ({
+			const stageData = (await FunZoneStage.find({}).select("-__v").sort({ stage: 1 })).map((s) => ({
 				_id: s._id,
 				stage: s.stage,
 				title: s.title || STAGE_TITLES[s.stage] || `Stage ${s.stage}`,
@@ -1556,15 +1694,11 @@ var Route$10 = createFileRoute("/api/fun/stages")({ server: { handlers: {
 		}
 	},
 	POST: async ({ request }) => {
+		const auth = requireAdmin(request);
+		if ("errorResponse" in auth) return auth.errorResponse;
+		const rateCheck = checkRateLimit(request, mutationRateLimiter);
+		if (!rateCheck.allowed) return createRateLimitResponse(rateCheck.retryAfterSeconds);
 		try {
-			if ((request.headers.get("cookie") || "").split(";").reduce((acc, cookie) => {
-				const [name, value] = cookie.trim().split("=");
-				if (name && value) acc[name] = value;
-				return acc;
-			}, {})["auth_role"] !== "admin") return new Response(JSON.stringify({ error: "Unauthorized" }), {
-				status: 403,
-				headers: { "Content-Type": "application/json" }
-			});
 			await dbConnect();
 			const formData = await request.formData();
 			const file = formData.get("file");
@@ -1578,36 +1712,19 @@ var Route$10 = createFileRoute("/api/fun/stages")({ server: { handlers: {
 				status: 400,
 				headers: { "Content-Type": "application/json" }
 			});
-			if (!file) return new Response(JSON.stringify({ error: "No image file provided" }), {
+			if (!file || !(file instanceof File)) return new Response(JSON.stringify({ error: "No image file provided" }), {
 				status: 400,
 				headers: { "Content-Type": "application/json" }
 			});
-			if (![
-				"image/jpeg",
-				"image/png",
-				"image/webp",
-				"image/gif"
-			].includes(file.type)) return new Response(JSON.stringify({ error: `Invalid MIME type: ${file.type}. Allowed: JPEG, PNG, WEBP, GIF.` }), {
-				status: 400,
-				headers: { "Content-Type": "application/json" }
-			});
-			const ext = file.name.split(".").pop()?.toLowerCase();
-			if (!ext || ![
-				"jpg",
-				"jpeg",
-				"png",
-				"webp",
-				"gif"
-			].includes(ext)) return new Response(JSON.stringify({ error: `Invalid file extension. Allowed: jpg, jpeg, png, webp, gif.` }), {
-				status: 400,
-				headers: { "Content-Type": "application/json" }
-			});
-			if (file.size > 10485760) return new Response(JSON.stringify({ error: `File size exceeds the limit of 10MB (actual: ${(file.size / 1024 / 1024).toFixed(2)}MB)` }), {
+			const arrayBuffer = await file.arrayBuffer();
+			const buffer = Buffer.from(arrayBuffer);
+			const validation = validateMediaUpload(buffer, file.name, file.type, "image");
+			if (!validation.valid) return new Response(JSON.stringify({ error: validation.error }), {
 				status: 400,
 				headers: { "Content-Type": "application/json" }
 			});
 			const db = import_mongoose.default.connection.db;
-			if (!db) return new Response(JSON.stringify({ error: "Database connection failed" }), {
+			if (!db) return new Response(JSON.stringify({ error: "Database connection unavailable" }), {
 				status: 500,
 				headers: { "Content-Type": "application/json" }
 			});
@@ -1618,10 +1735,8 @@ var Route$10 = createFileRoute("/api/fun/stages")({ server: { handlers: {
 			} catch (cleanupErr) {
 				console.warn("Could not delete old stage file from GridFS:", cleanupErr);
 			}
-			const arrayBuffer = await file.arrayBuffer();
-			const buffer = Buffer.from(arrayBuffer);
 			const fileId = await new Promise((resolve, reject) => {
-				const uploadStream = bucket.openUploadStream(file.name, { contentType: file.type });
+				const uploadStream = bucket.openUploadStream(validation.safeFilename, { contentType: validation.detectedMimeType || "image/jpeg" });
 				uploadStream.on("finish", () => {
 					resolve(uploadStream.id);
 				});
@@ -1634,10 +1749,10 @@ var Route$10 = createFileRoute("/api/fun/stages")({ server: { handlers: {
 			const title = STAGE_TITLES[stageNum] || `Stage ${stageNum}`;
 			const updatedStage = await FunZoneStage.findOneAndUpdate({ stage: stageNum }, {
 				stage: stageNum,
-				title,
-				filename: file.name,
-				mimeType: file.type,
-				fileSize: file.size,
+				title: sanitizePlainText(title, 100),
+				filename: validation.safeFilename,
+				mimeType: validation.detectedMimeType || "image/jpeg",
+				fileSize: buffer.length,
 				fileId
 			}, {
 				upsert: true,
@@ -1670,15 +1785,9 @@ var Route$10 = createFileRoute("/api/fun/stages")({ server: { handlers: {
 		}
 	},
 	DELETE: async ({ request }) => {
+		const auth = requireAdmin(request);
+		if ("errorResponse" in auth) return auth.errorResponse;
 		try {
-			if ((request.headers.get("cookie") || "").split(";").reduce((acc, cookie) => {
-				const [name, value] = cookie.trim().split("=");
-				if (name && value) acc[name] = value;
-				return acc;
-			}, {})["auth_role"] !== "admin") return new Response(JSON.stringify({ error: "Unauthorized" }), {
-				status: 403,
-				headers: { "Content-Type": "application/json" }
-			});
 			await dbConnect();
 			const stageStr = new URL(request.url).searchParams.get("stage");
 			if (!stageStr) return new Response(JSON.stringify({ error: "Stage parameter is required" }), {
@@ -1691,7 +1800,7 @@ var Route$10 = createFileRoute("/api/fun/stages")({ server: { handlers: {
 				headers: { "Content-Type": "application/json" }
 			});
 			const db = import_mongoose.default.connection.db;
-			if (!db) return new Response(JSON.stringify({ error: "Database connection failed" }), {
+			if (!db) return new Response(JSON.stringify({ error: "Database connection unavailable" }), {
 				status: 500,
 				headers: { "Content-Type": "application/json" }
 			});
@@ -1708,7 +1817,7 @@ var Route$10 = createFileRoute("/api/fun/stages")({ server: { handlers: {
 			await FunZoneStage.deleteOne({ stage: stageNum });
 			return new Response(JSON.stringify({
 				success: true,
-				message: `Stage ${stageNum} image deleted successfully from database and storage`,
+				message: `Stage ${stageNum} image deleted successfully`,
 				stage: stageNum
 			}), {
 				status: 200,
@@ -1723,17 +1832,91 @@ var Route$10 = createFileRoute("/api/fun/stages")({ server: { handlers: {
 		}
 	}
 } } });
+var UpdateLetterSchema = objectType({
+	title: stringType().min(1).max(200).optional(),
+	preview: stringType().min(1).max(500).optional(),
+	body: stringType().min(1).max(1e4).optional(),
+	date: stringType().min(1).max(50).optional(),
+	category: stringType().max(50).optional(),
+	favorite: booleanType().optional()
+});
+var Route$10 = createFileRoute("/api/letters/$id")({ server: { handlers: {
+	PUT: async ({ params, request }) => {
+		const auth = requireAdmin(request);
+		if ("errorResponse" in auth) return auth.errorResponse;
+		try {
+			await dbConnect();
+			const { id } = params;
+			if (!isValidObjectId(id)) return new Response(JSON.stringify({ error: "Invalid letter ID format" }), {
+				status: 400,
+				headers: { "Content-Type": "application/json" }
+			});
+			const rawBody = await request.json().catch(() => null);
+			if (!rawBody || typeof rawBody !== "object") return new Response(JSON.stringify({ error: "Invalid JSON payload" }), {
+				status: 400,
+				headers: { "Content-Type": "application/json" }
+			});
+			const parsed = UpdateLetterSchema.safeParse(sanitizeMongoInput(rawBody));
+			if (!parsed.success) return new Response(JSON.stringify({ error: parsed.error.issues[0]?.message || "Validation failed" }), {
+				status: 400,
+				headers: { "Content-Type": "application/json" }
+			});
+			const updateFields = {};
+			if (parsed.data.title !== void 0) updateFields.title = sanitizePlainText(parsed.data.title, 200);
+			if (parsed.data.preview !== void 0) updateFields.preview = sanitizePlainText(parsed.data.preview, 500);
+			if (parsed.data.body !== void 0) updateFields.body = sanitizePlainText(parsed.data.body, 1e4);
+			if (parsed.data.date !== void 0) updateFields.date = sanitizePlainText(parsed.data.date, 50);
+			if (parsed.data.category !== void 0) updateFields.category = sanitizePlainText(parsed.data.category, 50);
+			if (parsed.data.favorite !== void 0) updateFields.favorite = parsed.data.favorite;
+			const updated = await Letter.findByIdAndUpdate(id, { $set: updateFields }, { new: true });
+			if (!updated) return new Response(JSON.stringify({ error: "Letter not found" }), {
+				status: 404,
+				headers: { "Content-Type": "application/json" }
+			});
+			return new Response(JSON.stringify(updated), { headers: { "Content-Type": "application/json" } });
+		} catch (error) {
+			console.error("Error updating letter:", error);
+			return new Response(JSON.stringify({ error: "Internal server error" }), {
+				status: 500,
+				headers: { "Content-Type": "application/json" }
+			});
+		}
+	},
+	DELETE: async ({ params, request }) => {
+		const auth = requireAdmin(request);
+		if ("errorResponse" in auth) return auth.errorResponse;
+		try {
+			await dbConnect();
+			const { id } = params;
+			if (!isValidObjectId(id)) return new Response(JSON.stringify({ error: "Invalid letter ID format" }), {
+				status: 400,
+				headers: { "Content-Type": "application/json" }
+			});
+			if (!await Letter.findByIdAndDelete(id)) return new Response(JSON.stringify({ error: "Letter not found" }), {
+				status: 404,
+				headers: { "Content-Type": "application/json" }
+			});
+			return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } });
+		} catch (error) {
+			console.error("Error deleting letter:", error);
+			return new Response(JSON.stringify({ error: "Internal server error" }), {
+				status: 500,
+				headers: { "Content-Type": "application/json" }
+			});
+		}
+	}
+} } });
 var Route$9 = createFileRoute("/api/media/$id")({ server: { handlers: {
 	GET: async ({ request, params }) => {
 		try {
 			await dbConnect();
 			const { id } = params;
-			if (!import_mongoose.default.Types.ObjectId.isValid(id)) return new Response(JSON.stringify({ error: "Invalid file ID format" }), {
+			if (!isValidObjectId(id)) return new Response(JSON.stringify({ error: "Invalid media file ID format" }), {
 				status: 400,
 				headers: { "Content-Type": "application/json" }
 			});
 			const db = import_mongoose.default.connection.db;
-			if (!db) return new Response(JSON.stringify({ error: "Database connection failed" }), {
+			if (!db) return new Response(JSON.stringify({ error: "Database connection unavailable" }), {
 				status: 500,
 				headers: { "Content-Type": "application/json" }
 			});
@@ -1747,26 +1930,21 @@ var Route$9 = createFileRoute("/api/media/$id")({ server: { handlers: {
 			const fileSize = file.length;
 			const bucket = new import_mongoose.default.mongo.GridFSBucket(db, { bucketName: "media" });
 			const rangeHeader = request.headers.get("range");
-			if (rangeHeader) {
+			if (rangeHeader && fileSize > 0) {
 				const parts = rangeHeader.replace(/bytes=/, "").split("-");
-				const start = parseInt(parts[0], 10);
+				const start = parseInt(parts[0], 10) || 0;
 				const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
-				const chunksize = end - start + 1;
+				const safeEnd = Math.min(end, fileSize - 1);
+				const chunksize = safeEnd - start + 1;
 				const downloadStream = bucket.openDownloadStream(objectId, {
 					start,
-					end: end + 1
+					end: safeEnd + 1
 				});
 				const readable = new ReadableStream({
 					start(controller) {
-						downloadStream.on("data", (chunk) => {
-							controller.enqueue(chunk);
-						});
-						downloadStream.on("end", () => {
-							controller.close();
-						});
-						downloadStream.on("error", (err) => {
-							controller.error(err);
-						});
+						downloadStream.on("data", (chunk) => controller.enqueue(chunk));
+						downloadStream.on("end", () => controller.close());
+						downloadStream.on("error", (err) => controller.error(err));
 					},
 					cancel() {
 						downloadStream.destroy();
@@ -1775,25 +1953,20 @@ var Route$9 = createFileRoute("/api/media/$id")({ server: { handlers: {
 				return new Response(readable, {
 					status: 206,
 					headers: {
-						"Content-Range": `bytes ${start}-${end}/${fileSize}`,
+						"Content-Range": `bytes ${start}-${safeEnd}/${fileSize}`,
 						"Accept-Ranges": "bytes",
 						"Content-Length": chunksize.toString(),
-						"Content-Type": contentType
+						"Content-Type": contentType,
+						"X-Content-Type-Options": "nosniff"
 					}
 				});
 			} else {
 				const downloadStream = bucket.openDownloadStream(objectId);
 				const readable = new ReadableStream({
 					start(controller) {
-						downloadStream.on("data", (chunk) => {
-							controller.enqueue(chunk);
-						});
-						downloadStream.on("end", () => {
-							controller.close();
-						});
-						downloadStream.on("error", (err) => {
-							controller.error(err);
-						});
+						downloadStream.on("data", (chunk) => controller.enqueue(chunk));
+						downloadStream.on("end", () => controller.close());
+						downloadStream.on("error", (err) => controller.error(err));
 					},
 					cancel() {
 						downloadStream.destroy();
@@ -1803,56 +1976,52 @@ var Route$9 = createFileRoute("/api/media/$id")({ server: { handlers: {
 					status: 200,
 					headers: {
 						"Content-Length": fileSize.toString(),
-						"Content-Type": contentType
+						"Content-Type": contentType,
+						"Accept-Ranges": "bytes",
+						"X-Content-Type-Options": "nosniff"
 					}
 				});
 			}
 		} catch (error) {
-			console.error("Error fetching media from GridFS:", error);
+			console.error("Error streaming media from GridFS:", error);
 			return new Response(JSON.stringify({ error: "Internal server error" }), {
 				status: 500,
 				headers: { "Content-Type": "application/json" }
 			});
 		}
 	},
-	DELETE: async ({ params }) => {
+	DELETE: async ({ params, request }) => {
+		const auth = requireAdmin(request);
+		if ("errorResponse" in auth) return auth.errorResponse;
 		try {
 			await dbConnect();
 			const { id } = params;
-			console.log(`[DELETE /api/media/${id}] Deletion requested.`);
-			if (!import_mongoose.default.Types.ObjectId.isValid(id)) {
-				console.warn(`[DELETE /api/media/${id}] Invalid ID format.`);
-				return new Response(JSON.stringify({ error: "Invalid document ID format" }), {
-					status: 400,
-					headers: { "Content-Type": "application/json" }
-				});
-			}
+			if (!isValidObjectId(id)) return new Response(JSON.stringify({ error: "Invalid document ID format" }), {
+				status: 400,
+				headers: { "Content-Type": "application/json" }
+			});
 			const mediaItem = await MediaItem.findById(id);
-			if (!mediaItem) {
-				console.warn(`[DELETE /api/media/${id}] Media item not found in DB.`);
-				return new Response(JSON.stringify({ error: "Media item not found" }), {
-					status: 404,
-					headers: { "Content-Type": "application/json" }
-				});
-			}
+			if (!mediaItem) return new Response(JSON.stringify({ error: "Media item not found" }), {
+				status: 404,
+				headers: { "Content-Type": "application/json" }
+			});
 			if (mediaItem.source === "upload") {
 				const db = import_mongoose.default.connection.db;
 				if (db) {
 					const bucket = new import_mongoose.default.mongo.GridFSBucket(db, { bucketName: "media" });
 					if (mediaItem.fileId) try {
-						await bucket.delete(mediaItem.fileId);
+						await bucket.delete(new import_mongoose.default.Types.ObjectId(mediaItem.fileId));
 					} catch (err) {
-						console.warn("GridFS file delete failed during media item deletion:", err);
+						console.warn("GridFS file deletion warning:", err);
 					}
 					if (mediaItem.coverFileId) try {
-						await bucket.delete(mediaItem.coverFileId);
+						await bucket.delete(new import_mongoose.default.Types.ObjectId(mediaItem.coverFileId));
 					} catch (err) {
-						console.warn("GridFS cover art file delete failed during media item deletion:", err);
+						console.warn("GridFS cover deletion warning:", err);
 					}
 				}
 			}
 			await MediaItem.findByIdAndDelete(id);
-			console.log(`[DELETE /api/media/${id}] Document and attachments deleted successfully.`);
 			return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } });
 		} catch (error) {
 			console.error("Error deleting media item:", error);
@@ -1864,108 +2033,62 @@ var Route$9 = createFileRoute("/api/media/$id")({ server: { handlers: {
 	}
 } } });
 var Route$8 = createFileRoute("/api/media/upload")({ server: { handlers: { POST: async ({ request }) => {
+	const auth = requireAdmin(request);
+	if ("errorResponse" in auth) return auth.errorResponse;
+	const rateCheck = checkRateLimit(request, uploadRateLimiter);
+	if (!rateCheck.allowed) return createRateLimitResponse(rateCheck.retryAfterSeconds);
 	try {
 		await dbConnect();
 		const formData = await request.formData();
 		const file = formData.get("file");
-		const title = formData.get("title");
-		const artist = formData.get("artist");
-		const type = formData.get("type");
-		const category = formData.get("category");
+		const rawTitle = formData.get("title");
+		const rawArtist = formData.get("artist");
+		const rawType = formData.get("type");
+		const rawCategory = formData.get("category");
+		const rawDescription = formData.get("description");
+		const rawMemoryDate = formData.get("memoryDate");
 		const favorite = formData.get("favorite") === "true";
-		const memoryDate = formData.get("memoryDate");
-		if (!file) return new Response(JSON.stringify({ error: "No file uploaded" }), {
+		if (!file || !(file instanceof File)) return new Response(JSON.stringify({ error: "No file uploaded" }), {
 			status: 400,
 			headers: { "Content-Type": "application/json" }
 		});
-		if (!title || !title.trim()) return new Response(JSON.stringify({ error: "Title is required" }), {
+		const title = sanitizePlainText(rawTitle, 150);
+		if (!title) return new Response(JSON.stringify({ error: "Title is required" }), {
 			status: 400,
 			headers: { "Content-Type": "application/json" }
 		});
-		if (!type || ![
+		if (!rawType || ![
 			"image",
 			"video",
 			"song"
-		].includes(type)) return new Response(JSON.stringify({ error: "Invalid or missing media type" }), {
+		].includes(rawType)) return new Response(JSON.stringify({ error: "Invalid or missing media type" }), {
 			status: 400,
 			headers: { "Content-Type": "application/json" }
 		});
-		const ext = file.name.split(".").pop()?.toLowerCase();
-		if (type === "image") {
-			if (![
-				"image/jpeg",
-				"image/png",
-				"image/webp",
-				"image/gif"
-			].includes(file.type) && (!ext || ![
-				"jpg",
-				"jpeg",
-				"png",
-				"webp",
-				"gif"
-			].includes(ext))) return new Response(JSON.stringify({ error: `Invalid image type: ${file.type}. Allowed formats: JPG, JPEG, PNG, WEBP, GIF.` }), {
-				status: 400,
-				headers: { "Content-Type": "application/json" }
-			});
-			if (file.size > 10485760) return new Response(JSON.stringify({ error: "Image size exceeds the limit of 10MB" }), {
-				status: 400,
-				headers: { "Content-Type": "application/json" }
-			});
-		} else if (type === "video") {
-			if (![
-				"video/mp4",
-				"video/webm",
-				"video/quicktime"
-			].includes(file.type) && (!ext || ![
-				"mp4",
-				"webm",
-				"mov"
-			].includes(ext))) return new Response(JSON.stringify({ error: `Invalid video type: ${file.type}. Allowed formats: MP4, WEBM, MOV.` }), {
-				status: 400,
-				headers: { "Content-Type": "application/json" }
-			});
-			if (file.size > 104857600) return new Response(JSON.stringify({ error: "Video size exceeds the limit of 100MB" }), {
-				status: 400,
-				headers: { "Content-Type": "application/json" }
-			});
-		} else if (type === "song") {
-			if (![
-				"audio/mpeg",
-				"audio/wav",
-				"audio/ogg",
-				"audio/x-m4a",
-				"audio/mp3",
-				"audio/webm",
-				"audio/m4a"
-			].includes(file.type) && (!ext || ![
-				"mp3",
-				"wav",
-				"ogg",
-				"m4a",
-				"webm"
-			].includes(ext))) return new Response(JSON.stringify({ error: `Invalid audio type: ${file.type}. Allowed formats: MP3, WAV, OGG, M4A, WEBM.` }), {
-				status: 400,
-				headers: { "Content-Type": "application/json" }
-			});
-			if (file.size > 20971520) return new Response(JSON.stringify({ error: "Audio file size exceeds the limit of 20MB" }), {
-				status: 400,
-				headers: { "Content-Type": "application/json" }
-			});
-		}
-		const uploadId = formData.get("uploadId");
+		const type = rawType;
+		const artist = sanitizePlainText(rawArtist, 100);
+		const description = sanitizePlainText(rawDescription, 1e3);
+		const category = sanitizePlainText(rawCategory, 50) || "Favorites";
+		const memoryDate = sanitizePlainText(rawMemoryDate, 20) || (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
+		const uploadIdRaw = formData.get("uploadId");
+		const uploadId = sanitizePlainText(uploadIdRaw, 100);
 		const chunkIndex = parseInt(formData.get("chunkIndex"), 10);
 		const totalChunks = parseInt(formData.get("totalChunks"), 10);
 		const isLastChunk = formData.get("isLastChunk") === "true";
-		const filename = formData.get("filename") || file.name;
-		const mimeType = formData.get("mimeType") || file.type;
-		if (!uploadId || isNaN(chunkIndex) || isNaN(totalChunks)) return new Response(JSON.stringify({ error: "Missing chunk upload parameters" }), {
+		const filename = sanitizePlainText(formData.get("filename"), 200) || file.name;
+		const mimeType = sanitizePlainText(formData.get("mimeType"), 100) || file.type;
+		if (!uploadId || isNaN(chunkIndex) || isNaN(totalChunks) || chunkIndex < 0 || totalChunks <= 0 || chunkIndex >= totalChunks) return new Response(JSON.stringify({ error: "Invalid chunk upload parameters" }), {
+			status: 400,
+			headers: { "Content-Type": "application/json" }
+		});
+		if (totalChunks > 200) return new Response(JSON.stringify({ error: "Total chunks exceed allowed limit" }), {
 			status: 400,
 			headers: { "Content-Type": "application/json" }
 		});
 		const arrayBuffer = await file.arrayBuffer();
 		const buffer = Buffer.from(arrayBuffer);
 		const db = import_mongoose.default.connection.db;
-		if (!db) return new Response(JSON.stringify({ error: "Database connection failed" }), {
+		if (!db) return new Response(JSON.stringify({ error: "Database connection unavailable" }), {
 			status: 500,
 			headers: { "Content-Type": "application/json" }
 		});
@@ -1985,14 +2108,25 @@ var Route$8 = createFileRoute("/api/media/upload")({ server: { handlers: { POST:
 			headers: { "Content-Type": "application/json" }
 		});
 		const chunks = await UploadChunk.find({ uploadId }).sort({ chunkIndex: 1 });
-		if (chunks.length < totalChunks) return new Response(JSON.stringify({ error: `Chunk assembly failed. Only ${chunks.length}/${totalChunks} chunks received.` }), {
-			status: 400,
-			headers: { "Content-Type": "application/json" }
-		});
+		if (chunks.length < totalChunks) {
+			await UploadChunk.deleteMany({ uploadId });
+			return new Response(JSON.stringify({ error: `Chunk assembly failed. Only ${chunks.length}/${totalChunks} chunks received.` }), {
+				status: 400,
+				headers: { "Content-Type": "application/json" }
+			});
+		}
 		const finalBuffer = Buffer.concat(chunks.map((c) => c.data));
+		const validation = validateMediaUpload(finalBuffer, filename, mimeType, type);
+		if (!validation.valid) {
+			await UploadChunk.deleteMany({ uploadId });
+			return new Response(JSON.stringify({ error: validation.error }), {
+				status: 400,
+				headers: { "Content-Type": "application/json" }
+			});
+		}
 		const bucket = new import_mongoose.default.mongo.GridFSBucket(db, { bucketName: "media" });
 		const fileId = await new Promise((resolve, reject) => {
-			const uploadStream = bucket.openUploadStream(filename, { contentType: mimeType || (type === "song" ? "audio/mpeg" : type === "video" ? "video/mp4" : "image/jpeg") });
+			const uploadStream = bucket.openUploadStream(validation.safeFilename, { contentType: validation.detectedMimeType || mimeType });
 			uploadStream.on("finish", () => {
 				resolve(uploadStream.id);
 			});
@@ -2007,13 +2141,14 @@ var Route$8 = createFileRoute("/api/media/upload")({ server: { handlers: { POST:
 			source: "upload",
 			title,
 			artist: type === "song" ? artist || "Unknown Artist" : void 0,
-			filename,
-			mimeType: mimeType || (type === "song" ? "audio/mpeg" : type === "video" ? "video/mp4" : "image/jpeg"),
+			description,
+			filename: validation.safeFilename,
+			mimeType: validation.detectedMimeType || mimeType,
 			fileSize: finalBuffer.length,
 			fileId,
-			category: category || "Favorites",
+			category,
 			favorite,
-			memoryDate: memoryDate || (/* @__PURE__ */ new Date()).toISOString().split("T")[0]
+			memoryDate
 		});
 		await mediaItem.save();
 		await UploadChunk.deleteMany({ uploadId });
@@ -2022,13 +2157,30 @@ var Route$8 = createFileRoute("/api/media/upload")({ server: { handlers: { POST:
 			headers: { "Content-Type": "application/json" }
 		});
 	} catch (error) {
-		console.error("Error uploading media item:", error);
+		console.error("Error uploading media chunk:", error);
 		return new Response(JSON.stringify({ error: "Internal server error" }), {
 			status: 500,
 			headers: { "Content-Type": "application/json" }
 		});
 	}
 } } } });
+var MediaUrlSchema = objectType({
+	title: stringType().min(1, "Title is required").max(150),
+	url: stringType().url("Valid URL is required").max(2e3),
+	type: enumType([
+		"image",
+		"video",
+		"song"
+	]),
+	artist: stringType().max(100).optional(),
+	category: stringType().max(50).optional(),
+	memoryDate: stringType().max(20).optional(),
+	sourceType: enumType([
+		"url",
+		"spotify",
+		"google-drive"
+	]).optional()
+});
 function extractSpotifyTrackId(url) {
 	const match = url.match(/(?:open\.spotify\.com\/(?:intl-[a-z]{2}\/)?track\/|spotify:track:)([a-zA-Z0-9]{22})/i);
 	return match ? match[1] : null;
@@ -2037,19 +2189,36 @@ function extractGoogleDriveFileId(url) {
 	const match = url.match(/(?:\/file\/d\/|[?&]id=)([a-zA-Z0-9_-]{20,})/i);
 	return match ? match[1] : null;
 }
+function validateUrlProtocolAndHost(urlString) {
+	try {
+		const parsed = new URL(urlString);
+		if (!["http:", "https:"].includes(parsed.protocol)) return false;
+		const hostname = parsed.hostname.toLowerCase();
+		if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1" || hostname.startsWith("10.") || hostname.startsWith("192.168.") || hostname.startsWith("172.16.") || hostname.startsWith("169.254.") || hostname.endsWith(".internal") || hostname.endsWith(".local")) return false;
+		return true;
+	} catch {
+		return false;
+	}
+}
 var Route$7 = createFileRoute("/api/media/url")({ server: { handlers: { POST: async ({ request }) => {
+	const auth = requireAdmin(request);
+	if ("errorResponse" in auth) return auth.errorResponse;
+	const rateCheck = checkRateLimit(request, mutationRateLimiter);
+	if (!rateCheck.allowed) return createRateLimitResponse(rateCheck.retryAfterSeconds);
 	try {
 		await dbConnect();
-		const { title, artist, url, type, memoryDate, category, sourceType } = await request.json();
-		if (!type || ![
-			"image",
-			"video",
-			"song"
-		].includes(type)) return new Response(JSON.stringify({ error: "Invalid or missing media type" }), {
+		const rawBody = await request.json().catch(() => null);
+		if (!rawBody || typeof rawBody !== "object") return new Response(JSON.stringify({ error: "Invalid JSON payload" }), {
 			status: 400,
 			headers: { "Content-Type": "application/json" }
 		});
-		if (!url || !url.trim()) return new Response(JSON.stringify({ error: "Media URL is required" }), {
+		const parsed = MediaUrlSchema.safeParse(sanitizeMongoInput(rawBody));
+		if (!parsed.success) return new Response(JSON.stringify({ error: parsed.error.issues[0]?.message || "Validation failed" }), {
+			status: 400,
+			headers: { "Content-Type": "application/json" }
+		});
+		const { title, url, type, artist, category, memoryDate, sourceType } = parsed.data;
+		if (!validateUrlProtocolAndHost(url)) return new Response(JSON.stringify({ error: "Invalid or unsupported URL protocol/host" }), {
 			status: 400,
 			headers: { "Content-Type": "application/json" }
 		});
@@ -2068,13 +2237,6 @@ var Route$7 = createFileRoute("/api/media/url")({ server: { handlers: { POST: as
 				});
 				determinedSource = "spotify";
 				canonicalUrl = `https://open.spotify.com/track/${trackId}`;
-				if (await MediaItem.findOne({
-					type: "song",
-					$or: [{ url: canonicalUrl }, { url: { $regex: trackId } }]
-				})) return new Response(JSON.stringify({ error: "This song has already been added." }), {
-					status: 400,
-					headers: { "Content-Type": "application/json" }
-				});
 			} else if (isGoogleDrive) {
 				const fileId = extractGoogleDriveFileId(trimmedUrl);
 				if (!fileId) return new Response(JSON.stringify({ error: "Invalid Google Drive URL" }), {
@@ -2083,64 +2245,23 @@ var Route$7 = createFileRoute("/api/media/url")({ server: { handlers: { POST: as
 				});
 				determinedSource = "google-drive";
 				canonicalUrl = `https://drive.google.com/file/d/${fileId}/view?usp=sharing`;
-				if (await MediaItem.findOne({
-					type: "song",
-					$or: [{ url: canonicalUrl }, { url: { $regex: fileId } }]
-				})) return new Response(JSON.stringify({ error: "This song has already been added." }), {
-					status: 400,
-					headers: { "Content-Type": "application/json" }
-				});
-			} else {
-				try {
-					new URL(trimmedUrl);
-				} catch (_) {
-					return new Response(JSON.stringify({ error: "Please enter a valid URL." }), {
-						status: 400,
-						headers: { "Content-Type": "application/json" }
-					});
-				}
-				if (lowerUrl.includes("youtube.com") || lowerUrl.includes("youtu.be") || lowerUrl.includes("instagram.com") || lowerUrl.includes("soundcloud.com")) return new Response(JSON.stringify({ error: "This URL cannot be played directly as an audio file. Please use a Spotify URL, Google Drive URL, or direct audio link." }), {
-					status: 400,
-					headers: { "Content-Type": "application/json" }
-				});
-				if (await MediaItem.findOne({
-					type: "song",
-					url: canonicalUrl
-				})) return new Response(JSON.stringify({ error: "This song has already been added." }), {
-					status: 400,
-					headers: { "Content-Type": "application/json" }
-				});
 			}
-		} else {
-			try {
-				new URL(trimmedUrl);
-			} catch (_) {
-				return new Response(JSON.stringify({ error: "Please enter a valid URL." }), {
-					status: 400,
-					headers: { "Content-Type": "application/json" }
-				});
-			}
-			if (lowerUrl.includes("youtube.com") || lowerUrl.includes("youtu.be") || lowerUrl.includes("spotify.com") || lowerUrl.includes("instagram.com") || lowerUrl.includes("soundcloud.com")) return new Response(JSON.stringify({ error: type === "video" ? "This URL cannot be played directly as a video file. Please use a direct video URL." : "This URL cannot be rendered directly as an image. Please use a direct image URL." }), {
-				status: 400,
-				headers: { "Content-Type": "application/json" }
-			});
 		}
-		if (!title || !title.trim()) return new Response(JSON.stringify({ error: "Title is required" }), {
-			status: 400,
-			headers: { "Content-Type": "application/json" }
-		});
-		if (type === "song" && (!artist || !artist.trim())) return new Response(JSON.stringify({ error: "Artist name is required for songs" }), {
+		if (await MediaItem.findOne({
+			type,
+			url: canonicalUrl
+		})) return new Response(JSON.stringify({ error: "This media URL has already been added." }), {
 			status: 400,
 			headers: { "Content-Type": "application/json" }
 		});
 		const mediaItem = new MediaItem({
 			type,
 			source: determinedSource,
-			title: title.trim(),
-			artist: type === "song" ? artist ? artist.trim() : "Unknown Artist" : void 0,
+			title: sanitizePlainText(title, 150),
+			artist: type === "song" ? sanitizePlainText(artist || "Unknown Artist", 100) : void 0,
 			url: canonicalUrl,
-			memoryDate: memoryDate || (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
-			category: category || "Favorites"
+			memoryDate: sanitizePlainText(memoryDate, 20) || (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
+			category: sanitizePlainText(category || "Favorites", 50)
 		});
 		await mediaItem.save();
 		return new Response(JSON.stringify(mediaItem), {
@@ -2149,34 +2270,37 @@ var Route$7 = createFileRoute("/api/media/url")({ server: { handlers: { POST: as
 		});
 	} catch (error) {
 		console.error("Error creating URL media item:", error);
-		return new Response(JSON.stringify({ error: error.message || "Internal server error" }), {
+		return new Response(JSON.stringify({ error: "Internal server error" }), {
 			status: 500,
 			headers: { "Content-Type": "application/json" }
 		});
 	}
 } } } });
-var Route$6 = createFileRoute("/api/photos/$id")({ server: { handlers: { DELETE: async ({ params }) => {
+var Route$6 = createFileRoute("/api/photos/$id")({ server: { handlers: { DELETE: async ({ params, request }) => {
+	const auth = requireAdmin(request);
+	if ("errorResponse" in auth) return auth.errorResponse;
 	try {
 		await dbConnect();
 		const { id } = params;
-		if (!import_mongoose.default.Types.ObjectId.isValid(id)) return new Response(JSON.stringify({ error: "Invalid document ID format" }), {
+		if (!isValidObjectId(id)) return new Response(JSON.stringify({ error: "Invalid photo ID format" }), {
 			status: 400,
 			headers: { "Content-Type": "application/json" }
 		});
-		const photo = await Photo.findById(id);
-		if (!photo) return new Response(JSON.stringify({ error: "Photo not found" }), {
+		const item = await MediaItem.findById(id) || await Photo.findById(id);
+		if (!item) return new Response(JSON.stringify({ error: "Photo not found" }), {
 			status: 404,
 			headers: { "Content-Type": "application/json" }
 		});
 		const db = import_mongoose.default.connection.db;
-		if (db && photo.fileId) {
+		if (db && item.fileId) {
 			const bucket = new import_mongoose.default.mongo.GridFSBucket(db, { bucketName: "media" });
 			try {
-				await bucket.delete(photo.fileId);
+				await bucket.delete(new import_mongoose.default.Types.ObjectId(item.fileId));
 			} catch (err) {
-				console.warn("GridFS file delete failed (it may have been deleted already):", err);
+				console.warn("GridFS file deletion warning (may already be deleted):", err);
 			}
 		}
+		await MediaItem.findByIdAndDelete(id);
 		await Photo.findByIdAndDelete(id);
 		return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } });
 	} catch (error) {
@@ -2187,33 +2311,36 @@ var Route$6 = createFileRoute("/api/photos/$id")({ server: { handlers: { DELETE:
 		});
 	}
 } } } });
-var Route$5 = createFileRoute("/api/songs/$id")({ server: { handlers: { DELETE: async ({ params }) => {
+var Route$5 = createFileRoute("/api/songs/$id")({ server: { handlers: { DELETE: async ({ params, request }) => {
+	const auth = requireAdmin(request);
+	if ("errorResponse" in auth) return auth.errorResponse;
 	try {
 		await dbConnect();
 		const { id } = params;
-		if (!import_mongoose.default.Types.ObjectId.isValid(id)) return new Response(JSON.stringify({ error: "Invalid document ID format" }), {
+		if (!isValidObjectId(id)) return new Response(JSON.stringify({ error: "Invalid song ID format" }), {
 			status: 400,
 			headers: { "Content-Type": "application/json" }
 		});
-		const song = await Song.findById(id);
-		if (!song) return new Response(JSON.stringify({ error: "Song not found" }), {
+		const item = await MediaItem.findById(id) || await Song.findById(id);
+		if (!item) return new Response(JSON.stringify({ error: "Song not found" }), {
 			status: 404,
 			headers: { "Content-Type": "application/json" }
 		});
 		const db = import_mongoose.default.connection.db;
 		if (db) {
 			const bucket = new import_mongoose.default.mongo.GridFSBucket(db, { bucketName: "media" });
-			if (song.fileId) try {
-				await bucket.delete(song.fileId);
+			if (item.fileId) try {
+				await bucket.delete(new import_mongoose.default.Types.ObjectId(item.fileId));
 			} catch (err) {
-				console.warn("GridFS audio file delete failed:", err);
+				console.warn("GridFS audio file deletion warning:", err);
 			}
-			if (song.coverFileId) try {
-				await bucket.delete(song.coverFileId);
+			if (item.coverFileId) try {
+				await bucket.delete(new import_mongoose.default.Types.ObjectId(item.coverFileId));
 			} catch (err) {
-				console.warn("GridFS cover file delete failed:", err);
+				console.warn("GridFS cover file deletion warning:", err);
 			}
 		}
+		await MediaItem.findByIdAndDelete(id);
 		await Song.findByIdAndDelete(id);
 		return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } });
 	} catch (error) {
@@ -2226,10 +2353,12 @@ var Route$5 = createFileRoute("/api/songs/$id")({ server: { handlers: { DELETE: 
 } } } });
 var Route$4 = createFileRoute("/api/timeline/$id")({ server: { handlers: {
 	PUT: async ({ request, params }) => {
+		const auth = requireAdmin(request);
+		if ("errorResponse" in auth) return auth.errorResponse;
 		try {
 			await dbConnect();
 			const { id } = params;
-			if (!import_mongoose.default.Types.ObjectId.isValid(id)) return new Response(JSON.stringify({ error: "Invalid document ID format" }), {
+			if (!isValidObjectId(id)) return new Response(JSON.stringify({ error: "Invalid timeline ID format" }), {
 				status: 400,
 				headers: { "Content-Type": "application/json" }
 			});
@@ -2239,97 +2368,100 @@ var Route$4 = createFileRoute("/api/timeline/$id")({ server: { handlers: {
 				headers: { "Content-Type": "application/json" }
 			});
 			const formData = await request.formData();
-			const title = formData.get("title");
-			const description = formData.get("description");
-			const date = formData.get("date");
-			const memoryDate = formData.get("memoryDate");
-			const location = formData.get("location");
-			const icon = formData.get("icon");
+			const rawTitle = formData.get("title");
+			const rawDescription = formData.get("description");
+			const rawDate = formData.get("date");
+			const rawMemoryDate = formData.get("memoryDate");
+			const rawLocation = formData.get("location");
+			const rawIcon = formData.get("icon");
 			const highlight = formData.get("highlight") === "true";
 			const imageFile = formData.get("imageFile");
 			const videoFile = formData.get("videoFile");
 			const deleteImage = formData.get("deleteImage") === "true";
 			const deleteVideo = formData.get("deleteVideo") === "true";
-			if (title) milestone.title = title;
-			if (description !== null) milestone.description = description;
-			if (date) milestone.date = date;
-			else if (memoryDate) milestone.date = new Date(memoryDate).toLocaleDateString("en-GB", {
-				day: "2-digit",
-				month: "short",
-				year: "numeric"
-			});
-			if (memoryDate) milestone.memoryDate = memoryDate;
-			if (location !== null) milestone.location = location;
-			if (icon) milestone.icon = icon;
+			if (rawTitle !== null) {
+				const cleanTitle = sanitizePlainText(rawTitle, 150);
+				if (cleanTitle) milestone.title = cleanTitle;
+			}
+			if (rawDescription !== null) milestone.description = sanitizePlainText(rawDescription, 1e3);
+			if (rawDate !== null) milestone.date = sanitizePlainText(rawDate, 50);
+			if (rawMemoryDate !== null) milestone.memoryDate = sanitizePlainText(rawMemoryDate, 20);
+			if (rawLocation !== null) milestone.location = sanitizePlainText(rawLocation, 100);
+			if (rawIcon !== null) {
+				if ([
+					"heart",
+					"coffee",
+					"sparkles",
+					"plane",
+					"star"
+				].includes(rawIcon)) milestone.icon = rawIcon;
+			}
 			milestone.highlight = highlight;
 			const db = import_mongoose.default.connection.db;
-			if (!db) return new Response(JSON.stringify({ error: "Database connection failed" }), {
+			if (!db) return new Response(JSON.stringify({ error: "Database connection unavailable" }), {
 				status: 500,
 				headers: { "Content-Type": "application/json" }
 			});
 			const bucket = new import_mongoose.default.mongo.GridFSBucket(db, { bucketName: "media" });
-			if (deleteImage || imageFile && imageFile.size > 0) {
+			if (deleteImage || imageFile && imageFile instanceof File && imageFile.size > 0) {
 				if (milestone.imageFileId) {
 					try {
-						await bucket.delete(milestone.imageFileId);
+						await bucket.delete(new import_mongoose.default.Types.ObjectId(milestone.imageFileId));
 					} catch (err) {
-						console.warn("GridFS old image delete failed:", err);
+						console.warn("GridFS old image delete warning:", err);
 					}
 					milestone.imageFileId = void 0;
 				}
 			}
-			if (imageFile && imageFile.size > 0) {
-				if ([
-					"image/jpeg",
-					"image/png",
-					"image/webp",
-					"image/gif"
-				].includes(imageFile.type) || imageFile.name.match(/\.(jpg|jpeg|png|webp|gif)$/i)) {
-					const imageArrayBuffer = await imageFile.arrayBuffer();
-					const imageBuffer = Buffer.from(imageArrayBuffer);
-					milestone.imageFileId = await new Promise((resolve, reject) => {
-						const uploadStream = bucket.openUploadStream(imageFile.name, { contentType: imageFile.type || "image/jpeg" });
-						uploadStream.on("finish", () => {
-							resolve(uploadStream.id);
-						});
-						uploadStream.on("error", (err) => {
-							reject(err);
-						});
-						uploadStream.write(imageBuffer);
-						uploadStream.end();
+			if (imageFile && imageFile instanceof File && imageFile.size > 0) {
+				const imageArrayBuffer = await imageFile.arrayBuffer();
+				const imageBuffer = Buffer.from(imageArrayBuffer);
+				const imageValidation = validateMediaUpload(imageBuffer, imageFile.name, imageFile.type, "image");
+				if (!imageValidation.valid) return new Response(JSON.stringify({ error: imageValidation.error }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" }
+				});
+				milestone.imageFileId = await new Promise((resolve, reject) => {
+					const uploadStream = bucket.openUploadStream(imageValidation.safeFilename, { contentType: imageValidation.detectedMimeType || "image/jpeg" });
+					uploadStream.on("finish", () => {
+						resolve(uploadStream.id);
 					});
-				}
+					uploadStream.on("error", (err) => {
+						reject(err);
+					});
+					uploadStream.write(imageBuffer);
+					uploadStream.end();
+				});
 			}
-			if (deleteVideo || videoFile && videoFile.size > 0) {
+			if (deleteVideo || videoFile && videoFile instanceof File && videoFile.size > 0) {
 				if (milestone.videoFileId) {
 					try {
-						await bucket.delete(milestone.videoFileId);
+						await bucket.delete(new import_mongoose.default.Types.ObjectId(milestone.videoFileId));
 					} catch (err) {
-						console.warn("GridFS old video delete failed:", err);
+						console.warn("GridFS old video delete warning:", err);
 					}
 					milestone.videoFileId = void 0;
 				}
 			}
-			if (videoFile && videoFile.size > 0) {
-				if ([
-					"video/mp4",
-					"video/webm",
-					"video/quicktime"
-				].includes(videoFile.type) || videoFile.name.match(/\.(mp4|webm|mov)$/i)) {
-					const videoArrayBuffer = await videoFile.arrayBuffer();
-					const videoBuffer = Buffer.from(videoArrayBuffer);
-					milestone.videoFileId = await new Promise((resolve, reject) => {
-						const uploadStream = bucket.openUploadStream(videoFile.name, { contentType: videoFile.type || "video/mp4" });
-						uploadStream.on("finish", () => {
-							resolve(uploadStream.id);
-						});
-						uploadStream.on("error", (err) => {
-							reject(err);
-						});
-						uploadStream.write(videoBuffer);
-						uploadStream.end();
+			if (videoFile && videoFile instanceof File && videoFile.size > 0) {
+				const videoArrayBuffer = await videoFile.arrayBuffer();
+				const videoBuffer = Buffer.from(videoArrayBuffer);
+				const videoValidation = validateMediaUpload(videoBuffer, videoFile.name, videoFile.type, "video");
+				if (!videoValidation.valid) return new Response(JSON.stringify({ error: videoValidation.error }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" }
+				});
+				milestone.videoFileId = await new Promise((resolve, reject) => {
+					const uploadStream = bucket.openUploadStream(videoValidation.safeFilename, { contentType: videoValidation.detectedMimeType || "video/mp4" });
+					uploadStream.on("finish", () => {
+						resolve(uploadStream.id);
 					});
-				}
+					uploadStream.on("error", (err) => {
+						reject(err);
+					});
+					uploadStream.write(videoBuffer);
+					uploadStream.end();
+				});
 			}
 			await milestone.save();
 			return new Response(JSON.stringify(milestone), { headers: { "Content-Type": "application/json" } });
@@ -2341,11 +2473,13 @@ var Route$4 = createFileRoute("/api/timeline/$id")({ server: { handlers: {
 			});
 		}
 	},
-	DELETE: async ({ params }) => {
+	DELETE: async ({ params, request }) => {
+		const auth = requireAdmin(request);
+		if ("errorResponse" in auth) return auth.errorResponse;
 		try {
 			await dbConnect();
 			const { id } = params;
-			if (!import_mongoose.default.Types.ObjectId.isValid(id)) return new Response(JSON.stringify({ error: "Invalid document ID format" }), {
+			if (!isValidObjectId(id)) return new Response(JSON.stringify({ error: "Invalid timeline ID format" }), {
 				status: 400,
 				headers: { "Content-Type": "application/json" }
 			});
@@ -2358,14 +2492,14 @@ var Route$4 = createFileRoute("/api/timeline/$id")({ server: { handlers: {
 			if (db) {
 				const bucket = new import_mongoose.default.mongo.GridFSBucket(db, { bucketName: "media" });
 				if (milestone.imageFileId) try {
-					await bucket.delete(milestone.imageFileId);
+					await bucket.delete(new import_mongoose.default.Types.ObjectId(milestone.imageFileId));
 				} catch (err) {
-					console.warn("GridFS image delete failed:", err);
+					console.warn("GridFS image delete warning:", err);
 				}
 				if (milestone.videoFileId) try {
-					await bucket.delete(milestone.videoFileId);
+					await bucket.delete(new import_mongoose.default.Types.ObjectId(milestone.videoFileId));
 				} catch (err) {
-					console.warn("GridFS video delete failed:", err);
+					console.warn("GridFS video delete warning:", err);
 				}
 			}
 			await Timeline.findByIdAndDelete(id);
@@ -2380,18 +2514,16 @@ var Route$4 = createFileRoute("/api/timeline/$id")({ server: { handlers: {
 	}
 } } });
 var Route$3 = createFileRoute("/api/users/$id")({ server: { handlers: { DELETE: async ({ params, request }) => {
+	const auth = requireAdmin(request);
+	if ("errorResponse" in auth) return auth.errorResponse;
 	try {
-		if ((request.headers.get("cookie") || "").split(";").reduce((acc, cookie) => {
-			const [name, value] = cookie.trim().split("=");
-			if (name && value) acc[name] = value;
-			return acc;
-		}, {})["auth_role"] !== "admin") return new Response(JSON.stringify({ error: "Unauthorized" }), {
-			status: 403,
-			headers: { "Content-Type": "application/json" }
-		});
 		await dbConnect();
 		const { id } = params;
-		if (!import_mongoose.default.Types.ObjectId.isValid(id)) return new Response(JSON.stringify({ error: "Invalid user ID format" }), {
+		if (!isValidObjectId(id)) return new Response(JSON.stringify({ error: "Invalid user ID format" }), {
+			status: 400,
+			headers: { "Content-Type": "application/json" }
+		});
+		if (auth.session.userId === id) return new Response(JSON.stringify({ error: "Cannot delete your own active user account" }), {
 			status: 400,
 			headers: { "Content-Type": "application/json" }
 		});
@@ -2409,28 +2541,31 @@ var Route$3 = createFileRoute("/api/users/$id")({ server: { handlers: { DELETE: 
 		});
 	}
 } } } });
-var Route$2 = createFileRoute("/api/videos/$id")({ server: { handlers: { DELETE: async ({ params }) => {
+var Route$2 = createFileRoute("/api/videos/$id")({ server: { handlers: { DELETE: async ({ params, request }) => {
+	const auth = requireAdmin(request);
+	if ("errorResponse" in auth) return auth.errorResponse;
 	try {
 		await dbConnect();
 		const { id } = params;
-		if (!import_mongoose.default.Types.ObjectId.isValid(id)) return new Response(JSON.stringify({ error: "Invalid document ID format" }), {
+		if (!isValidObjectId(id)) return new Response(JSON.stringify({ error: "Invalid video ID format" }), {
 			status: 400,
 			headers: { "Content-Type": "application/json" }
 		});
-		const video = await Video$1.findById(id);
-		if (!video) return new Response(JSON.stringify({ error: "Video not found" }), {
+		const item = await MediaItem.findById(id) || await Video$1.findById(id);
+		if (!item) return new Response(JSON.stringify({ error: "Video not found" }), {
 			status: 404,
 			headers: { "Content-Type": "application/json" }
 		});
 		const db = import_mongoose.default.connection.db;
-		if (db && video.fileId) {
+		if (db && item.fileId) {
 			const bucket = new import_mongoose.default.mongo.GridFSBucket(db, { bucketName: "media" });
 			try {
-				await bucket.delete(video.fileId);
+				await bucket.delete(new import_mongoose.default.Types.ObjectId(item.fileId));
 			} catch (err) {
-				console.warn("GridFS file delete failed (it may have been deleted already):", err);
+				console.warn("GridFS file deletion warning (may already be deleted):", err);
 			}
 		}
+		await MediaItem.findByIdAndDelete(id);
 		await Video$1.findByIdAndDelete(id);
 		return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } });
 	} catch (error) {
@@ -2441,21 +2576,39 @@ var Route$2 = createFileRoute("/api/videos/$id")({ server: { handlers: { DELETE:
 		});
 	}
 } } } });
+var EditMediaSchema = objectType({
+	title: stringType().min(1).max(150).optional(),
+	artist: stringType().max(100).optional(),
+	memoryDate: stringType().max(20).optional(),
+	category: stringType().max(50).optional(),
+	favorite: booleanType().optional()
+});
 var Route$1 = createFileRoute("/api/media/edit/$id")({ server: { handlers: { PUT: async ({ params, request }) => {
+	const auth = requireAdmin(request);
+	if ("errorResponse" in auth) return auth.errorResponse;
 	try {
 		await dbConnect();
 		const { id } = params;
-		const { title, artist, memoryDate, category, favorite } = await request.json();
-		if (!import_mongoose.default.Types.ObjectId.isValid(id)) return new Response(JSON.stringify({ error: "Invalid document ID format" }), {
+		if (!isValidObjectId(id)) return new Response(JSON.stringify({ error: "Invalid document ID format" }), {
+			status: 400,
+			headers: { "Content-Type": "application/json" }
+		});
+		const rawBody = await request.json().catch(() => null);
+		if (!rawBody || typeof rawBody !== "object") return new Response(JSON.stringify({ error: "Invalid JSON payload" }), {
+			status: 400,
+			headers: { "Content-Type": "application/json" }
+		});
+		const parsed = EditMediaSchema.safeParse(sanitizeMongoInput(rawBody));
+		if (!parsed.success) return new Response(JSON.stringify({ error: parsed.error.issues[0]?.message || "Validation failed" }), {
 			status: 400,
 			headers: { "Content-Type": "application/json" }
 		});
 		const updateData = {};
-		if (title !== void 0) updateData.title = title;
-		if (artist !== void 0) updateData.artist = artist;
-		if (memoryDate !== void 0) updateData.memoryDate = memoryDate;
-		if (category !== void 0) updateData.category = category;
-		if (favorite !== void 0) updateData.favorite = favorite;
+		if (parsed.data.title !== void 0) updateData.title = sanitizePlainText(parsed.data.title, 150);
+		if (parsed.data.artist !== void 0) updateData.artist = sanitizePlainText(parsed.data.artist, 100);
+		if (parsed.data.memoryDate !== void 0) updateData.memoryDate = sanitizePlainText(parsed.data.memoryDate, 20);
+		if (parsed.data.category !== void 0) updateData.category = sanitizePlainText(parsed.data.category, 50);
+		if (parsed.data.favorite !== void 0) updateData.favorite = parsed.data.favorite;
 		const updatedItem = await MediaItem.findByIdAndUpdate(id, { $set: updateData }, { new: true });
 		if (!updatedItem) return new Response(JSON.stringify({ error: "Media item not found" }), {
 			status: 404,
@@ -2474,12 +2627,12 @@ var Route = createFileRoute("/api/media/file/$fileId")({ server: { handlers: { G
 	try {
 		await dbConnect();
 		const { fileId } = params;
-		if (!import_mongoose.default.Types.ObjectId.isValid(fileId)) return new Response(JSON.stringify({ error: "Invalid file ID format" }), {
+		if (!isValidObjectId(fileId)) return new Response(JSON.stringify({ error: "Invalid file ID format" }), {
 			status: 400,
 			headers: { "Content-Type": "application/json" }
 		});
 		const db = import_mongoose.default.connection.db;
-		if (!db) return new Response(JSON.stringify({ error: "Database connection failed" }), {
+		if (!db) return new Response(JSON.stringify({ error: "Database connection unavailable" }), {
 			status: 500,
 			headers: { "Content-Type": "application/json" }
 		});
@@ -2493,26 +2646,21 @@ var Route = createFileRoute("/api/media/file/$fileId")({ server: { handlers: { G
 		const fileSize = file.length;
 		const bucket = new import_mongoose.default.mongo.GridFSBucket(db, { bucketName: "media" });
 		const rangeHeader = request.headers.get("range");
-		if (rangeHeader) {
+		if (rangeHeader && fileSize > 0) {
 			const parts = rangeHeader.replace(/bytes=/, "").split("-");
-			const start = parseInt(parts[0], 10);
+			const start = parseInt(parts[0], 10) || 0;
 			const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
-			const chunksize = end - start + 1;
+			const safeEnd = Math.min(end, fileSize - 1);
+			const chunksize = safeEnd - start + 1;
 			const downloadStream = bucket.openDownloadStream(objectId, {
 				start,
-				end: end + 1
+				end: safeEnd + 1
 			});
 			const readable = new ReadableStream({
 				start(controller) {
-					downloadStream.on("data", (chunk) => {
-						controller.enqueue(chunk);
-					});
-					downloadStream.on("end", () => {
-						controller.close();
-					});
-					downloadStream.on("error", (err) => {
-						controller.error(err);
-					});
+					downloadStream.on("data", (chunk) => controller.enqueue(chunk));
+					downloadStream.on("end", () => controller.close());
+					downloadStream.on("error", (err) => controller.error(err));
 				},
 				cancel() {
 					downloadStream.destroy();
@@ -2521,25 +2669,20 @@ var Route = createFileRoute("/api/media/file/$fileId")({ server: { handlers: { G
 			return new Response(readable, {
 				status: 206,
 				headers: {
-					"Content-Range": `bytes ${start}-${end}/${fileSize}`,
+					"Content-Range": `bytes ${start}-${safeEnd}/${fileSize}`,
 					"Accept-Ranges": "bytes",
 					"Content-Length": chunksize.toString(),
-					"Content-Type": contentType
+					"Content-Type": contentType,
+					"X-Content-Type-Options": "nosniff"
 				}
 			});
 		} else {
 			const downloadStream = bucket.openDownloadStream(objectId);
 			const readable = new ReadableStream({
 				start(controller) {
-					downloadStream.on("data", (chunk) => {
-						controller.enqueue(chunk);
-					});
-					downloadStream.on("end", () => {
-						controller.close();
-					});
-					downloadStream.on("error", (err) => {
-						controller.error(err);
-					});
+					downloadStream.on("data", (chunk) => controller.enqueue(chunk));
+					downloadStream.on("end", () => controller.close());
+					downloadStream.on("error", (err) => controller.error(err));
 				},
 				cancel() {
 					downloadStream.destroy();
@@ -2549,7 +2692,9 @@ var Route = createFileRoute("/api/media/file/$fileId")({ server: { handlers: { G
 				status: 200,
 				headers: {
 					"Content-Length": fileSize.toString(),
-					"Content-Type": contentType
+					"Content-Type": contentType,
+					"Accept-Ranges": "bytes",
+					"X-Content-Type-Options": "nosniff"
 				}
 			});
 		}
@@ -2561,100 +2706,110 @@ var Route = createFileRoute("/api/media/file/$fileId")({ server: { handlers: { G
 		});
 	}
 } } } });
-var IndexRoute = Route$28.update({
+var IndexRoute = Route$30.update({
 	id: "/",
 	path: "/",
-	getParentRoute: () => Route$29
+	getParentRoute: () => Route$31
 });
-var AdminRoute = Route$27.update({
+var AdminRoute = Route$29.update({
 	id: "/admin",
 	path: "/admin",
-	getParentRoute: () => Route$29
+	getParentRoute: () => Route$31
 });
-var FunRoute = Route$26.update({
+var FunRoute = Route$28.update({
 	id: "/fun",
 	path: "/fun",
-	getParentRoute: () => Route$29
+	getParentRoute: () => Route$31
 });
-var LettersRoute = Route$25.update({
+var LettersRoute = Route$27.update({
 	id: "/letters",
 	path: "/letters",
-	getParentRoute: () => Route$29
+	getParentRoute: () => Route$31
 });
-var LoginRoute = Route$24.update({
+var LoginRoute = Route$26.update({
 	id: "/login",
 	path: "/login",
-	getParentRoute: () => Route$29
+	getParentRoute: () => Route$31
 });
-var PhotosRoute = Route$23.update({
+var PhotosRoute = Route$25.update({
 	id: "/photos",
 	path: "/photos",
-	getParentRoute: () => Route$29
+	getParentRoute: () => Route$31
 });
-var SongsRoute = Route$22.update({
+var SongsRoute = Route$24.update({
 	id: "/songs",
 	path: "/songs",
-	getParentRoute: () => Route$29
+	getParentRoute: () => Route$31
 });
-var TimelineRoute = Route$21.update({
+var TimelineRoute = Route$23.update({
 	id: "/timeline",
 	path: "/timeline",
-	getParentRoute: () => Route$29
+	getParentRoute: () => Route$31
 });
-var VideosRoute = Route$20.update({
+var VideosRoute = Route$22.update({
 	id: "/videos",
 	path: "/videos",
-	getParentRoute: () => Route$29
+	getParentRoute: () => Route$31
 });
-var ApiMediaRoute = Route$19.update({
+var ApiLettersRoute = Route$21.update({
+	id: "/api/letters",
+	path: "/api/letters",
+	getParentRoute: () => Route$31
+});
+var ApiMediaRoute = Route$20.update({
 	id: "/api/media",
 	path: "/api/media",
-	getParentRoute: () => Route$29
+	getParentRoute: () => Route$31
 });
-var ApiPhotosRoute = Route$18.update({
+var ApiPhotosRoute = Route$19.update({
 	id: "/api/photos",
 	path: "/api/photos",
-	getParentRoute: () => Route$29
+	getParentRoute: () => Route$31
 });
-var ApiSongsRoute = Route$17.update({
+var ApiSongsRoute = Route$18.update({
 	id: "/api/songs",
 	path: "/api/songs",
-	getParentRoute: () => Route$29
+	getParentRoute: () => Route$31
 });
-var ApiTimelineRoute = Route$16.update({
+var ApiTimelineRoute = Route$17.update({
 	id: "/api/timeline",
 	path: "/api/timeline",
-	getParentRoute: () => Route$29
+	getParentRoute: () => Route$31
 });
-var ApiUsersRoute = Route$15.update({
+var ApiUsersRoute = Route$16.update({
 	id: "/api/users",
 	path: "/api/users",
-	getParentRoute: () => Route$29
+	getParentRoute: () => Route$31
 });
-var ApiVideosRoute = Route$14.update({
+var ApiVideosRoute = Route$15.update({
 	id: "/api/videos",
 	path: "/api/videos",
-	getParentRoute: () => Route$29
+	getParentRoute: () => Route$31
 });
-var ApiAuthLoginRoute = Route$13.update({
+var ApiAuthLoginRoute = Route$14.update({
 	id: "/api/auth/login",
 	path: "/api/auth/login",
-	getParentRoute: () => Route$29
+	getParentRoute: () => Route$31
 });
-var ApiAuthLogoutRoute = Route$12.update({
+var ApiAuthLogoutRoute = Route$13.update({
 	id: "/api/auth/logout",
 	path: "/api/auth/logout",
-	getParentRoute: () => Route$29
+	getParentRoute: () => Route$31
 });
-var ApiAuthSessionRoute = Route$11.update({
+var ApiAuthSessionRoute = Route$12.update({
 	id: "/api/auth/session",
 	path: "/api/auth/session",
-	getParentRoute: () => Route$29
+	getParentRoute: () => Route$31
 });
-var ApiFunStagesRoute = Route$10.update({
+var ApiFunStagesRoute = Route$11.update({
 	id: "/api/fun/stages",
 	path: "/api/fun/stages",
-	getParentRoute: () => Route$29
+	getParentRoute: () => Route$31
+});
+var ApiLettersIdRoute = Route$10.update({
+	id: "/$id",
+	path: "/$id",
+	getParentRoute: () => ApiLettersRoute
 });
 var ApiMediaIdRoute = Route$9.update({
 	id: "/$id",
@@ -2696,20 +2851,24 @@ var ApiVideosIdRoute = Route$2.update({
 	path: "/$id",
 	getParentRoute: () => ApiVideosRoute
 });
+var ApiMediaEditIdRoute = Route$1.update({
+	id: "/edit/$id",
+	path: "/edit/$id",
+	getParentRoute: () => ApiMediaRoute
+});
+var ApiMediaFileFileIdRoute = Route.update({
+	id: "/file/$fileId",
+	path: "/file/$fileId",
+	getParentRoute: () => ApiMediaRoute
+});
+var ApiLettersRouteChildren = { ApiLettersIdRoute };
+var ApiLettersRouteWithChildren = ApiLettersRoute._addFileChildren(ApiLettersRouteChildren);
 var ApiMediaRouteChildren = {
 	ApiMediaIdRoute,
 	ApiMediaUploadRoute,
 	ApiMediaUrlRoute,
-	ApiMediaEditIdRoute: Route$1.update({
-		id: "/edit/$id",
-		path: "/edit/$id",
-		getParentRoute: () => ApiMediaRoute
-	}),
-	ApiMediaFileFileIdRoute: Route.update({
-		id: "/file/$fileId",
-		path: "/file/$fileId",
-		getParentRoute: () => ApiMediaRoute
-	})
+	ApiMediaEditIdRoute,
+	ApiMediaFileFileIdRoute
 };
 var ApiMediaRouteWithChildren = ApiMediaRoute._addFileChildren(ApiMediaRouteChildren);
 var ApiPhotosRouteChildren = { ApiPhotosIdRoute };
@@ -2731,6 +2890,7 @@ var rootRouteChildren = {
 	SongsRoute,
 	TimelineRoute,
 	VideosRoute,
+	ApiLettersRoute: ApiLettersRouteWithChildren,
 	ApiMediaRoute: ApiMediaRouteWithChildren,
 	ApiPhotosRoute: ApiPhotosRouteWithChildren,
 	ApiSongsRoute: ApiSongsRouteWithChildren,
@@ -2742,7 +2902,7 @@ var rootRouteChildren = {
 	ApiAuthSessionRoute,
 	ApiFunStagesRoute
 };
-var routeTree = Route$29._addFileChildren(rootRouteChildren)._addFileTypes();
+var routeTree = Route$31._addFileChildren(rootRouteChildren)._addFileTypes();
 var getRouter = () => {
 	const queryClient = new QueryClient();
 	return createRouter({

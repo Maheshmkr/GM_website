@@ -2,6 +2,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { dbConnect } from "@/lib/db";
 import { MediaItem } from "@/lib/models";
+import { requireAdmin, isValidObjectId } from "@/lib/security";
 import mongoose from "mongoose";
 
 export const Route = createFileRoute("/api/media/$id")({
@@ -12,8 +13,8 @@ export const Route = createFileRoute("/api/media/$id")({
           await dbConnect();
           const { id } = params;
 
-          if (!mongoose.Types.ObjectId.isValid(id)) {
-            return new Response(JSON.stringify({ error: "Invalid file ID format" }), {
+          if (!isValidObjectId(id)) {
+            return new Response(JSON.stringify({ error: "Invalid media file ID format" }), {
               status: 400,
               headers: { "Content-Type": "application/json" },
             });
@@ -21,7 +22,7 @@ export const Route = createFileRoute("/api/media/$id")({
 
           const db = mongoose.connection.db;
           if (!db) {
-            return new Response(JSON.stringify({ error: "Database connection failed" }), {
+            return new Response(JSON.stringify({ error: "Database connection unavailable" }), {
               status: 500,
               headers: { "Content-Type": "application/json" },
             });
@@ -41,29 +42,25 @@ export const Route = createFileRoute("/api/media/$id")({
           const fileSize = file.length;
           const bucket = new mongoose.mongo.GridFSBucket(db, { bucketName: "media" });
 
+          // Support HTTP 206 Range requests for video/audio seeking
           const rangeHeader = request.headers.get("range");
-          if (rangeHeader) {
+          if (rangeHeader && fileSize > 0) {
             const parts = rangeHeader.replace(/bytes=/, "").split("-");
-            const start = parseInt(parts[0], 10);
+            const start = parseInt(parts[0], 10) || 0;
             const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
-            const chunksize = end - start + 1;
+            const safeEnd = Math.min(end, fileSize - 1);
+            const chunksize = safeEnd - start + 1;
 
             const downloadStream = bucket.openDownloadStream(objectId, {
               start,
-              end: end + 1, // exclusive
+              end: safeEnd + 1, // exclusive in GridFS
             });
 
             const readable = new ReadableStream({
               start(controller) {
-                downloadStream.on("data", (chunk) => {
-                  controller.enqueue(chunk);
-                });
-                downloadStream.on("end", () => {
-                  controller.close();
-                });
-                downloadStream.on("error", (err) => {
-                  controller.error(err);
-                });
+                downloadStream.on("data", (chunk) => controller.enqueue(chunk));
+                downloadStream.on("end", () => controller.close());
+                downloadStream.on("error", (err) => controller.error(err));
               },
               cancel() {
                 downloadStream.destroy();
@@ -73,25 +70,20 @@ export const Route = createFileRoute("/api/media/$id")({
             return new Response(readable, {
               status: 206,
               headers: {
-                "Content-Range": `bytes ${start}-${end}/${fileSize}`,
+                "Content-Range": `bytes ${start}-${safeEnd}/${fileSize}`,
                 "Accept-Ranges": "bytes",
                 "Content-Length": chunksize.toString(),
                 "Content-Type": contentType,
+                "X-Content-Type-Options": "nosniff",
               },
             });
           } else {
             const downloadStream = bucket.openDownloadStream(objectId);
             const readable = new ReadableStream({
               start(controller) {
-                downloadStream.on("data", (chunk) => {
-                  controller.enqueue(chunk);
-                });
-                downloadStream.on("end", () => {
-                  controller.close();
-                });
-                downloadStream.on("error", (err) => {
-                  controller.error(err);
-                });
+                downloadStream.on("data", (chunk) => controller.enqueue(chunk));
+                downloadStream.on("end", () => controller.close());
+                downloadStream.on("error", (err) => controller.error(err));
               },
               cancel() {
                 downloadStream.destroy();
@@ -103,25 +95,31 @@ export const Route = createFileRoute("/api/media/$id")({
               headers: {
                 "Content-Length": fileSize.toString(),
                 "Content-Type": contentType,
+                "Accept-Ranges": "bytes",
+                "X-Content-Type-Options": "nosniff",
               },
             });
           }
         } catch (error: any) {
-          console.error("Error fetching media from GridFS:", error);
+          console.error("Error streaming media from GridFS:", error);
           return new Response(JSON.stringify({ error: "Internal server error" }), {
             status: 500,
             headers: { "Content-Type": "application/json" },
           });
         }
       },
-      DELETE: async ({ params }) => {
+      DELETE: async ({ params, request }) => {
+        // 1. Authorization: Admin check
+        const auth = requireAdmin(request);
+        if ("errorResponse" in auth) {
+          return auth.errorResponse;
+        }
+
         try {
           await dbConnect();
           const { id } = params;
-          console.log(`[DELETE /api/media/${id}] Deletion requested.`);
 
-          if (!mongoose.Types.ObjectId.isValid(id)) {
-            console.warn(`[DELETE /api/media/${id}] Invalid ID format.`);
+          if (!isValidObjectId(id)) {
             return new Response(JSON.stringify({ error: "Invalid document ID format" }), {
               status: 400,
               headers: { "Content-Type": "application/json" },
@@ -130,41 +128,38 @@ export const Route = createFileRoute("/api/media/$id")({
 
           const mediaItem = await MediaItem.findById(id);
           if (!mediaItem) {
-            console.warn(`[DELETE /api/media/${id}] Media item not found in DB.`);
             return new Response(JSON.stringify({ error: "Media item not found" }), {
               status: 404,
               headers: { "Content-Type": "application/json" },
             });
           }
 
-          // If the media item is an uploaded file, delete its binary from GridFS
+          // 2. Cascade delete binary files from GridFS
           if (mediaItem.source === "upload") {
             const db = mongoose.connection.db;
             if (db) {
               const bucket = new mongoose.mongo.GridFSBucket(db, { bucketName: "media" });
-              
+
               if (mediaItem.fileId) {
                 try {
-                  await bucket.delete(mediaItem.fileId);
+                  await bucket.delete(new mongoose.Types.ObjectId(mediaItem.fileId));
                 } catch (err) {
-                  console.warn("GridFS file delete failed during media item deletion:", err);
+                  console.warn("GridFS file deletion warning:", err);
                 }
               }
 
-              // Delete optional cover art if present (for songs)
               if (mediaItem.coverFileId) {
                 try {
-                  await bucket.delete(mediaItem.coverFileId);
+                  await bucket.delete(new mongoose.Types.ObjectId(mediaItem.coverFileId));
                 } catch (err) {
-                  console.warn("GridFS cover art file delete failed during media item deletion:", err);
+                  console.warn("GridFS cover deletion warning:", err);
                 }
               }
             }
           }
 
-          // Remove the metadata from DB
+          // 3. Delete metadata
           await MediaItem.findByIdAndDelete(id);
-          console.log(`[DELETE /api/media/${id}] Document and attachments deleted successfully.`);
 
           return new Response(JSON.stringify({ success: true }), {
             headers: { "Content-Type": "application/json" },

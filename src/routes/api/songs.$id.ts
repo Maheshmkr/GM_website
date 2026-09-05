@@ -1,26 +1,34 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute } from "@tanstack/react-router";
 import { dbConnect } from "@/lib/db";
-import { Song } from "@/lib/models";
+import { MediaItem, Song } from "@/lib/models";
+import { requireAdmin, isValidObjectId } from "@/lib/security";
 import mongoose from "mongoose";
 
 export const Route = createFileRoute("/api/songs/$id")({
   server: {
     handlers: {
-      DELETE: async ({ params }) => {
+      DELETE: async ({ params, request }) => {
+        // 1. Authorization: Admin check
+        const auth = requireAdmin(request);
+        if ("errorResponse" in auth) {
+          return auth.errorResponse;
+        }
+
         try {
           await dbConnect();
           const { id } = params;
 
-          if (!mongoose.Types.ObjectId.isValid(id)) {
-            return new Response(JSON.stringify({ error: "Invalid document ID format" }), {
+          // 2. Strict ID validation
+          if (!isValidObjectId(id)) {
+            return new Response(JSON.stringify({ error: "Invalid song ID format" }), {
               status: 400,
               headers: { "Content-Type": "application/json" },
             });
           }
 
-          const song = await Song.findById(id);
-          if (!song) {
+          const item = (await MediaItem.findById(id)) || (await Song.findById(id));
+          if (!item) {
             return new Response(JSON.stringify({ error: "Song not found" }), {
               status: 404,
               headers: { "Content-Type": "application/json" },
@@ -32,25 +40,26 @@ export const Route = createFileRoute("/api/songs/$id")({
             const bucket = new mongoose.mongo.GridFSBucket(db, { bucketName: "media" });
 
             // Delete song audio file from GridFS
-            if (song.fileId) {
+            if (item.fileId) {
               try {
-                await bucket.delete(song.fileId);
+                await bucket.delete(new mongoose.Types.ObjectId(item.fileId));
               } catch (err) {
-                console.warn("GridFS audio file delete failed:", err);
+                console.warn("GridFS audio file deletion warning:", err);
               }
             }
 
             // Delete cover art image from GridFS if present
-            if (song.coverFileId) {
+            if (item.coverFileId) {
               try {
-                await bucket.delete(song.coverFileId);
+                await bucket.delete(new mongoose.Types.ObjectId(item.coverFileId));
               } catch (err) {
-                console.warn("GridFS cover file delete failed:", err);
+                console.warn("GridFS cover file deletion warning:", err);
               }
             }
           }
 
           // Delete metadata document
+          await MediaItem.findByIdAndDelete(id);
           await Song.findByIdAndDelete(id);
 
           return new Response(JSON.stringify({ success: true }), {

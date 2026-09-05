@@ -2,6 +2,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { dbConnect } from "@/lib/db";
 import { MediaItem } from "@/lib/models";
+import {
+  requireAdmin,
+  validateMediaUpload,
+  checkRateLimit,
+  uploadRateLimiter,
+  createRateLimitResponse,
+  sanitizePlainText,
+} from "@/lib/security";
 import mongoose from "mongoose";
 
 export const Route = createFileRoute("/api/songs")({
@@ -10,7 +18,10 @@ export const Route = createFileRoute("/api/songs")({
       GET: async () => {
         try {
           await dbConnect();
-          const songs = await MediaItem.find({ type: "song" }).sort({ createdAt: -1 });
+          const songs = await MediaItem.find({ type: "song" })
+            .select("-__v")
+            .sort({ createdAt: -1 });
+
           return new Response(JSON.stringify(songs), {
             headers: { "Content-Type": "application/json" },
           });
@@ -23,23 +34,38 @@ export const Route = createFileRoute("/api/songs")({
         }
       },
       POST: async ({ request }) => {
+        // 1. Authorization: Admin check
+        const auth = requireAdmin(request);
+        if ("errorResponse" in auth) {
+          return auth.errorResponse;
+        }
+
+        // 2. Rate Limiting
+        const rateCheck = checkRateLimit(request, uploadRateLimiter);
+        if (!rateCheck.allowed) {
+          return createRateLimitResponse(rateCheck.retryAfterSeconds);
+        }
+
         try {
           await dbConnect();
           const formData = await request.formData();
           const file = formData.get("file") as File | null;
           const coverFile = formData.get("coverFile") as File | null;
-          const title = formData.get("title") as string | null;
-          const artist = formData.get("artist") as string | null;
-          const description = formData.get("description") as string | null;
-          const duration = formData.get("duration") as string | null;
-          const memoryDate = formData.get("memoryDate") as string | null;
+          const rawTitle = formData.get("title") as string | null;
+          const rawArtist = formData.get("artist") as string | null;
+          const rawDescription = formData.get("description") as string | null;
+          const rawDuration = formData.get("duration") as string | null;
+          const rawMemoryDate = formData.get("memoryDate") as string | null;
 
-          if (!file) {
+          if (!file || !(file instanceof File)) {
             return new Response(JSON.stringify({ error: "No audio file uploaded" }), {
               status: 400,
               headers: { "Content-Type": "application/json" },
             });
           }
+
+          const title = sanitizePlainText(rawTitle, 150);
+          const artist = sanitizePlainText(rawArtist, 100);
 
           if (!title || !artist) {
             return new Response(JSON.stringify({ error: "Title and Artist are required" }), {
@@ -48,53 +74,36 @@ export const Route = createFileRoute("/api/songs")({
             });
           }
 
-          // Validate Audio MIME Type
-          const allowedAudioMimeTypes = [
-            "audio/mpeg",
-            "audio/wav",
-            "audio/ogg",
-            "audio/webm",
-            "audio/mp3",
-            "audio/x-m4a",
-          ];
-          if (
-            !allowedAudioMimeTypes.includes(file.type) &&
-            !file.name.endsWith(".mp3") &&
-            !file.name.endsWith(".m4a")
-          ) {
-            return new Response(
-              JSON.stringify({
-                error: `Invalid audio MIME type: ${file.type}. Allowed: MP3, WAV, OGG, WEBM.`,
-              }),
-              { status: 400, headers: { "Content-Type": "application/json" } },
-            );
-          }
+          const description = sanitizePlainText(rawDescription, 1000);
+          const duration = sanitizePlainText(rawDuration, 20) || "3:00";
+          const memoryDate = sanitizePlainText(rawMemoryDate, 20) || new Date().toISOString().split("T")[0];
 
-          // Audio Size Limit: 20MB
-          const MAX_AUDIO_SIZE = 20 * 1024 * 1024;
-          if (file.size > MAX_AUDIO_SIZE) {
-            return new Response(
-              JSON.stringify({ error: `Audio file size exceeds the limit of 20MB` }),
-              { status: 400, headers: { "Content-Type": "application/json" } },
-            );
+          // 3. Audio Binary Magic Bytes & Security Validation
+          const audioArrayBuffer = await file.arrayBuffer();
+          const audioBuffer = Buffer.from(audioArrayBuffer);
+
+          const audioValidation = validateMediaUpload(audioBuffer, file.name, file.type, "song");
+          if (!audioValidation.valid) {
+            return new Response(JSON.stringify({ error: audioValidation.error }), {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            });
           }
 
           const db = mongoose.connection.db;
           if (!db) {
-            return new Response(JSON.stringify({ error: "Database connection failed" }), {
+            return new Response(JSON.stringify({ error: "Database connection unavailable" }), {
               status: 500,
               headers: { "Content-Type": "application/json" },
             });
           }
+
           const bucket = new mongoose.mongo.GridFSBucket(db, { bucketName: "media" });
 
           // Upload Audio File
-          const audioArrayBuffer = await file.arrayBuffer();
-          const audioBuffer = Buffer.from(audioArrayBuffer);
-
           const fileId = await new Promise<mongoose.Types.ObjectId>((resolve, reject) => {
-            const uploadStream = bucket.openUploadStream(file.name, {
-              contentType: file.type || "audio/mpeg",
+            const uploadStream = bucket.openUploadStream(audioValidation.safeFilename, {
+              contentType: audioValidation.detectedMimeType || "audio/mpeg",
             });
             uploadStream.on("finish", () => {
               resolve(uploadStream.id as mongoose.Types.ObjectId);
@@ -108,18 +117,15 @@ export const Route = createFileRoute("/api/songs")({
 
           // Upload Optional Cover File
           let coverFileId: mongoose.Types.ObjectId | undefined;
-          if (coverFile && coverFile.size > 0) {
-            const allowedImageMimeTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-            if (
-              allowedImageMimeTypes.includes(coverFile.type) ||
-              coverFile.name.match(/\.(jpg|jpeg|png|webp|gif)$/i)
-            ) {
-              const coverArrayBuffer = await coverFile.arrayBuffer();
-              const coverBuffer = Buffer.from(coverArrayBuffer);
+          if (coverFile && coverFile instanceof File && coverFile.size > 0) {
+            const coverArrayBuffer = await coverFile.arrayBuffer();
+            const coverBuffer = Buffer.from(coverArrayBuffer);
 
+            const coverValidation = validateMediaUpload(coverBuffer, coverFile.name, coverFile.type, "image");
+            if (coverValidation.valid) {
               coverFileId = await new Promise<mongoose.Types.ObjectId>((resolve, reject) => {
-                const uploadStream = bucket.openUploadStream(coverFile.name, {
-                  contentType: coverFile.type || "image/jpeg",
+                const uploadStream = bucket.openUploadStream(coverValidation.safeFilename, {
+                  contentType: coverValidation.detectedMimeType || "image/jpeg",
                 });
                 uploadStream.on("finish", () => {
                   resolve(uploadStream.id as mongoose.Types.ObjectId);
@@ -133,20 +139,20 @@ export const Route = createFileRoute("/api/songs")({
             }
           }
 
-          // Save metadata to MediaItem
+          // 4. Save metadata to MediaItem
           const song = new MediaItem({
             type: "song",
             source: "upload",
             title,
             artist,
-            description: description || "",
-            filename: file.name,
-            mimeType: file.type || "audio/mpeg",
-            fileSize: file.size,
+            description,
+            filename: audioValidation.safeFilename,
+            mimeType: audioValidation.detectedMimeType || "audio/mpeg",
+            fileSize: audioBuffer.length,
             fileId,
             coverFileId,
-            duration: duration || "3:00",
-            memoryDate: memoryDate || new Date().toISOString().split("T")[0],
+            duration,
+            memoryDate,
           });
           await song.save();
 
