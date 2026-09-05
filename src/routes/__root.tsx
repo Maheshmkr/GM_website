@@ -93,6 +93,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
     const { role } = await getSession();
 
+    // If unauthenticated, redirect to /login as the starting page
+    if (!role) {
+      throw redirect({
+        to: "/login",
+      });
+    }
+
     if (location.pathname === "/admin" && role !== "admin") {
       throw redirect({
         to: "/login",

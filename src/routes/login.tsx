@@ -10,6 +10,9 @@ export const Route = createFileRoute("/login")({
     if (role === "admin") {
       throw redirect({ to: "/admin" });
     }
+    if (role === "user") {
+      throw redirect({ to: "/" });
+    }
     return {};
   },
   component: LoginComponent,
