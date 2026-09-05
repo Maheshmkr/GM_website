@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -26,6 +26,12 @@ import {
   Image as ImageIcon,
   CheckCircle2,
   Mail,
+  ShieldCheck,
+  KeyRound,
+  Lock,
+  Eye,
+  EyeOff,
+  Shield,
 } from "lucide-react";
 import { SectionHeading } from "@/components/SectionHeading";
 import { Reveal } from "@/components/Reveal";
@@ -1848,10 +1854,19 @@ function TimelineManager({
    USERS MANAGER COMPONENT
    ========================================== */
 function UsersManager({ queryClient }: { queryClient: any }) {
+  // --- Normal User Creation State ---
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [creating, setCreating] = useState(false);
 
+  // --- Admin Profile & Credentials State ---
+  const [adminUsername, setAdminUsername] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [confirmAdminPassword, setConfirmAdminPassword] = useState("");
+  const [showAdminPass, setShowAdminPass] = useState(false);
+  const [updatingAdmin, setUpdatingAdmin] = useState(false);
+
+  // Query users list
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
@@ -1862,6 +1877,27 @@ function UsersManager({ queryClient }: { queryClient: any }) {
     },
   });
 
+  // Query current admin profile
+  const { data: adminProfile } = useQuery({
+    queryKey: ["adminProfile"],
+    queryFn: async () => {
+      const res = await fetch("/api/auth/admin");
+      const payload = await readJsonResponse(res);
+      if (payload.ok && payload.data) {
+        return payload.data;
+      }
+      return { username: "admin" };
+    },
+  });
+
+  // Sync admin username when admin profile loads
+  useEffect(() => {
+    if (adminProfile?.username && !adminUsername) {
+      setAdminUsername(adminProfile.username);
+    }
+  }, [adminProfile]);
+
+  // Create Standard User Mutation
   const createMutation = useMutation({
     mutationFn: async (userData: any) => {
       const res = await fetch("/api/users", {
@@ -1884,6 +1920,32 @@ function UsersManager({ queryClient }: { queryClient: any }) {
     },
   });
 
+  // Update Admin Credentials Mutation
+  const updateAdminMutation = useMutation({
+    mutationFn: async (payload: { username: string; newPassword?: string }) => {
+      const res = await fetch("/api/auth/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await readJsonResponse(res);
+      if (!data.ok) throw new Error(data.error || "Failed to update admin credentials");
+      return data;
+    },
+    onSuccess: (data: any) => {
+      toast.success(data?.data?.message || data?.message || "Admin credentials updated successfully!");
+      setAdminPassword("");
+      setConfirmAdminPassword("");
+      queryClient.invalidateQueries({ queryKey: ["adminProfile"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["auth-session"] });
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Error updating admin credentials");
+    },
+  });
+
+  // Delete User Mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
@@ -1893,6 +1955,7 @@ function UsersManager({ queryClient }: { queryClient: any }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["adminProfile"] });
       toast.success("User deleted successfully!");
     },
     onError: (err: any) => {
@@ -1914,110 +1977,274 @@ function UsersManager({ queryClient }: { queryClient: any }) {
     setCreating(true);
     try {
       await createMutation.mutateAsync({ username, password });
-    } catch (err) {
+    } catch {
       // Handled by mutation onError
     } finally {
       setCreating(false);
     }
   };
 
+  const handleUpdateAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanUser = (adminUsername || adminProfile?.username || "admin").trim();
+    if (!cleanUser) {
+      toast.error("Admin username is required");
+      return;
+    }
+    if (adminPassword) {
+      if (adminPassword.length < 6) {
+        toast.error("New password must be at least 6 characters");
+        return;
+      }
+      if (adminPassword !== confirmAdminPassword) {
+        toast.error("Passwords do not match");
+        return;
+      }
+    }
+
+    setUpdatingAdmin(true);
+    try {
+      await updateAdminMutation.mutateAsync({
+        username: cleanUser,
+        newPassword: adminPassword || undefined,
+      });
+    } catch {
+      // Handled by mutation onError
+    } finally {
+      setUpdatingAdmin(false);
+    }
+  };
+
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
-      {/* Create User Form */}
-      <div>
-        <h3 className="text-lg font-semibold flex items-center gap-2 mb-6">
-          <Plus className="size-5 text-primary" /> Create User Account
-        </h3>
-        <form onSubmit={handleCreate} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-muted-foreground mb-1">Username</label>
-            <input
-              type="text"
-              placeholder="e.g. lovebird"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full text-sm bg-surface/50 border border-border rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-muted-foreground mb-1">Password</label>
-            <input
-              type="password"
-              placeholder="Enter account password..."
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full text-sm bg-surface/50 border border-border rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            />
+    <div className="grid gap-8 lg:grid-cols-[1.1fr_1.4fr]">
+      {/* Forms Column */}
+      <div className="space-y-8">
+        {/* 1. Admin Security & Credentials Form */}
+        <div className="bg-surface/40 border border-primary/20 rounded-3xl p-6 shadow-sm relative overflow-hidden backdrop-blur-md">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
+          
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-base font-semibold flex items-center gap-2 text-foreground">
+              <ShieldCheck className="size-5 text-primary" />
+              Admin Credentials & Security
+            </h3>
+            <span className="text-[11px] font-medium text-primary bg-primary/10 border border-primary/20 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+              <KeyRound className="size-3" /> Master Admin
+            </span>
           </div>
 
-          <button
-            type="submit"
-            disabled={creating}
-            className="w-full btn-love rounded-full py-3 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            {creating ? (
-              <>
-                <Loader2 className="size-4 animate-spin" /> Creating...
-              </>
-            ) : (
-              "Create User"
-            )}
-          </button>
-        </form>
+          <p className="text-xs text-muted-foreground mb-5 leading-relaxed">
+            Change your administrator login username and password. This will update the primary admin credentials for logging into the admin dashboard.
+          </p>
+
+          <form onSubmit={handleUpdateAdmin} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+                Admin Username
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. admin or custom username"
+                value={adminUsername}
+                onChange={(e) => setAdminUsername(e.target.value)}
+                className="w-full text-sm bg-surface/80 border border-border/80 rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+              />
+            </div>
+
+            <div className="relative">
+              <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+                New Admin Password <span className="text-[10px] font-normal text-muted-foreground">(leave blank to keep current)</span>
+              </label>
+              <div className="relative">
+                <input
+                  type={showAdminPass ? "text" : "password"}
+                  placeholder="Enter new password (min 6 chars)..."
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  className="w-full text-sm bg-surface/80 border border-border/80 rounded-xl p-3 pr-10 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowAdminPass(!showAdminPass)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                >
+                  {showAdminPass ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
+            </div>
+
+            {adminPassword ? (
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+                  Confirm New Admin Password
+                </label>
+                <input
+                  type={showAdminPass ? "text" : "password"}
+                  placeholder="Re-enter new password..."
+                  value={confirmAdminPassword}
+                  onChange={(e) => setConfirmAdminPassword(e.target.value)}
+                  className="w-full text-sm bg-surface/80 border border-border/80 rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                />
+              </div>
+            ) : null}
+
+            <button
+              type="submit"
+              disabled={updatingAdmin}
+              className="w-full btn-love rounded-full py-3 text-sm font-semibold flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 mt-2"
+            >
+              {updatingAdmin ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" /> Saving Admin Changes...
+                </>
+              ) : (
+                <>
+                  <Lock className="size-4" /> Save Admin Credentials
+                </>
+              )}
+            </button>
+          </form>
+        </div>
+
+        {/* 2. Create Standard User Form */}
+        <div className="bg-surface/30 border border-border/60 rounded-3xl p-6 backdrop-blur-md">
+          <h3 className="text-base font-semibold flex items-center gap-2 mb-2 text-foreground">
+            <Plus className="size-5 text-primary" /> Create Standard User Account
+          </h3>
+          <p className="text-xs text-muted-foreground mb-5">
+            Create standard viewer accounts with restricted permissions for visitors.
+          </p>
+
+          <form onSubmit={handleCreate} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground mb-1.5">Username</label>
+              <input
+                type="text"
+                placeholder="e.g. lovebird"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full text-sm bg-surface/80 border border-border/80 rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground mb-1.5">Password</label>
+              <input
+                type="password"
+                placeholder="Enter account password..."
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full text-sm bg-surface/80 border border-border/80 rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={creating}
+              className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border rounded-full py-3 text-sm font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+            >
+              {creating ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" /> Creating Account...
+                </>
+              ) : (
+                "Create Standard User"
+              )}
+            </button>
+          </form>
+        </div>
       </div>
 
-      {/* Users List */}
-      <div className="border-l border-border/30 pl-0 lg:pl-8">
-        <h3 className="text-lg font-semibold mb-6 flex justify-between items-center">
-          <span>User Accounts</span>
-          <span className="text-xs font-normal text-muted-foreground bg-secondary/80 px-2.5 py-1 rounded-full">
+      {/* Accounts Directory Column */}
+      <div className="border-t lg:border-t-0 lg:border-l border-border/40 pt-6 lg:pt-0 lg:pl-8">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <Users className="size-5 text-primary" /> Registered Accounts
+            </h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Overview of all active administrator and user accounts
+            </p>
+          </div>
+          <span className="text-xs font-medium text-muted-foreground bg-secondary/80 border border-border px-3 py-1 rounded-full">
             {users.length} accounts
           </span>
-        </h3>
+        </div>
 
         {isLoading ? (
           <div className="flex items-center justify-center py-20 text-muted-foreground text-sm gap-2">
-            <Loader2 className="size-5 animate-spin" /> Loading user accounts...
+            <Loader2 className="size-5 animate-spin text-primary" /> Loading user accounts...
           </div>
         ) : users.length === 0 ? (
-          <div className="text-center py-20 text-muted-foreground text-sm">
-            No database user accounts found. Use the form to create one.
+          <div className="text-center py-20 text-muted-foreground text-sm bg-surface/20 border border-dashed border-border rounded-2xl p-6">
+            No database user accounts found. Use the forms to create accounts.
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {users.map((u: any) => (
-              <div
-                key={u._id}
-                className="bg-surface/30 border border-border rounded-2xl p-4 flex justify-between items-center relative group"
-              >
-                <div className="min-w-0">
-                  <h4 className="font-semibold text-sm truncate flex items-center gap-1.5">
-                    <Users className="size-4 text-primary" />
-                    {u.username}
-                  </h4>
-                  <p className="text-[10px] text-muted-foreground mt-1">
-                    Role: <span className="text-foreground capitalize font-medium">{u.role}</span>
-                  </p>
-                  <p className="text-[9px] text-muted-foreground mt-0.5">
-                    Created: {new Date(u.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
+          <div className="grid gap-4">
+            {users.map((u: any) => {
+              const isAdmin = u.role === "admin";
+              return (
+                <div
+                  key={u._id}
+                  className={cn(
+                    "border rounded-2xl p-4 flex justify-between items-center relative group transition-all duration-200",
+                    isAdmin
+                      ? "bg-primary/5 border-primary/30 hover:border-primary/50 shadow-sm"
+                      : "bg-surface/30 border-border hover:border-border/80"
+                  )}
+                >
+                  <div className="min-w-0 flex items-center gap-3.5">
+                    <div
+                      className={cn(
+                        "size-10 rounded-xl flex items-center justify-center shrink-0",
+                        isAdmin
+                          ? "bg-primary/15 text-primary"
+                          : "bg-secondary text-secondary-foreground"
+                      )}
+                    >
+                      {isAdmin ? <Shield className="size-5" /> : <Users className="size-5" />}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-semibold text-sm truncate text-foreground">
+                          {u.username}
+                        </h4>
+                        <span
+                          className={cn(
+                            "text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border",
+                            isAdmin
+                              ? "bg-primary/15 text-primary border-primary/30"
+                              : "bg-secondary text-muted-foreground border-border"
+                          )}
+                        >
+                          {u.role}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                        Created: {new Date(u.createdAt).toLocaleDateString(undefined, {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </p>
+                    </div>
+                  </div>
 
-                <div>
-                  <button
-                    onClick={() => {
-                      if (confirm(`Are you sure you want to delete user "${u.username}"?`)) {
-                        deleteMutation.mutate(u._id);
-                      }
-                    }}
-                    className="p-2 text-destructive hover:bg-destructive/10 rounded-full transition-colors"
-                    title="Delete Account"
-                  >
-                    <Trash2 className="size-4" />
-                  </button>
+                  <div>
+                    <button
+                      onClick={() => {
+                        if (confirm(`Are you sure you want to delete account "${u.username}"?`)) {
+                          deleteMutation.mutate(u._id);
+                        }
+                      }}
+                      className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full transition-colors"
+                      title="Delete Account"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

@@ -2,10 +2,10 @@ import { o as __toESM } from "../_runtime.mjs";
 import { t as readJsonResponse } from "./api-BUT7_u4b.mjs";
 import { t as cn } from "./utils-C_uf36nf.mjs";
 import { a as require_react, i as useQueryClient, n as useQuery, o as require_jsx_runtime, t as useMutation } from "../_libs/react+tanstack__react-query.mjs";
-import { A as Link, B as Camera, I as Clock, L as CircleCheck, M as Heart, N as Film, P as ExternalLink, S as Music4, T as Mail, V as Calendar, a as Upload, c as Sparkles, g as Play, h as Plus, j as Image, k as LoaderCircle, o as Trash2, r as Users, t as X, v as Pen, w as MapPin, x as Music } from "../_libs/lucide-react.mjs";
+import { A as Lock, C as Music, D as Mail, E as MapPin, F as Heart, G as Camera, H as CircleCheck, I as Film, K as Calendar, L as Eye, M as Link, N as KeyRound, P as Image, R as EyeOff, V as Clock, _ as Plus, a as Upload, b as Pen, c as Sparkles, f as Shield, j as LoaderCircle, o as Trash2, p as ShieldCheck, r as Users, t as X, v as Play, w as Music4, z as ExternalLink } from "../_libs/lucide-react.mjs";
 import { t as SectionHeading } from "./SectionHeading-BVG9eVYl.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/admin-DvbZeKcs.js
+//#region node_modules/.nitro/vite/services/ssr/assets/admin-BMaWnh1R.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function AdminPage() {
@@ -1614,6 +1614,11 @@ function UsersManager({ queryClient }) {
 	const [username, setUsername] = (0, import_react.useState)("");
 	const [password, setPassword] = (0, import_react.useState)("");
 	const [creating, setCreating] = (0, import_react.useState)(false);
+	const [adminUsername, setAdminUsername] = (0, import_react.useState)("");
+	const [adminPassword, setAdminPassword] = (0, import_react.useState)("");
+	const [confirmAdminPassword, setConfirmAdminPassword] = (0, import_react.useState)("");
+	const [showAdminPass, setShowAdminPass] = (0, import_react.useState)(false);
+	const [updatingAdmin, setUpdatingAdmin] = (0, import_react.useState)(false);
 	const { data: users = [], isLoading } = useQuery({
 		queryKey: ["users"],
 		queryFn: async () => {
@@ -1623,6 +1628,18 @@ function UsersManager({ queryClient }) {
 			return payload.data ?? [];
 		}
 	});
+	const { data: adminProfile } = useQuery({
+		queryKey: ["adminProfile"],
+		queryFn: async () => {
+			const res = await fetch("/api/auth/admin");
+			const payload = await readJsonResponse(res);
+			if (payload.ok && payload.data) return payload.data;
+			return { username: "admin" };
+		}
+	});
+	(0, import_react.useEffect)(() => {
+		if (adminProfile?.username && !adminUsername) setAdminUsername(adminProfile.username);
+	}, [adminProfile]);
 	const createMutation = useMutation({
 		mutationFn: async (userData) => {
 			const res = await fetch("/api/users", {
@@ -1644,6 +1661,29 @@ function UsersManager({ queryClient }) {
 			toast.error(`Error creating user: ${err.message}`);
 		}
 	});
+	const updateAdminMutation = useMutation({
+		mutationFn: async (payload) => {
+			const res = await fetch("/api/auth/admin", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(payload)
+			});
+			const data = await readJsonResponse(res);
+			if (!data.ok) throw new Error(data.error || "Failed to update admin credentials");
+			return data;
+		},
+		onSuccess: (data) => {
+			toast.success(data?.data?.message || data?.message || "Admin credentials updated successfully!");
+			setAdminPassword("");
+			setConfirmAdminPassword("");
+			queryClient.invalidateQueries({ queryKey: ["adminProfile"] });
+			queryClient.invalidateQueries({ queryKey: ["users"] });
+			queryClient.invalidateQueries({ queryKey: ["auth-session"] });
+		},
+		onError: (err) => {
+			toast.error(err.message || "Error updating admin credentials");
+		}
+	});
 	const deleteMutation = useMutation({
 		mutationFn: async (id) => {
 			const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
@@ -1653,6 +1693,7 @@ function UsersManager({ queryClient }) {
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["users"] });
+			queryClient.invalidateQueries({ queryKey: ["adminProfile"] });
 			toast.success("User deleted successfully!");
 		},
 		onError: (err) => {
@@ -1675,92 +1716,222 @@ function UsersManager({ queryClient }) {
 				username,
 				password
 			});
-		} catch (err) {} finally {
+		} catch {} finally {
 			setCreating(false);
 		}
 	};
+	const handleUpdateAdmin = async (e) => {
+		e.preventDefault();
+		const cleanUser = (adminUsername || adminProfile?.username || "admin").trim();
+		if (!cleanUser) {
+			toast.error("Admin username is required");
+			return;
+		}
+		if (adminPassword) {
+			if (adminPassword.length < 6) {
+				toast.error("New password must be at least 6 characters");
+				return;
+			}
+			if (adminPassword !== confirmAdminPassword) {
+				toast.error("Passwords do not match");
+				return;
+			}
+		}
+		setUpdatingAdmin(true);
+		try {
+			await updateAdminMutation.mutateAsync({
+				username: cleanUser,
+				newPassword: adminPassword || void 0
+			});
+		} catch {} finally {
+			setUpdatingAdmin(false);
+		}
+	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "grid gap-8 lg:grid-cols-[1fr_2fr]",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
-			className: "text-lg font-semibold flex items-center gap-2 mb-6",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "size-5 text-primary" }), " Create User Account"]
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
-			onSubmit: handleCreate,
-			className: "space-y-4",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-					className: "block text-xs font-semibold text-muted-foreground mb-1",
-					children: "Username"
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-					type: "text",
-					placeholder: "e.g. lovebird",
-					value: username,
-					onChange: (e) => setUsername(e.target.value),
-					className: "w-full text-sm bg-surface/50 border border-border rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-				})] }),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-					className: "block text-xs font-semibold text-muted-foreground mb-1",
-					children: "Password"
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-					type: "password",
-					placeholder: "Enter account password...",
-					value: password,
-					onChange: (e) => setPassword(e.target.value),
-					className: "w-full text-sm bg-surface/50 border border-border rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-				})] }),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-					type: "submit",
-					disabled: creating,
-					className: "w-full btn-love rounded-full py-3 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50",
-					children: creating ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-4 animate-spin" }), " Creating..."] }) : "Create User"
-				})
-			]
-		})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "border-l border-border/30 pl-0 lg:pl-8",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
-				className: "text-lg font-semibold mb-6 flex justify-between items-center",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "User Accounts" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-					className: "text-xs font-normal text-muted-foreground bg-secondary/80 px-2.5 py-1 rounded-full",
+		className: "grid gap-8 lg:grid-cols-[1.1fr_1.4fr]",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "space-y-8",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "bg-surface/40 border border-primary/20 rounded-3xl p-6 shadow-sm relative overflow-hidden backdrop-blur-md",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center justify-between mb-4",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+							className: "text-base font-semibold flex items-center gap-2 text-foreground",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ShieldCheck, { className: "size-5 text-primary" }), "Admin Credentials & Security"]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+							className: "text-[11px] font-medium text-primary bg-primary/10 border border-primary/20 px-2.5 py-0.5 rounded-full flex items-center gap-1",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(KeyRound, { className: "size-3" }), " Master Admin"]
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-xs text-muted-foreground mb-5 leading-relaxed",
+						children: "Change your administrator login username and password. This will update the primary admin credentials for logging into the admin dashboard."
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+						onSubmit: handleUpdateAdmin,
+						className: "space-y-4",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+								className: "block text-xs font-semibold text-muted-foreground mb-1.5",
+								children: "Admin Username"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								type: "text",
+								placeholder: "e.g. admin or custom username",
+								value: adminUsername,
+								onChange: (e) => setAdminUsername(e.target.value),
+								className: "w-full text-sm bg-surface/80 border border-border/80 rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+							})] }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "relative",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+									className: "block text-xs font-semibold text-muted-foreground mb-1.5",
+									children: ["New Admin Password ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "text-[10px] font-normal text-muted-foreground",
+										children: "(leave blank to keep current)"
+									})]
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "relative",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+										type: showAdminPass ? "text" : "password",
+										placeholder: "Enter new password (min 6 chars)...",
+										value: adminPassword,
+										onChange: (e) => setAdminPassword(e.target.value),
+										className: "w-full text-sm bg-surface/80 border border-border/80 rounded-xl p-3 pr-10 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+										type: "button",
+										onClick: () => setShowAdminPass(!showAdminPass),
+										className: "absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1",
+										children: showAdminPass ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "size-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "size-4" })
+									})]
+								})]
+							}),
+							adminPassword ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+								className: "block text-xs font-semibold text-muted-foreground mb-1.5",
+								children: "Confirm New Admin Password"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								type: showAdminPass ? "text" : "password",
+								placeholder: "Re-enter new password...",
+								value: confirmAdminPassword,
+								onChange: (e) => setConfirmAdminPassword(e.target.value),
+								className: "w-full text-sm bg-surface/80 border border-border/80 rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+							})] }) : null,
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								type: "submit",
+								disabled: updatingAdmin,
+								className: "w-full btn-love rounded-full py-3 text-sm font-semibold flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 mt-2",
+								children: updatingAdmin ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-4 animate-spin" }), " Saving Admin Changes..."] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "size-4" }), " Save Admin Credentials"] })
+							})
+						]
+					})
+				]
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "bg-surface/30 border border-border/60 rounded-3xl p-6 backdrop-blur-md",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+						className: "text-base font-semibold flex items-center gap-2 mb-2 text-foreground",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "size-5 text-primary" }), " Create Standard User Account"]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-xs text-muted-foreground mb-5",
+						children: "Create standard viewer accounts with restricted permissions for visitors."
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+						onSubmit: handleCreate,
+						className: "space-y-4",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+								className: "block text-xs font-semibold text-muted-foreground mb-1.5",
+								children: "Username"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								type: "text",
+								placeholder: "e.g. lovebird",
+								value: username,
+								onChange: (e) => setUsername(e.target.value),
+								className: "w-full text-sm bg-surface/80 border border-border/80 rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+							})] }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+								className: "block text-xs font-semibold text-muted-foreground mb-1.5",
+								children: "Password"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								type: "password",
+								placeholder: "Enter account password...",
+								value: password,
+								onChange: (e) => setPassword(e.target.value),
+								className: "w-full text-sm bg-surface/80 border border-border/80 rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+							})] }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								type: "submit",
+								disabled: creating,
+								className: "w-full bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border rounded-full py-3 text-sm font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50",
+								children: creating ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-4 animate-spin" }), " Creating Account..."] }) : "Create Standard User"
+							})
+						]
+					})
+				]
+			})]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "border-t lg:border-t-0 lg:border-l border-border/40 pt-6 lg:pt-0 lg:pl-8",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex justify-between items-center mb-6",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+					className: "text-lg font-semibold flex items-center gap-2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "size-5 text-primary" }), " Registered Accounts"]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "text-xs text-muted-foreground mt-0.5",
+					children: "Overview of all active administrator and user accounts"
+				})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+					className: "text-xs font-medium text-muted-foreground bg-secondary/80 border border-border px-3 py-1 rounded-full",
 					children: [users.length, " accounts"]
 				})]
 			}), isLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex items-center justify-center py-20 text-muted-foreground text-sm gap-2",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-5 animate-spin" }), " Loading user accounts..."]
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-5 animate-spin text-primary" }), " Loading user accounts..."]
 			}) : users.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "text-center py-20 text-muted-foreground text-sm",
-				children: "No database user accounts found. Use the form to create one."
+				className: "text-center py-20 text-muted-foreground text-sm bg-surface/20 border border-dashed border-border rounded-2xl p-6",
+				children: "No database user accounts found. Use the forms to create accounts."
 			}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "grid gap-4 sm:grid-cols-2",
-				children: users.map((u) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "bg-surface/30 border border-border rounded-2xl p-4 flex justify-between items-center relative group",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "min-w-0",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h4", {
-								className: "font-semibold text-sm truncate flex items-center gap-1.5",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "size-4 text-primary" }), u.username]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-								className: "text-[10px] text-muted-foreground mt-1",
-								children: ["Role: ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-foreground capitalize font-medium",
-									children: u.role
+				className: "grid gap-4",
+				children: users.map((u) => {
+					const isAdmin = u.role === "admin";
+					return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: cn("border rounded-2xl p-4 flex justify-between items-center relative group transition-all duration-200", isAdmin ? "bg-primary/5 border-primary/30 hover:border-primary/50 shadow-sm" : "bg-surface/30 border-border hover:border-border/80"),
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "min-w-0 flex items-center gap-3.5",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: cn("size-10 rounded-xl flex items-center justify-center shrink-0", isAdmin ? "bg-primary/15 text-primary" : "bg-secondary text-secondary-foreground"),
+								children: isAdmin ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "size-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "size-5" })
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "min-w-0",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center gap-2",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
+										className: "font-semibold text-sm truncate text-foreground",
+										children: u.username
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: cn("text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border", isAdmin ? "bg-primary/15 text-primary border-primary/30" : "bg-secondary text-muted-foreground border-border"),
+										children: u.role
+									})]
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+									className: "text-[11px] text-muted-foreground mt-0.5",
+									children: ["Created: ", new Date(u.createdAt).toLocaleDateString(void 0, {
+										year: "numeric",
+										month: "short",
+										day: "numeric"
+									})]
 								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-								className: "text-[9px] text-muted-foreground mt-0.5",
-								children: ["Created: ", new Date(u.createdAt).toLocaleDateString()]
-							})
-						]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: () => {
-							if (confirm(`Are you sure you want to delete user "${u.username}"?`)) deleteMutation.mutate(u._id);
-						},
-						className: "p-2 text-destructive hover:bg-destructive/10 rounded-full transition-colors",
-						title: "Delete Account",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "size-4" })
-					}) })]
-				}, u._id))
+							})]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							onClick: () => {
+								if (confirm(`Are you sure you want to delete account "${u.username}"?`)) deleteMutation.mutate(u._id);
+							},
+							className: "p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full transition-colors",
+							title: "Delete Account",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "size-4" })
+						}) })]
+					}, u._id);
+				})
 			})]
 		})]
 	});

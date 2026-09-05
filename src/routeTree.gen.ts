@@ -25,6 +25,7 @@ import { Route as ApiSongsRouteImport } from './routes/api/songs'
 import { Route as ApiTimelineRouteImport } from './routes/api/timeline'
 import { Route as ApiUsersRouteImport } from './routes/api/users'
 import { Route as ApiVideosRouteImport } from './routes/api/videos'
+import { Route as ApiAuthAdminRouteImport } from './routes/api/auth.admin'
 import { Route as ApiAuthLoginRouteImport } from './routes/api/auth.login'
 import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth.logout'
 import { Route as ApiAuthSessionRouteImport } from './routes/api/auth.session'
@@ -121,6 +122,11 @@ const ApiVideosRoute = ApiVideosRouteImport.update({
   path: '/api/videos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthAdminRoute = ApiAuthAdminRouteImport.update({
+  id: '/api/auth/admin',
+  path: '/api/auth/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthLoginRoute = ApiAuthLoginRouteImport.update({
   id: '/api/auth/login',
   path: '/api/auth/login',
@@ -214,6 +220,7 @@ export interface FileRoutesByFullPath {
   '/api/timeline': typeof ApiTimelineRouteWithChildren
   '/api/users': typeof ApiUsersRouteWithChildren
   '/api/videos': typeof ApiVideosRouteWithChildren
+  '/api/auth/admin': typeof ApiAuthAdminRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
   '/api/auth/session': typeof ApiAuthSessionRoute
@@ -247,6 +254,7 @@ export interface FileRoutesByTo {
   '/api/timeline': typeof ApiTimelineRouteWithChildren
   '/api/users': typeof ApiUsersRouteWithChildren
   '/api/videos': typeof ApiVideosRouteWithChildren
+  '/api/auth/admin': typeof ApiAuthAdminRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
   '/api/auth/session': typeof ApiAuthSessionRoute
@@ -281,6 +289,7 @@ export interface FileRoutesById {
   '/api/timeline': typeof ApiTimelineRouteWithChildren
   '/api/users': typeof ApiUsersRouteWithChildren
   '/api/videos': typeof ApiVideosRouteWithChildren
+  '/api/auth/admin': typeof ApiAuthAdminRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/logout': typeof ApiAuthLogoutRoute
   '/api/auth/session': typeof ApiAuthSessionRoute
@@ -316,6 +325,7 @@ export interface FileRouteTypes {
     | '/api/timeline'
     | '/api/users'
     | '/api/videos'
+    | '/api/auth/admin'
     | '/api/auth/login'
     | '/api/auth/logout'
     | '/api/auth/session'
@@ -349,6 +359,7 @@ export interface FileRouteTypes {
     | '/api/timeline'
     | '/api/users'
     | '/api/videos'
+    | '/api/auth/admin'
     | '/api/auth/login'
     | '/api/auth/logout'
     | '/api/auth/session'
@@ -382,6 +393,7 @@ export interface FileRouteTypes {
     | '/api/timeline'
     | '/api/users'
     | '/api/videos'
+    | '/api/auth/admin'
     | '/api/auth/login'
     | '/api/auth/logout'
     | '/api/auth/session'
@@ -416,6 +428,7 @@ export interface RootRouteChildren {
   ApiTimelineRoute: typeof ApiTimelineRouteWithChildren
   ApiUsersRoute: typeof ApiUsersRouteWithChildren
   ApiVideosRoute: typeof ApiVideosRouteWithChildren
+  ApiAuthAdminRoute: typeof ApiAuthAdminRoute
   ApiAuthLoginRoute: typeof ApiAuthLoginRoute
   ApiAuthLogoutRoute: typeof ApiAuthLogoutRoute
   ApiAuthSessionRoute: typeof ApiAuthSessionRoute
@@ -534,6 +547,13 @@ declare module '@tanstack/react-router' {
       path: '/api/videos'
       fullPath: '/api/videos'
       preLoaderRoute: typeof ApiVideosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/admin': {
+      id: '/api/auth/admin'
+      path: '/api/auth/admin'
+      fullPath: '/api/auth/admin'
+      preLoaderRoute: typeof ApiAuthAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/login': {
@@ -753,6 +773,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiTimelineRoute: ApiTimelineRouteWithChildren,
   ApiUsersRoute: ApiUsersRouteWithChildren,
   ApiVideosRoute: ApiVideosRouteWithChildren,
+  ApiAuthAdminRoute: ApiAuthAdminRoute,
   ApiAuthLoginRoute: ApiAuthLoginRoute,
   ApiAuthLogoutRoute: ApiAuthLogoutRoute,
   ApiAuthSessionRoute: ApiAuthSessionRoute,

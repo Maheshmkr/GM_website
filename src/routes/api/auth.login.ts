@@ -58,8 +58,23 @@ export const Route = createFileRoute("/api/auth/login")({
           let matchedUsername: string = cleanUsername || "visitor";
           let matchedUserId: string | undefined;
 
-          // 3. Admin Account Validation (timing-safe)
-          if (cleanUsername.toLowerCase() === "admin") {
+          // 3. DB User Account Validation (Prioritized for dynamic admin & user accounts)
+          if (cleanUsername) {
+            await dbConnect();
+            const user = await User.findOne({
+              username: { $regex: new RegExp(`^${cleanUsername.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i") },
+            });
+            if (user && user.password) {
+              if (verifyPassword(password, user.password)) {
+                matchedRole = (user.role as "admin" | "user") || "user";
+                matchedUsername = user.username;
+                matchedUserId = user._id.toString();
+              }
+            }
+          }
+
+          // 4. Admin Account Validation Fallback (via env credentials)
+          if (!matchedRole && cleanUsername.toLowerCase() === "admin") {
             const isMatch = adminPassHash
               ? verifyPassword(password, adminPassHash)
               : password === adminPass;
@@ -70,20 +85,7 @@ export const Route = createFileRoute("/api/auth/login")({
             }
           }
 
-          // 4. DB User Account Validation
-          if (!matchedRole && cleanUsername) {
-            await dbConnect();
-            const user = await User.findOne({ username: cleanUsername });
-            if (user && user.password) {
-              if (verifyPassword(password, user.password)) {
-                matchedRole = (user.role as "admin" | "user") || "user";
-                matchedUsername = user.username;
-                matchedUserId = user._id.toString();
-              }
-            }
-          }
-
-          // 5. Fallback Password Validation (Without username or fallback)
+          // 5. Fallback Password Validation (Without username or legacy pass)
           if (!matchedRole) {
             if (password === adminPass) {
               matchedRole = "admin";

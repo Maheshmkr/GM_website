@@ -278,6 +278,45 @@ var ExternalLink = createLucideIcon("external-link", [
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
+var EyeOff = createLucideIcon("eye-off", [
+	["path", {
+		d: "M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49",
+		key: "ct8e1f"
+	}],
+	["path", {
+		d: "M14.084 14.158a3 3 0 0 1-4.242-4.242",
+		key: "151rxh"
+	}],
+	["path", {
+		d: "M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143",
+		key: "13bj9a"
+	}],
+	["path", {
+		d: "m2 2 20 20",
+		key: "1ooewy"
+	}]
+]);
+/**
+* @license lucide-react v0.575.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
+var Eye = createLucideIcon("eye", [["path", {
+	d: "M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0",
+	key: "1nclc0"
+}], ["circle", {
+	cx: "12",
+	cy: "12",
+	r: "3",
+	key: "1v7zrd"
+}]]);
+/**
+* @license lucide-react v0.575.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
 var Film = createLucideIcon("film", [
 	["rect", {
 		width: "18",
@@ -353,6 +392,22 @@ var Image = createLucideIcon("image", [
 		key: "1xmnt7"
 	}]
 ]);
+/**
+* @license lucide-react v0.575.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
+var KeyRound = createLucideIcon("key-round", [["path", {
+	d: "M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z",
+	key: "1s6t7t"
+}], ["circle", {
+	cx: "16.5",
+	cy: "7.5",
+	r: ".5",
+	fill: "currentColor",
+	key: "w0ekpg"
+}]]);
 /**
 * @license lucide-react v0.575.0 - ISC
 *
@@ -678,6 +733,29 @@ var Save = createLucideIcon("save", [
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
+var ShieldCheck = createLucideIcon("shield-check", [["path", {
+	d: "M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z",
+	key: "oel41y"
+}], ["path", {
+	d: "m9 12 2 2 4-4",
+	key: "dzmm74"
+}]]);
+/**
+* @license lucide-react v0.575.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
+var Shield = createLucideIcon("shield", [["path", {
+	d: "M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z",
+	key: "oel41y"
+}]]);
+/**
+* @license lucide-react v0.575.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
 var Shuffle = createLucideIcon("shuffle", [
 	["path", {
 		d: "m18 14 4 4-4 4",
@@ -882,4 +960,4 @@ var X = createLucideIcon("x", [["path", {
 	key: "d8bk6v"
 }]]);
 //#endregion
-export { Link as A, Camera as B, Menu as C, LogIn as D, LogOut as E, Coffee as F, ArrowRight as H, Clock as I, CircleCheck as L, Heart as M, Film as N, Lock as O, ExternalLink as P, ChevronRight as R, Music4 as S, Mail as T, ArrowLeft as U, Calendar as V, Plane as _, Upload as a, Pause as b, Sparkles as c, Shuffle as d, Save as f, Play as g, Plus as h, User as i, Image as j, LoaderCircle as k, SkipForward as l, Repeat as m, Video as n, Trash2 as o, RotateCcw as p, Users as r, Star as s, X as t, SkipBack as u, Pen as v, MapPin as w, Music as x, PenLine as y, ChevronLeft as z };
+export { Lock as A, Coffee as B, Music as C, Mail as D, MapPin as E, Heart as F, Camera as G, CircleCheck as H, Film as I, ArrowLeft as J, Calendar as K, Eye as L, Link as M, KeyRound as N, LogOut as O, Image as P, EyeOff as R, Pause as S, Menu as T, ChevronRight as U, Clock as V, ChevronLeft as W, Plus as _, Upload as a, Pen as b, Sparkles as c, Shuffle as d, Shield as f, Repeat as g, RotateCcw as h, User as i, LoaderCircle as j, LogIn as k, SkipForward as l, Save as m, Video as n, Trash2 as o, ShieldCheck as p, ArrowRight as q, Users as r, Star as s, X as t, SkipBack as u, Play as v, Music4 as w, PenLine as x, Plane as y, ExternalLink as z };

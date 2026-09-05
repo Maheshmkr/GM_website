@@ -1,21 +1,21 @@
 import { o as __toESM } from "../_runtime.mjs";
 import { t as cn } from "./utils-C_uf36nf.mjs";
 import { a as require_react, o as require_jsx_runtime, r as QueryClientProvider } from "../_libs/react+tanstack__react-query.mjs";
-import { C as Menu, D as LogIn, E as LogOut, M as Heart, b as Pause, c as Sparkles, g as Play, l as SkipForward, t as X, u as SkipBack } from "../_libs/lucide-react.mjs";
+import { F as Heart, O as LogOut, S as Pause, T as Menu, c as Sparkles, k as LogIn, l as SkipForward, t as X, u as SkipBack, v as Play } from "../_libs/lucide-react.mjs";
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import { _ as useLoaderData, c as HeadContent, d as createRouter, f as Outlet, g as Link, h as createRootRouteWithContext, j as redirect, l as useLocation, m as createFileRoute, p as lazyRouteComponent, s as Scripts, v as useRouter } from "../_libs/@tanstack/react-router+[...].mjs";
 import { t as require_mongoose } from "../_libs/mongoose+mpath+mquery+ms+sift.mjs";
 import { a as createSessionCookie, c as hashPassword, d as requireAdmin, f as sanitizeMongoInput, g as verifyPassword, h as validateMediaUpload, i as createRateLimitResponse, l as isValidObjectId, m as uploadRateLimiter, n as checkRateLimit, o as createSessionToken, p as sanitizePlainText, r as createClearSessionCookie, s as getAuthSession, t as authRateLimiter, u as mutationRateLimiter, v as dbConnect } from "./ssr.mjs";
 import { c as createServerFn, i as TSS_SERVER_FUNCTION } from "./createServerFn-CIHAFgYl.mjs";
 import { i as letters, n as girlfriend } from "./site-_zOoiwhn.mjs";
-import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-Dxi6v49_.mjs";
+import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-Cjhcuqwl.mjs";
 import { n as formatTime, r as useMusic, t as MusicProvider } from "./MusicProvider-CexXRw5f.mjs";
-import { i as stringType, n as enumType, r as objectType, t as booleanType } from "../_libs/zod.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-_b14X1F3.js
+import { a as stringType, i as objectType, n as enumType, r as literalType, t as booleanType } from "../_libs/zod.mjs";
+//#region node_modules/.nitro/vite/services/ssr/assets/router-21IrmAWd.js
 var import_mongoose = /* @__PURE__ */ __toESM(require_mongoose());
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-UGWeI36y.css";
+var styles_default = "/assets/styles-pzQAf11U.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -417,7 +417,7 @@ function ErrorComponent({ error, reset }) {
 		})
 	});
 }
-var Route$31 = createRootRouteWithContext()({
+var Route$32 = createRootRouteWithContext()({
 	loader: async ({ location }) => {
 		if (location.pathname === "/login" || location.pathname.startsWith("/api/") || location.pathname.includes(".")) return { role: null };
 		const { role } = await getSession();
@@ -481,7 +481,7 @@ function RootShell({ children }) {
 	});
 }
 function RootComponent() {
-	const { queryClient } = Route$31.useRouteContext();
+	const { queryClient } = Route$32.useRouteContext();
 	if (useLocation().pathname === "/login") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(QueryClientProvider, {
 		client: queryClient,
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Ambience, {}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", {
@@ -506,7 +506,7 @@ function RootComponent() {
 var $$splitComponentImporter$8 = () => import("./routes-CKmu2OzX.mjs");
 var title$6 = "For You — A Little World Made Just For Us";
 var description$6 = "A private collection of our photos, videos, songs, letters and the timeline of our story — made with all my love.";
-var Route$30 = createFileRoute("/")({
+var Route$31 = createFileRoute("/")({
 	head: () => ({ meta: [
 		{ title: title$6 },
 		{
@@ -524,12 +524,12 @@ var Route$30 = createFileRoute("/")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$8, "component")
 });
-var $$splitComponentImporter$7 = () => import("./admin-DvbZeKcs.mjs");
-var Route$29 = createFileRoute("/admin")({ component: lazyRouteComponent($$splitComponentImporter$7, "component") });
+var $$splitComponentImporter$7 = () => import("./admin-BMaWnh1R.mjs");
+var Route$30 = createFileRoute("/admin")({ component: lazyRouteComponent($$splitComponentImporter$7, "component") });
 var $$splitComponentImporter$6 = () => import("./fun-wkuS3tR7.mjs");
 var title$5 = "Fun Zone ❤️ — Interactive Character Game";
 var description$5 = "Playful interactive cartoon reactions! Select an action like Stone, Hand, Punch, Hit, Slap or Love and tap the picture for fun visual effects.";
-var Route$28 = createFileRoute("/fun")({
+var Route$29 = createFileRoute("/fun")({
 	head: () => ({ meta: [
 		{ title: title$5 },
 		{
@@ -550,7 +550,7 @@ var Route$28 = createFileRoute("/fun")({
 var $$splitComponentImporter$5 = () => import("./letters-CmueGxn_.mjs");
 var title$4 = "Letters For You — Open When...";
 var description$4 = "Open-when letters written for your low days, your proud days and the days you miss me. Words from my heart.";
-var Route$27 = createFileRoute("/letters")({
+var Route$28 = createFileRoute("/letters")({
 	head: () => ({ meta: [
 		{ title: title$4 },
 		{
@@ -569,7 +569,7 @@ var Route$27 = createFileRoute("/letters")({
 	component: lazyRouteComponent($$splitComponentImporter$5, "component")
 });
 var $$splitComponentImporter$4 = () => import("./login-nqSf7xLp.mjs");
-var Route$26 = createFileRoute("/login")({
+var Route$27 = createFileRoute("/login")({
 	loader: async () => {
 		const { role } = await getSession();
 		if (role === "admin") throw redirect({ to: "/admin" });
@@ -580,7 +580,7 @@ var Route$26 = createFileRoute("/login")({
 var $$splitComponentImporter$3 = () => import("./photos-BO0Kt4e2.mjs");
 var title$3 = "Our Beautiful Memories — Photos";
 var description$3 = "Every picture holds a special moment with you: our trips, dates, candid smiles and the days I never want to forget.";
-var Route$25 = createFileRoute("/photos")({
+var Route$26 = createFileRoute("/photos")({
 	head: () => ({ meta: [
 		{ title: title$3 },
 		{
@@ -601,7 +601,7 @@ var Route$25 = createFileRoute("/photos")({
 var $$splitComponentImporter$2 = () => import("./songs-DnoZ_WkY.mjs");
 var title$2 = "Songs That Remind Me of You";
 var description$2 = "Our playlist — the melodies that speak your name, from the first song we danced to onwards.";
-var Route$24 = createFileRoute("/songs")({
+var Route$25 = createFileRoute("/songs")({
 	head: () => ({ meta: [
 		{ title: title$2 },
 		{
@@ -622,7 +622,7 @@ var Route$24 = createFileRoute("/songs")({
 var $$splitComponentImporter$1 = () => import("./timeline-BM-yOlM-.mjs");
 var title$1 = "Our Journey Timeline";
 var description$1 = "From the day we met to the adventures still ahead — a timeline of our beautiful journey together.";
-var Route$23 = createFileRoute("/timeline")({
+var Route$24 = createFileRoute("/timeline")({
 	head: () => ({ meta: [
 		{ title: title$1 },
 		{
@@ -643,7 +643,7 @@ var Route$23 = createFileRoute("/timeline")({
 var $$splitComponentImporter = () => import("./videos-CfSrdCHo.mjs");
 var title = "Our Videos — Moments In Motion";
 var description = "Little moments captured in motion: sunset dates, your laugh, our first trip and the candid clips I keep rewatching.";
-var Route$22 = createFileRoute("/videos")({
+var Route$23 = createFileRoute("/videos")({
 	head: () => ({ meta: [
 		{ title },
 		{
@@ -952,7 +952,7 @@ var LetterSchema = objectType({
 	category: stringType().max(50).optional(),
 	favorite: booleanType().optional()
 });
-var Route$21 = createFileRoute("/api/letters")({ server: { handlers: {
+var Route$22 = createFileRoute("/api/letters")({ server: { handlers: {
 	GET: async () => {
 		try {
 			await dbConnect();
@@ -1004,7 +1004,7 @@ var Route$21 = createFileRoute("/api/letters")({ server: { handlers: {
 		}
 	}
 } } });
-var Route$20 = createFileRoute("/api/media")({ server: { handlers: { GET: async ({ request }) => {
+var Route$21 = createFileRoute("/api/media")({ server: { handlers: { GET: async ({ request }) => {
 	try {
 		await dbConnect();
 		const rawType = new URL(request.url).searchParams.get("type");
@@ -1024,7 +1024,7 @@ var Route$20 = createFileRoute("/api/media")({ server: { handlers: { GET: async 
 		});
 	}
 } } } });
-var Route$19 = createFileRoute("/api/photos")({ server: { handlers: {
+var Route$20 = createFileRoute("/api/photos")({ server: { handlers: {
 	GET: async () => {
 		try {
 			await dbConnect();
@@ -1115,7 +1115,7 @@ var Route$19 = createFileRoute("/api/photos")({ server: { handlers: {
 		}
 	}
 } } });
-var Route$18 = createFileRoute("/api/songs")({ server: { handlers: {
+var Route$19 = createFileRoute("/api/songs")({ server: { handlers: {
 	GET: async () => {
 		try {
 			await dbConnect();
@@ -1226,7 +1226,7 @@ var Route$18 = createFileRoute("/api/songs")({ server: { handlers: {
 		}
 	}
 } } });
-var Route$17 = createFileRoute("/api/timeline")({ server: { handlers: {
+var Route$18 = createFileRoute("/api/timeline")({ server: { handlers: {
 	GET: async () => {
 		try {
 			await dbConnect();
@@ -1359,7 +1359,7 @@ var CreateUserSchema = objectType({
 	password: stringType().min(6, "Password must be at least 6 characters").max(100),
 	role: enumType(["user"]).optional()
 });
-var Route$16 = createFileRoute("/api/users")({ server: { handlers: {
+var Route$17 = createFileRoute("/api/users")({ server: { handlers: {
 	GET: async ({ request }) => {
 		const auth = requireAdmin(request);
 		if ("errorResponse" in auth) return auth.errorResponse;
@@ -1433,7 +1433,7 @@ var Route$16 = createFileRoute("/api/users")({ server: { handlers: {
 		}
 	}
 } } });
-var Route$15 = createFileRoute("/api/videos")({ server: { handlers: {
+var Route$16 = createFileRoute("/api/videos")({ server: { handlers: {
 	GET: async () => {
 		try {
 			await dbConnect();
@@ -1524,6 +1524,94 @@ var Route$15 = createFileRoute("/api/videos")({ server: { handlers: {
 		}
 	}
 } } });
+var UpdateAdminSchema = objectType({
+	username: stringType().min(3, "Admin username must be at least 3 characters").max(50, "Admin username must be at most 50 characters").regex(/^[a-zA-Z0-9_.-]+$/, "Username can only contain letters, numbers, hyphens, and underscores"),
+	newPassword: stringType().min(6, "New password must be at least 6 characters").max(100, "New password must be at most 100 characters").optional().or(literalType(""))
+});
+var Route$15 = createFileRoute("/api/auth/admin")({ server: { handlers: {
+	GET: async ({ request }) => {
+		const auth = requireAdmin(request);
+		if ("errorResponse" in auth) return auth.errorResponse;
+		try {
+			await dbConnect();
+			let adminUser = auth.session.userId ? await User$1.findById(auth.session.userId) : null;
+			if (!adminUser) adminUser = await User$1.findOne({ role: "admin" });
+			return new Response(JSON.stringify({
+				success: true,
+				username: adminUser?.username || auth.session.username || "admin",
+				hasDbRecord: !!adminUser
+			}), { headers: { "Content-Type": "application/json" } });
+		} catch (error) {
+			console.error("Error retrieving admin info:", error);
+			return new Response(JSON.stringify({ error: "Internal server error" }), {
+				status: 500,
+				headers: { "Content-Type": "application/json" }
+			});
+		}
+	},
+	POST: async ({ request }) => {
+		const auth = requireAdmin(request);
+		if ("errorResponse" in auth) return auth.errorResponse;
+		const rateCheck = checkRateLimit(request, mutationRateLimiter);
+		if (!rateCheck.allowed) return createRateLimitResponse(rateCheck.retryAfterSeconds);
+		try {
+			const rawBody = await request.json().catch(() => null);
+			if (!rawBody || typeof rawBody !== "object") return new Response(JSON.stringify({ error: "Invalid JSON payload" }), {
+				status: 400,
+				headers: { "Content-Type": "application/json" }
+			});
+			const parsed = UpdateAdminSchema.safeParse(sanitizeMongoInput(rawBody));
+			if (!parsed.success) return new Response(JSON.stringify({ error: parsed.error.issues[0]?.message || "Validation failed" }), {
+				status: 400,
+				headers: { "Content-Type": "application/json" }
+			});
+			const { username, newPassword } = parsed.data;
+			const cleanUsername = sanitizePlainText(username, 50).trim();
+			await dbConnect();
+			let adminUser = auth.session.userId ? await User$1.findById(auth.session.userId) : null;
+			if (!adminUser) adminUser = await User$1.findOne({ role: "admin" });
+			const conflictingUser = await User$1.findOne({ username: cleanUsername });
+			if (conflictingUser && (!adminUser || conflictingUser._id.toString() !== adminUser._id.toString())) return new Response(JSON.stringify({ error: "That username is already taken by another account" }), {
+				status: 400,
+				headers: { "Content-Type": "application/json" }
+			});
+			if (adminUser) {
+				adminUser.username = cleanUsername;
+				adminUser.role = "admin";
+				if (newPassword && newPassword.trim()) adminUser.password = hashPassword(newPassword.trim());
+				await adminUser.save();
+			} else {
+				const passwordToHash = newPassword && newPassword.trim() ? newPassword.trim() : process.env["ADMIN_PASSWORD"] || "admin123";
+				adminUser = await User$1.create({
+					username: cleanUsername,
+					password: hashPassword(passwordToHash),
+					role: "admin"
+				});
+			}
+			const newToken = createSessionToken({
+				userId: adminUser._id.toString(),
+				username: cleanUsername,
+				role: "admin"
+			});
+			const cookie = createSessionCookie(newToken);
+			console.log(`[AUTH] Admin credentials updated for '${cleanUsername}'`);
+			return new Response(JSON.stringify({
+				success: true,
+				message: "Admin credentials updated successfully!",
+				username: cleanUsername
+			}), { headers: {
+				"Content-Type": "application/json",
+				"Set-Cookie": cookie
+			} });
+		} catch (error) {
+			console.error("Error updating admin credentials:", error);
+			return new Response(JSON.stringify({ error: "Internal server error" }), {
+				status: 500,
+				headers: { "Content-Type": "application/json" }
+			});
+		}
+	}
+} } });
 var LoginSchema = objectType({
 	username: stringType().max(100).optional(),
 	password: stringType().min(1, "Password is required").max(500)
@@ -1559,21 +1647,21 @@ var Route$14 = createFileRoute("/api/auth/login")({ server: { handlers: { POST: 
 		let matchedRole = null;
 		let matchedUsername = cleanUsername || "visitor";
 		let matchedUserId;
-		if (cleanUsername.toLowerCase() === "admin") {
-			if (adminPassHash ? verifyPassword(password, adminPassHash) : password === adminPass) {
-				matchedRole = "admin";
-				matchedUsername = "admin";
-			}
-		}
-		if (!matchedRole && cleanUsername) {
+		if (cleanUsername) {
 			await dbConnect();
-			const user = await User$1.findOne({ username: cleanUsername });
+			const user = await User$1.findOne({ username: { $regex: new RegExp(`^${cleanUsername.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i") } });
 			if (user && user.password) {
 				if (verifyPassword(password, user.password)) {
 					matchedRole = user.role || "user";
 					matchedUsername = user.username;
 					matchedUserId = user._id.toString();
 				}
+			}
+		}
+		if (!matchedRole && cleanUsername.toLowerCase() === "admin") {
+			if (adminPassHash ? verifyPassword(password, adminPassHash) : password === adminPass) {
+				matchedRole = "admin";
+				matchedUsername = "admin";
 			}
 		}
 		if (!matchedRole) {
@@ -2704,105 +2792,110 @@ var Route = createFileRoute("/api/media/file/$fileId")({ server: { handlers: { G
 		});
 	}
 } } } });
-var IndexRoute = Route$30.update({
+var IndexRoute = Route$31.update({
 	id: "/",
 	path: "/",
-	getParentRoute: () => Route$31
+	getParentRoute: () => Route$32
 });
-var AdminRoute = Route$29.update({
+var AdminRoute = Route$30.update({
 	id: "/admin",
 	path: "/admin",
-	getParentRoute: () => Route$31
+	getParentRoute: () => Route$32
 });
-var FunRoute = Route$28.update({
+var FunRoute = Route$29.update({
 	id: "/fun",
 	path: "/fun",
-	getParentRoute: () => Route$31
+	getParentRoute: () => Route$32
 });
-var LettersRoute = Route$27.update({
+var LettersRoute = Route$28.update({
 	id: "/letters",
 	path: "/letters",
-	getParentRoute: () => Route$31
+	getParentRoute: () => Route$32
 });
-var LoginRoute = Route$26.update({
+var LoginRoute = Route$27.update({
 	id: "/login",
 	path: "/login",
-	getParentRoute: () => Route$31
+	getParentRoute: () => Route$32
 });
-var PhotosRoute = Route$25.update({
+var PhotosRoute = Route$26.update({
 	id: "/photos",
 	path: "/photos",
-	getParentRoute: () => Route$31
+	getParentRoute: () => Route$32
 });
-var SongsRoute = Route$24.update({
+var SongsRoute = Route$25.update({
 	id: "/songs",
 	path: "/songs",
-	getParentRoute: () => Route$31
+	getParentRoute: () => Route$32
 });
-var TimelineRoute = Route$23.update({
+var TimelineRoute = Route$24.update({
 	id: "/timeline",
 	path: "/timeline",
-	getParentRoute: () => Route$31
+	getParentRoute: () => Route$32
 });
-var VideosRoute = Route$22.update({
+var VideosRoute = Route$23.update({
 	id: "/videos",
 	path: "/videos",
-	getParentRoute: () => Route$31
+	getParentRoute: () => Route$32
 });
-var ApiLettersRoute = Route$21.update({
+var ApiLettersRoute = Route$22.update({
 	id: "/api/letters",
 	path: "/api/letters",
-	getParentRoute: () => Route$31
+	getParentRoute: () => Route$32
 });
-var ApiMediaRoute = Route$20.update({
+var ApiMediaRoute = Route$21.update({
 	id: "/api/media",
 	path: "/api/media",
-	getParentRoute: () => Route$31
+	getParentRoute: () => Route$32
 });
-var ApiPhotosRoute = Route$19.update({
+var ApiPhotosRoute = Route$20.update({
 	id: "/api/photos",
 	path: "/api/photos",
-	getParentRoute: () => Route$31
+	getParentRoute: () => Route$32
 });
-var ApiSongsRoute = Route$18.update({
+var ApiSongsRoute = Route$19.update({
 	id: "/api/songs",
 	path: "/api/songs",
-	getParentRoute: () => Route$31
+	getParentRoute: () => Route$32
 });
-var ApiTimelineRoute = Route$17.update({
+var ApiTimelineRoute = Route$18.update({
 	id: "/api/timeline",
 	path: "/api/timeline",
-	getParentRoute: () => Route$31
+	getParentRoute: () => Route$32
 });
-var ApiUsersRoute = Route$16.update({
+var ApiUsersRoute = Route$17.update({
 	id: "/api/users",
 	path: "/api/users",
-	getParentRoute: () => Route$31
+	getParentRoute: () => Route$32
 });
-var ApiVideosRoute = Route$15.update({
+var ApiVideosRoute = Route$16.update({
 	id: "/api/videos",
 	path: "/api/videos",
-	getParentRoute: () => Route$31
+	getParentRoute: () => Route$32
+});
+var ApiAuthAdminRoute = Route$15.update({
+	id: "/api/auth/admin",
+	path: "/api/auth/admin",
+	getParentRoute: () => Route$32
 });
 var ApiAuthLoginRoute = Route$14.update({
 	id: "/api/auth/login",
 	path: "/api/auth/login",
-	getParentRoute: () => Route$31
+	getParentRoute: () => Route$32
 });
 var ApiAuthLogoutRoute = Route$13.update({
 	id: "/api/auth/logout",
 	path: "/api/auth/logout",
-	getParentRoute: () => Route$31
+	getParentRoute: () => Route$32
 });
 var ApiAuthSessionRoute = Route$12.update({
 	id: "/api/auth/session",
 	path: "/api/auth/session",
-	getParentRoute: () => Route$31
+	getParentRoute: () => Route$32
 });
 var ApiFunStagesRoute = Route$11.update({
 	id: "/api/fun/stages",
 	path: "/api/fun/stages",
-	getParentRoute: () => Route$31
+	getParentRoute: () => Route$32
 });
 var ApiLettersIdRoute = Route$10.update({
 	id: "/$id",
@@ -2895,12 +2988,13 @@ var rootRouteChildren = {
 	ApiTimelineRoute: ApiTimelineRouteWithChildren,
 	ApiUsersRoute: ApiUsersRouteWithChildren,
 	ApiVideosRoute: ApiVideosRoute._addFileChildren(ApiVideosRouteChildren),
+	ApiAuthAdminRoute,
 	ApiAuthLoginRoute,
 	ApiAuthLogoutRoute,
 	ApiAuthSessionRoute,
 	ApiFunStagesRoute
 };
-var routeTree = Route$31._addFileChildren(rootRouteChildren)._addFileTypes();
+var routeTree = Route$32._addFileChildren(rootRouteChildren)._addFileTypes();
 var getRouter = () => {
 	const queryClient = new QueryClient();
 	return createRouter({

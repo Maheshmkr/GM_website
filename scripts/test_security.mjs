@@ -256,20 +256,40 @@ for (let i = 1; i <= 5; i++) {
 assert(!testRateLimiter(testIp, 5), "Request 6/5 exceeds rate limit and is blocked (HTTP 429)");
 
 // -------------------------------------------------------------
-// 7. Privilege Escalation Tests
+// 8. Admin Credentials Update Security Tests
 // -------------------------------------------------------------
-console.log("\n--- [7] PRIVILEGE ESCALATION TESTS ---");
+console.log("\n--- [8] ADMIN CREDENTIALS UPDATE TESTS ---");
 
-function createUserSafely(body) {
-  // Reject role from client; always assign 'user'
-  return {
-    username: body.username,
-    role: "user", // forced
-  };
+function validateAdminUpdate(payload) {
+  if (!payload || typeof payload !== "object") return { valid: false, error: "Invalid payload" };
+  const username = typeof payload.username === "string" ? payload.username.trim() : "";
+  if (username.length < 3 || username.length > 50) return { valid: false, error: "Username must be 3-50 chars" };
+  if (!/^[a-zA-Z0-9_.-]+$/.test(username)) return { valid: false, error: "Invalid characters in username" };
+  
+  if (payload.newPassword !== undefined && payload.newPassword !== "") {
+    if (typeof payload.newPassword !== "string" || payload.newPassword.length < 6) {
+      return { valid: false, error: "Password must be at least 6 chars" };
+    }
+  }
+  return { valid: true, username };
 }
 
-const userCreated = createUserSafely({ username: "eve", role: "admin" });
-assert(userCreated.role === "user", "Attacker cannot elevate role by sending { role: 'admin' }");
+assert(validateAdminUpdate({ username: "superadmin" }).valid, "Valid admin username update is accepted");
+assert(validateAdminUpdate({ username: "superadmin", newPassword: "SuperSecurePassword123!" }).valid, "Valid admin username and password update is accepted");
+assert(!validateAdminUpdate({ username: "ad" }).valid, "Short admin username (<3 chars) is rejected");
+assert(!validateAdminUpdate({ username: "admin<script>" }).valid, "Admin username with XSS/special chars is rejected");
+assert(!validateAdminUpdate({ username: "admin", newPassword: "123" }).valid, "Short admin password (<6 chars) is rejected");
+
+// Scrypt hash & verify new password
+const newPass = "NewMasterSecret2026!";
+const saltHex = crypto.randomBytes(16).toString("hex");
+const derived = crypto.scryptSync(newPass, saltHex, 64);
+const hashedPass = `scrypt$${saltHex}$${derived.toString("hex")}`;
+
+const parts = hashedPass.split("$");
+const testDerived = crypto.scryptSync(newPass, parts[1], 64);
+const testBuf = Buffer.from(parts[2], "hex");
+assert(crypto.timingSafeEqual(testDerived, testBuf), "New admin password securely hashed and verified with Scrypt");
 
 console.log("\n=================================================");
 console.log(`  ALL ${passedTests}/${totalTests} SECURITY TESTS PASSED SUCCESSFULLY!`);

@@ -3529,7 +3529,7 @@ ZodMap.create;
 ZodSet.create;
 ZodFunction.create;
 ZodLazy.create;
-ZodLiteral.create;
+var literalType = ZodLiteral.create;
 var enumType = ZodEnum.create;
 ZodNativeEnum.create;
 ZodPromise.create;
@@ -3539,4 +3539,4 @@ ZodNullable.create;
 ZodEffects.createWithPreprocess;
 ZodPipeline.create;
 //#endregion
-export { stringType as i, enumType as n, objectType as r, booleanType as t };
+export { stringType as a, objectType as i, enumType as n, literalType as r, booleanType as t };
