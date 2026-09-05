@@ -540,7 +540,7 @@ function handleCors(request) {
 import_main.default.config();
 var serverEntryPromise;
 async function getServerEntry() {
-	if (!serverEntryPromise) serverEntryPromise = import("./server-DeaWIeow.mjs").then((m) => m.default ?? m);
+	if (!serverEntryPromise) serverEntryPromise = import("./server-DeSn6eWi.mjs").then((m) => m.default ?? m);
 	return serverEntryPromise;
 }
 async function normalizeCatastrophicSsrResponse(response) {
@@ -569,7 +569,7 @@ var server_default = { async fetch(request, env, ctx) {
 		headers: corsResult.headers
 	});
 	try {
-		await dbConnect();
+		dbConnect().catch((err) => console.warn("Background DB connection:", err.message));
 		const response = await normalizeCatastrophicSsrResponse(await (await getServerEntry()).fetch(request, env, ctx));
 		const newHeaders = new Headers(response.headers);
 		const secHeaders = getSecurityHeaders();

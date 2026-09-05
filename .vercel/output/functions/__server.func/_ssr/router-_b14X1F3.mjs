@@ -8,10 +8,10 @@ import { t as require_mongoose } from "../_libs/mongoose+mpath+mquery+ms+sift.mj
 import { a as createSessionCookie, c as hashPassword, d as requireAdmin, f as sanitizeMongoInput, g as verifyPassword, h as validateMediaUpload, i as createRateLimitResponse, l as isValidObjectId, m as uploadRateLimiter, n as checkRateLimit, o as createSessionToken, p as sanitizePlainText, r as createClearSessionCookie, s as getAuthSession, t as authRateLimiter, u as mutationRateLimiter, v as dbConnect } from "./ssr.mjs";
 import { c as createServerFn, i as TSS_SERVER_FUNCTION } from "./createServerFn-CIHAFgYl.mjs";
 import { i as letters, n as girlfriend } from "./site-_zOoiwhn.mjs";
-import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-D5amRCfg.mjs";
+import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-Dxi6v49_.mjs";
 import { n as formatTime, r as useMusic, t as MusicProvider } from "./MusicProvider-CexXRw5f.mjs";
 import { i as stringType, n as enumType, r as objectType, t as booleanType } from "../_libs/zod.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-BpFHayFe.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-_b14X1F3.js
 var import_mongoose = /* @__PURE__ */ __toESM(require_mongoose());
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
@@ -421,9 +421,8 @@ var Route$31 = createRootRouteWithContext()({
 	loader: async ({ location }) => {
 		if (location.pathname === "/login" || location.pathname.startsWith("/api/") || location.pathname.includes(".")) return { role: null };
 		const { role } = await getSession();
-		if (!role) throw redirect({ to: "/login" });
-		if (location.pathname === "/admin" && role !== "admin") throw redirect({ to: "/" });
-		return { role };
+		if (location.pathname === "/admin" && role !== "admin") throw redirect({ to: "/login" });
+		return { role: role || null };
 	},
 	head: () => ({
 		meta: [
@@ -574,7 +573,6 @@ var Route$26 = createFileRoute("/login")({
 	loader: async () => {
 		const { role } = await getSession();
 		if (role === "admin") throw redirect({ to: "/admin" });
-		if (role === "user") throw redirect({ to: "/" });
 		return {};
 	},
 	component: lazyRouteComponent($$splitComponentImporter$4, "component")

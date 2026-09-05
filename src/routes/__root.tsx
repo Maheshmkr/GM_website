@@ -93,19 +93,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
     const { role } = await getSession();
 
-    if (!role) {
+    if (location.pathname === "/admin" && role !== "admin") {
       throw redirect({
         to: "/login",
       });
     }
 
-    if (location.pathname === "/admin" && role !== "admin") {
-      throw redirect({
-        to: "/",
-      });
-    }
-
-    return { role };
+    return { role: role || null };
   },
   head: () => ({
     meta: [

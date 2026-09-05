@@ -62,7 +62,7 @@ export default {
     }
 
     try {
-      await dbConnect(); // Establish DB connection before accepting requests
+      dbConnect().catch((err) => console.warn("Background DB connection:", err.message));
       const handler = await getServerEntry();
       const rawResponse = await handler.fetch(request, env, ctx);
       const response = await normalizeCatastrophicSsrResponse(rawResponse);
