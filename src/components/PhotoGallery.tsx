@@ -257,26 +257,27 @@ export function PhotoGallery() {
       </div>
 
       {/* Grid figure display */}
-      <div className="mt-10 columns-1 gap-4 sm:columns-2 lg:columns-3 [&>*]:mb-4">
+      <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {list.map((p, i) => (
           <Reveal key={p._id + i} delay={(i % 6) * 70}>
-            <figure className="group relative break-inside-avoid overflow-hidden rounded-3xl border border-border">
+            <figure className="group relative overflow-hidden rounded-3xl border border-border bg-surface/30 flex flex-col">
               <button
                 onClick={() => setOpenIndex(i)}
                 className="block w-full text-left"
                 aria-label={`Open ${p.caption}`}
               >
-                <img
-                  src={p.image}
-                  alt={p.caption}
-                  loading="lazy"
-                  className="w-full object-cover transition-transform duration-700 group-hover:scale-[1.06]"
-                />
-                <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/85 via-background/10 to-transparent opacity-80 transition-opacity group-hover:opacity-100" />
+                <div className="relative w-full aspect-[4/3] overflow-hidden bg-black/30">
+                  <img
+                    src={p.image}
+                    alt={p.caption}
+                    loading="lazy"
+                    className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-[1.06]"
+                  />
+                  <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent opacity-80 transition-opacity group-hover:opacity-100" />
+                </div>
 
-                <figcaption className="absolute inset-x-0 bottom-0 p-5 pr-14">
+                <figcaption className="p-4 pr-14">
                   <p className="text-sm font-semibold truncate">{p.caption}</p>
-
                   <div className="flex items-center gap-2 mt-0.5">
                     <p className="text-xs text-muted-foreground">{p.date}</p>
                   </div>
@@ -286,7 +287,7 @@ export function PhotoGallery() {
               <button
                 onClick={() => setFavorites((f) => ({ ...f, [p.caption]: !f[p.caption] }))}
                 aria-label="Favorite photo"
-                className="glass absolute right-4 top-4 grid size-9 place-items-center rounded-full pointer-events-auto"
+                className="glass absolute right-3 top-3 grid size-9 place-items-center rounded-full pointer-events-auto"
               >
                 <Heart
                   className={cn("size-4", favorites[p.caption] && "text-primary")}
@@ -319,11 +320,13 @@ export function PhotoGallery() {
             className="animate-letter-open relative w-full max-w-4xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <img
-              src={active.image}
-              alt={active.caption}
-              className="max-h-[72vh] w-full rounded-3xl object-contain mx-auto"
-            />
+            <div className="relative max-h-[72vh] w-full flex items-center justify-center overflow-hidden rounded-3xl bg-black/40">
+              <img
+                src={active.image}
+                alt={active.caption}
+                className="max-h-[72vh] max-w-full w-auto h-auto rounded-3xl object-contain mx-auto"
+              />
+            </div>
             <div className="mt-4 text-center">
               <p className="text-base font-semibold">{active.caption}</p>
               <p className="text-sm text-muted-foreground">{active.date}</p>

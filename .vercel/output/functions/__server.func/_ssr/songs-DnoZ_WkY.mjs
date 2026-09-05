@@ -5,7 +5,7 @@ import { M as Heart, b as Pause, d as Shuffle, f as Save, g as Play, l as SkipFo
 import { t as SectionHeading } from "./SectionHeading-BVG9eVYl.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
 import { n as formatTime, r as useMusic } from "./MusicProvider-CexXRw5f.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/songs-CrU0o9R2.js
+//#region node_modules/.nitro/vite/services/ssr/assets/songs-DnoZ_WkY.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function MusicPlayer() {
@@ -37,11 +37,14 @@ function MusicPlayer() {
 			className: "glass rounded-3xl p-6 sm:p-8",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex flex-col items-center gap-6 sm:flex-row sm:items-start",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
-					src: current.cover,
-					alt: `${current.title} cover`,
-					loading: "lazy",
-					className: cn("size-40 shrink-0 rounded-2xl object-cover shadow-[var(--shadow-glow)] transition-transform duration-700", playing && "scale-[1.02]")
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "size-40 shrink-0 overflow-hidden rounded-2xl bg-black/20 shadow-[var(--shadow-glow)]",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+						src: current.cover,
+						alt: `${current.title} cover`,
+						loading: "lazy",
+						className: cn("size-full object-cover object-center transition-transform duration-700", playing && "scale-[1.02]")
+					})
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "min-w-0 flex-1 text-center sm:text-left",
 					children: [
@@ -188,11 +191,14 @@ function MusicPlayer() {
 					onClick: () => play(i),
 					className: cn("grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl p-2.5 text-left transition-colors hover:bg-secondary/70", i === index && "bg-secondary"),
 					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
-							src: s.cover,
-							alt: "",
-							loading: "lazy",
-							className: "size-11 rounded-xl object-cover"
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "size-11 shrink-0 overflow-hidden rounded-xl bg-black/20",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+								src: s.cover,
+								alt: "",
+								loading: "lazy",
+								className: "size-full object-cover object-center"
+							})
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 							className: "min-w-0",

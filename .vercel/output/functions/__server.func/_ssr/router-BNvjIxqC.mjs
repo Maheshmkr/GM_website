@@ -8,14 +8,14 @@ import { c as createServerFn, i as TSS_SERVER_FUNCTION } from "./createServerFn-
 import { n as girlfriend } from "./site-_zOoiwhn.mjs";
 import { t as require_mongoose } from "../_libs/mongoose+mpath+mquery+ms+sift.mjs";
 import { t as dbConnect } from "./ssr.mjs";
-import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-C3F4qZFO.mjs";
+import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-CIY7ALnQ.mjs";
 import { n as formatTime, r as useMusic, t as MusicProvider } from "./MusicProvider-CexXRw5f.mjs";
 import crypto from "crypto";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-B79-B8g-.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-BNvjIxqC.js
 var import_mongoose = /* @__PURE__ */ __toESM(require_mongoose());
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-CaoPgwAu.css";
+var styles_default = "/assets/styles-DBYljTOA.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -259,11 +259,14 @@ function MiniPlayer() {
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "glass mx-auto flex max-w-3xl items-center gap-3 rounded-2xl p-2.5 sm:gap-4 sm:p-3",
 			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
-					src: current.cover,
-					alt: "",
-					loading: "lazy",
-					className: "size-11 shrink-0 rounded-xl object-cover sm:size-12"
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "size-11 shrink-0 overflow-hidden rounded-xl bg-black/20 sm:size-12",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+						src: current.cover,
+						alt: "",
+						loading: "lazy",
+						className: "size-full object-cover object-center"
+					})
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "min-w-0 flex-1",
@@ -501,7 +504,7 @@ function RootComponent() {
 		] })
 	});
 }
-var $$splitComponentImporter$8 = () => import("./routes-BB-aimTf.mjs");
+var $$splitComponentImporter$8 = () => import("./routes-D20lSYMu.mjs");
 var title$6 = "For You — A Little World Made Just For Us";
 var description$6 = "A private collection of our photos, videos, songs, letters and the timeline of our story — made with all my love.";
 var Route$28 = createFileRoute("/")({
@@ -522,9 +525,9 @@ var Route$28 = createFileRoute("/")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$8, "component")
 });
-var $$splitComponentImporter$7 = () => import("./admin-BR4-nR0-.mjs");
+var $$splitComponentImporter$7 = () => import("./admin-p5vyf-dy.mjs");
 var Route$27 = createFileRoute("/admin")({ component: lazyRouteComponent($$splitComponentImporter$7, "component") });
-var $$splitComponentImporter$6 = () => import("./fun-f4YPNlf8.mjs");
+var $$splitComponentImporter$6 = () => import("./fun-wkuS3tR7.mjs");
 var title$5 = "Fun Zone ❤️ — Interactive Character Game";
 var description$5 = "Playful interactive cartoon reactions! Select an action like Stone, Hand, Punch, Hit, Slap or Love and tap the picture for fun visual effects.";
 var Route$26 = createFileRoute("/fun")({
@@ -576,7 +579,7 @@ var Route$24 = createFileRoute("/login")({
 	},
 	component: lazyRouteComponent($$splitComponentImporter$4, "component")
 });
-var $$splitComponentImporter$3 = () => import("./photos-Xp2frrei.mjs");
+var $$splitComponentImporter$3 = () => import("./photos-BO0Kt4e2.mjs");
 var title$3 = "Our Beautiful Memories — Photos";
 var description$3 = "Every picture holds a special moment with you: our trips, dates, candid smiles and the days I never want to forget.";
 var Route$23 = createFileRoute("/photos")({
@@ -597,7 +600,7 @@ var Route$23 = createFileRoute("/photos")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$3, "component")
 });
-var $$splitComponentImporter$2 = () => import("./songs-CrU0o9R2.mjs");
+var $$splitComponentImporter$2 = () => import("./songs-DnoZ_WkY.mjs");
 var title$2 = "Songs That Remind Me of You";
 var description$2 = "Our playlist — the melodies that speak your name, from the first song we danced to onwards.";
 var Route$22 = createFileRoute("/songs")({
@@ -618,7 +621,7 @@ var Route$22 = createFileRoute("/songs")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-var $$splitComponentImporter$1 = () => import("./timeline-Di7wUNyD.mjs");
+var $$splitComponentImporter$1 = () => import("./timeline-BM-yOlM-.mjs");
 var title$1 = "Our Journey Timeline";
 var description$1 = "From the day we met to the adventures still ahead — a timeline of our beautiful journey together.";
 var Route$21 = createFileRoute("/timeline")({

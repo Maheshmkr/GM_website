@@ -74,13 +74,17 @@ export function MemoryCards() {
             </CardHead>
             <div className="mt-6 flex gap-2">
               {mappedPhotos.map((p) => (
-                <img
+                <div
                   key={p.image + p.caption}
-                  src={p.image}
-                  alt={p.caption}
-                  loading="lazy"
-                  className="size-16 flex-1 rounded-xl object-cover"
-                />
+                  className="relative aspect-square size-16 flex-1 overflow-hidden rounded-xl bg-black/20"
+                >
+                  <img
+                    src={p.image}
+                    alt={p.caption}
+                    loading="lazy"
+                    className="size-full object-cover object-center"
+                  />
+                </div>
               ))}
               <span className="grid size-16 flex-1 place-items-center rounded-xl bg-secondary text-xs font-semibold">
                 +{totalPhotosCount}
@@ -96,12 +100,12 @@ export function MemoryCards() {
             </CardHead>
             <div className="mt-6 flex gap-2">
               {mappedVideos.map((v) => (
-                <div key={v.title} className="relative h-16 flex-1 overflow-hidden rounded-xl">
+                <div key={v.title} className="relative aspect-video h-16 flex-1 overflow-hidden rounded-xl bg-black/20">
                   <img
                     src={v.thumbnail}
                     alt={v.title}
                     loading="lazy"
-                    className="size-full object-cover"
+                    className="size-full object-cover object-center"
                   />
                   <span className="absolute inset-0 grid place-items-center bg-background/40">
                     <Play className="size-4" fill="currentColor" />
@@ -121,12 +125,14 @@ export function MemoryCards() {
               Melodies that remind me of you
             </CardHead>
             <div className="mt-6 flex items-center gap-3 rounded-2xl bg-secondary/60 p-3">
-              <img
-                src={song.cover}
-                alt=""
-                loading="lazy"
-                className="size-11 shrink-0 rounded-lg object-cover"
-              />
+              <div className="size-11 shrink-0 overflow-hidden rounded-lg bg-black/20">
+                <img
+                  src={song.cover}
+                  alt=""
+                  loading="lazy"
+                  className="size-full object-cover object-center"
+                />
+              </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold">{song.title}</p>
                 <p className="truncate text-xs text-muted-foreground">{song.artist}</p>

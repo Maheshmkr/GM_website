@@ -95,12 +95,14 @@ export function Timeline() {
                 {m.date}
               </p>
               {m.image && (
-                <img
-                  src={m.image}
-                  alt={m.title}
-                  loading="lazy"
-                  className="mx-auto mt-4 h-28 w-full rounded-2xl object-cover opacity-80 transition-opacity hover:opacity-100"
-                />
+                <div className="mx-auto mt-4 h-28 w-full overflow-hidden rounded-2xl bg-black/20">
+                  <img
+                    src={m.image}
+                    alt={m.title}
+                    loading="lazy"
+                    className="size-full object-cover object-center opacity-85 transition-transform duration-500 hover:scale-105 hover:opacity-100"
+                  />
+                </div>
               )}
             </Reveal>
           ))}
@@ -126,12 +128,14 @@ export function Timeline() {
                   {m.date}
                 </p>
                 {m.image && (
-                  <img
-                    src={m.image}
-                    alt={m.title}
-                    loading="lazy"
-                    className="mt-3 h-32 w-full rounded-xl object-cover"
-                  />
+                  <div className="mt-3 aspect-video max-h-48 w-full overflow-hidden rounded-xl bg-black/20">
+                    <img
+                      src={m.image}
+                      alt={m.title}
+                      loading="lazy"
+                      className="size-full object-cover object-center"
+                    />
+                  </div>
                 )}
               </div>
             </div>

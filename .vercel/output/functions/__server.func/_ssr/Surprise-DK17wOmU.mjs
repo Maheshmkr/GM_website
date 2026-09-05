@@ -4,7 +4,7 @@ import { a as require_react, n as useQuery, o as require_jsx_runtime } from "../
 import { F as Coffee, M as Heart, _ as Plane, c as Sparkles, k as LoaderCircle, s as Star, t as X } from "../_libs/lucide-react.mjs";
 import { c as timeline, n as girlfriend } from "./site-_zOoiwhn.mjs";
 import { t as Reveal } from "./Reveal-DSJJWaqp.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/Surprise-QM1POoHR.js
+//#region node_modules/.nitro/vite/services/ssr/assets/Surprise-DK17wOmU.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var icons = {
@@ -80,11 +80,14 @@ function Timeline() {
 							className: cn("mt-3 text-xs", m.highlight ? "font-semibold text-primary" : "text-muted-foreground"),
 							children: m.date
 						}),
-						m.image && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
-							src: m.image,
-							alt: m.title,
-							loading: "lazy",
-							className: "mx-auto mt-4 h-28 w-full rounded-2xl object-cover opacity-80 transition-opacity hover:opacity-100"
+						m.image && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "mx-auto mt-4 h-28 w-full overflow-hidden rounded-2xl bg-black/20",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+								src: m.image,
+								alt: m.title,
+								loading: "lazy",
+								className: "size-full object-cover object-center opacity-85 transition-transform duration-500 hover:scale-105 hover:opacity-100"
+							})
 						})
 					]
 				}, m.title))
@@ -111,11 +114,14 @@ function Timeline() {
 								className: cn("mt-2 text-xs", m.highlight ? "font-semibold text-primary" : "text-muted-foreground"),
 								children: m.date
 							}),
-							m.image && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
-								src: m.image,
-								alt: m.title,
-								loading: "lazy",
-								className: "mt-3 h-32 w-full rounded-xl object-cover"
+							m.image && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "mt-3 aspect-video max-h-48 w-full overflow-hidden rounded-xl bg-black/20",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+									src: m.image,
+									alt: m.title,
+									loading: "lazy",
+									className: "size-full object-cover object-center"
+								})
 							})
 						]
 					})]

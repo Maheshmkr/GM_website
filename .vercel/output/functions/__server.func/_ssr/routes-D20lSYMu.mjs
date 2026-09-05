@@ -9,8 +9,8 @@ import { t as Reveal } from "./Reveal-DSJJWaqp.mjs";
 import { t as Letters } from "./Letters-t59vAT3V.mjs";
 import { r as useMusic } from "./MusicProvider-CexXRw5f.mjs";
 import { t as VideoGallery } from "./VideoGallery-Bl2ZouvL.mjs";
-import { n as Timeline, t as Surprise } from "./Surprise-QM1POoHR.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-BB-aimTf.js
+import { n as Timeline, t as Surprise } from "./Surprise-DK17wOmU.mjs";
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-D20lSYMu.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function Hero() {
@@ -103,14 +103,14 @@ function Hero() {
 				})
 			]
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "group relative aspect-[16/10] overflow-hidden rounded-[2rem] border border-border shadow-[var(--shadow-glow)]",
+			className: "group relative aspect-[16/10] overflow-hidden rounded-[2rem] border border-border bg-black/20 shadow-[var(--shadow-glow)]",
 			children: [heroSlides.map((s, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
 				src: s.image,
 				alt: s.alt,
 				width: 1600,
 				height: 1e3,
 				loading: i === 0 ? "eager" : "lazy",
-				className: cn("absolute inset-0 size-full object-cover transition-all duration-[1200ms] ease-out group-hover:scale-105", i === slide ? "opacity-100" : "opacity-0")
+				className: cn("absolute inset-0 size-full object-cover object-center transition-all duration-[1200ms] ease-out group-hover:scale-105", i === slide ? "opacity-100" : "opacity-0")
 			}, s.image)), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "pointer-events-none absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-background/20" })]
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 			className: "mt-5 flex items-center justify-center gap-2",
@@ -176,11 +176,14 @@ function MemoryCards() {
 							children: "Beautiful memories we've created together"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "mt-6 flex gap-2",
-							children: [mappedPhotos.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
-								src: p.image,
-								alt: p.caption,
-								loading: "lazy",
-								className: "size-16 flex-1 rounded-xl object-cover"
+							children: [mappedPhotos.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "relative aspect-square size-16 flex-1 overflow-hidden rounded-xl bg-black/20",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+									src: p.image,
+									alt: p.caption,
+									loading: "lazy",
+									className: "size-full object-cover object-center"
+								})
 							}, p.image + p.caption)), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 								className: "grid size-16 flex-1 place-items-center rounded-xl bg-secondary text-xs font-semibold",
 								children: ["+", totalPhotosCount]
@@ -200,12 +203,12 @@ function MemoryCards() {
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "mt-6 flex gap-2",
 							children: [mappedVideos.map((v) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "relative h-16 flex-1 overflow-hidden rounded-xl",
+								className: "relative aspect-video h-16 flex-1 overflow-hidden rounded-xl bg-black/20",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
 									src: v.thumbnail,
 									alt: v.title,
 									loading: "lazy",
-									className: "size-full object-cover"
+									className: "size-full object-cover object-center"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 									className: "absolute inset-0 grid place-items-center bg-background/40",
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Play, {
@@ -232,11 +235,14 @@ function MemoryCards() {
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "mt-6 flex items-center gap-3 rounded-2xl bg-secondary/60 p-3",
 							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
-									src: song.cover,
-									alt: "",
-									loading: "lazy",
-									className: "size-11 shrink-0 rounded-lg object-cover"
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "size-11 shrink-0 overflow-hidden rounded-lg bg-black/20",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+										src: song.cover,
+										alt: "",
+										loading: "lazy",
+										className: "size-full object-cover object-center"
+									})
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "min-w-0 flex-1",

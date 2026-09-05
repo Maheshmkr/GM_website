@@ -1,4 +1,4 @@
-//#region node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-BMig4WhO.js
+//#region node_modules/.nitro/vite/services/ssr/assets/_tanstack-start-manifest_v-BFK6OxG5.js
 var tsrStartManifest = () => ({ routes: {
 	__root__: {
 		filePath: "C:/Users/mahes/Downloads/GM_Website/src/routes/__root.tsx",
@@ -23,34 +23,34 @@ var tsrStartManifest = () => ({ routes: {
 			"/api/auth/session",
 			"/api/fun/stages"
 		],
-		preloads: ["/assets/index-De0YEWJh.js", "/assets/heart-CJLjDj4v.js"],
+		preloads: ["/assets/index-AUf4jBJR.js", "/assets/heart-CJLjDj4v.js"],
 		scripts: [{ attrs: {
 			type: "module",
 			async: !0,
-			src: "/assets/index-De0YEWJh.js"
+			src: "/assets/index-AUf4jBJR.js"
 		} }]
 	},
 	"/": {
 		filePath: "C:/Users/mahes/Downloads/GM_Website/src/routes/index.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/routes-dgAQy9eX.js",
-			"/assets/Surprise-gh948FrD.js",
+			"/assets/routes-igdWyOOc.js",
+			"/assets/Surprise-BsYE0HI-.js",
 			"/assets/music-BPrDfMN-.js",
-			"/assets/Letters-D33YhhRR.js",
+			"/assets/Letters-BRQ_lzUJ.js",
 			"/assets/SectionHeading-BmL1yZsm.js",
-			"/assets/Reveal-DY68ewoB.js",
-			"/assets/VideoGallery-524LqYmL.js"
+			"/assets/Reveal-6vN--KJE.js",
+			"/assets/VideoGallery-DBHnJWdr.js"
 		]
 	},
 	"/admin": {
 		filePath: "C:/Users/mahes/Downloads/GM_Website/src/routes/admin.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/admin-7k3U-zLG.js",
+			"/assets/admin-DAfXKgZ6.js",
 			"/assets/music-BPrDfMN-.js",
 			"/assets/loader-circle-CENuMKHS.js",
-			"/assets/dist-GpPJdixs.js",
+			"/assets/dist-CNHjq0F_.js",
 			"/assets/SectionHeading-BmL1yZsm.js"
 		]
 	},
@@ -58,43 +58,43 @@ var tsrStartManifest = () => ({ routes: {
 		filePath: "C:/Users/mahes/Downloads/GM_Website/src/routes/fun.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/fun-CInNo_zu.js",
-			"/assets/dist-GpPJdixs.js",
+			"/assets/fun-DW06HK-m.js",
+			"/assets/dist-CNHjq0F_.js",
 			"/assets/SectionHeading-BmL1yZsm.js",
-			"/assets/Reveal-DY68ewoB.js"
+			"/assets/Reveal-6vN--KJE.js"
 		]
 	},
 	"/letters": {
 		filePath: "C:/Users/mahes/Downloads/GM_Website/src/routes/letters.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/letters-BLooIhDX.js",
-			"/assets/Letters-D33YhhRR.js",
+			"/assets/letters-CklVZ9DV.js",
+			"/assets/Letters-BRQ_lzUJ.js",
 			"/assets/SectionHeading-BmL1yZsm.js"
 		]
 	},
 	"/login": {
 		filePath: "C:/Users/mahes/Downloads/GM_Website/src/routes/login.tsx",
 		children: void 0,
-		preloads: ["/assets/login-uHGzV9uN.js", "/assets/dist-GpPJdixs.js"]
+		preloads: ["/assets/login-DXR6XYj7.js", "/assets/dist-CNHjq0F_.js"]
 	},
 	"/photos": {
 		filePath: "C:/Users/mahes/Downloads/GM_Website/src/routes/photos.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/photos-DTeODyRR.js",
+			"/assets/photos-DH6QjsPY.js",
 			"/assets/loader-circle-CENuMKHS.js",
-			"/assets/dist-GpPJdixs.js",
+			"/assets/dist-CNHjq0F_.js",
 			"/assets/SectionHeading-BmL1yZsm.js",
-			"/assets/Reveal-DY68ewoB.js"
+			"/assets/Reveal-6vN--KJE.js"
 		]
 	},
 	"/songs": {
 		filePath: "C:/Users/mahes/Downloads/GM_Website/src/routes/songs.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/songs-DLuqQvRR.js",
-			"/assets/dist-GpPJdixs.js",
+			"/assets/songs-2y8KtWEA.js",
+			"/assets/dist-CNHjq0F_.js",
 			"/assets/SectionHeading-BmL1yZsm.js"
 		]
 	},
@@ -102,8 +102,8 @@ var tsrStartManifest = () => ({ routes: {
 		filePath: "C:/Users/mahes/Downloads/GM_Website/src/routes/timeline.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/timeline-Q4mSTLNX.js",
-			"/assets/Surprise-gh948FrD.js",
+			"/assets/timeline-CrbkqWnV.js",
+			"/assets/Surprise-BsYE0HI-.js",
 			"/assets/SectionHeading-BmL1yZsm.js"
 		]
 	},
@@ -111,9 +111,9 @@ var tsrStartManifest = () => ({ routes: {
 		filePath: "C:/Users/mahes/Downloads/GM_Website/src/routes/videos.tsx",
 		children: void 0,
 		preloads: [
-			"/assets/videos-koFgVdmY.js",
+			"/assets/videos-K6PWuhXQ.js",
 			"/assets/SectionHeading-BmL1yZsm.js",
-			"/assets/VideoGallery-524LqYmL.js"
+			"/assets/VideoGallery-DBHnJWdr.js"
 		]
 	}
 } });

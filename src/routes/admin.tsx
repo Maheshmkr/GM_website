@@ -369,11 +369,13 @@ function PhotosManager({
                 key={p._id}
                 className="bg-surface/30 border border-border rounded-2xl p-4 flex gap-4 items-start relative group"
               >
-                <img
-                  src={`/api/media/${p.fileId}`}
-                  alt={p.title}
-                  className="size-16 rounded-xl object-cover border border-border"
-                />
+                <div className="size-16 shrink-0 rounded-xl overflow-hidden border border-border bg-black/20">
+                  <img
+                    src={`/api/media/${p.fileId}`}
+                    alt={p.title}
+                    className="size-full object-cover object-center"
+                  />
+                </div>
                 <div className="min-w-0 flex-1">
                   <h4 className="font-semibold text-sm truncate flex items-center gap-1">
                     {p.title}
@@ -1210,11 +1212,13 @@ function SongsManager({
                   className="bg-surface/30 border border-border rounded-2xl p-4 flex gap-4 items-start relative group"
                 >
                   {s.coverFileId ? (
-                    <img
-                      src={`/api/media/${s.coverFileId}`}
-                      alt={s.title}
-                      className="size-16 rounded-xl object-cover border border-border shrink-0"
-                    />
+                    <div className="size-16 shrink-0 rounded-xl overflow-hidden border border-border bg-black/20">
+                      <img
+                        src={`/api/media/${s.coverFileId}`}
+                        alt={s.title}
+                        className="size-full object-cover object-center"
+                      />
+                    </div>
                   ) : (
                     <div className="size-16 rounded-xl bg-secondary border border-border flex items-center justify-center shrink-0">
                       <Music4 className="size-6 text-primary" />

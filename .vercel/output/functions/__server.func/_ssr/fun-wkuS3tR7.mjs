@@ -7,7 +7,7 @@ import { g as Link } from "../_libs/@tanstack/react-router+[...].mjs";
 import { t as toast } from "../_libs/sonner.mjs";
 import { t as funZoneConfig } from "./site-_zOoiwhn.mjs";
 import { t as Reveal } from "./Reveal-DSJJWaqp.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/fun-f4YPNlf8.js
+//#region node_modules/.nitro/vite/services/ssr/assets/fun-wkuS3tR7.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var ACTIONS = [
@@ -510,10 +510,13 @@ function FunCharacter({ imageSrc, characterName, selectedAction, isReacting, act
 				},
 				className: cn("group relative w-full h-full rounded-2xl overflow-hidden cursor-pointer select-none outline-none focus-visible:ring-4 focus-visible:ring-primary/60 transition-transform duration-300", "hover:scale-[1.02] active:scale-[0.98]", getAnimationClass()),
 				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
-						src: imageSrc,
-						alt: characterName,
-						className: "w-full h-full object-cover object-center select-none pointer-events-none transition-all duration-300"
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "relative w-full h-full rounded-2xl overflow-hidden bg-black/40 flex items-center justify-center",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+							src: imageSrc,
+							alt: characterName,
+							className: "w-full h-full object-cover object-center select-none pointer-events-none transition-all duration-300"
+						})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20 pointer-events-none" }),
 					selectedAction === "tomato" && !isReacting && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {

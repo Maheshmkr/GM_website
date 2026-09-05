@@ -97,7 +97,7 @@ export function Hero() {
       </div>
 
       <div>
-        <div className="group relative aspect-[16/10] overflow-hidden rounded-[2rem] border border-border shadow-[var(--shadow-glow)]">
+        <div className="group relative aspect-[16/10] overflow-hidden rounded-[2rem] border border-border bg-black/20 shadow-[var(--shadow-glow)]">
           {heroSlides.map((s, i) => (
             <img
               key={s.image}
@@ -107,7 +107,7 @@ export function Hero() {
               height={1000}
               loading={i === 0 ? "eager" : "lazy"}
               className={cn(
-                "absolute inset-0 size-full object-cover transition-all duration-[1200ms] ease-out group-hover:scale-105",
+                "absolute inset-0 size-full object-cover object-center transition-all duration-[1200ms] ease-out group-hover:scale-105",
                 i === slide ? "opacity-100" : "opacity-0",
               )}
             />

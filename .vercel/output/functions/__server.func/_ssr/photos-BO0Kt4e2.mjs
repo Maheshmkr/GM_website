@@ -7,7 +7,7 @@ import { t as SectionHeading } from "./SectionHeading-BVG9eVYl.mjs";
 import "../_libs/sonner.mjs";
 import { a as photoCategories } from "./site-_zOoiwhn.mjs";
 import { t as Reveal } from "./Reveal-DSJJWaqp.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/photos-Xp2frrei.js
+//#region node_modules/.nitro/vite/services/ssr/assets/photos-BO0Kt4e2.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function PhotoGallery() {
@@ -88,44 +88,43 @@ function PhotoGallery() {
 			}, c))
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "mt-10 columns-1 gap-4 sm:columns-2 lg:columns-3 [&>*]:mb-4",
+			className: "mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3",
 			children: list.map((p, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Reveal, {
 				delay: i % 6 * 70,
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("figure", {
-					className: "group relative break-inside-avoid overflow-hidden rounded-3xl border border-border",
+					className: "group relative overflow-hidden rounded-3xl border border-border bg-surface/30 flex flex-col",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						onClick: () => setOpenIndex(i),
 						className: "block w-full text-left",
 						"aria-label": `Open ${p.caption}`,
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "relative w-full aspect-[4/3] overflow-hidden bg-black/30",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
 								src: p.image,
 								alt: p.caption,
 								loading: "lazy",
-								className: "w-full object-cover transition-transform duration-700 group-hover:scale-[1.06]"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pointer-events-none absolute inset-0 bg-gradient-to-t from-background/85 via-background/10 to-transparent opacity-80 transition-opacity group-hover:opacity-100" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("figcaption", {
-								className: "absolute inset-x-0 bottom-0 p-5 pr-14",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-sm font-semibold truncate",
-									children: p.caption
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "flex items-center gap-2 mt-0.5",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "text-xs text-muted-foreground",
-										children: p.date
-									})
-								})]
-							})
-						]
+								className: "w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-[1.06]"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "pointer-events-none absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent opacity-80 transition-opacity group-hover:opacity-100" })]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("figcaption", {
+							className: "p-4 pr-14",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-sm font-semibold truncate",
+								children: p.caption
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "flex items-center gap-2 mt-0.5",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-xs text-muted-foreground",
+									children: p.date
+								})
+							})]
+						})]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						onClick: () => setFavorites((f) => ({
 							...f,
 							[p.caption]: !f[p.caption]
 						})),
 						"aria-label": "Favorite photo",
-						className: "glass absolute right-4 top-4 grid size-9 place-items-center rounded-full pointer-events-auto",
+						className: "glass absolute right-3 top-3 grid size-9 place-items-center rounded-full pointer-events-auto",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Heart, {
 							className: cn("size-4", favorites[p.caption] && "text-primary"),
 							fill: favorites[p.caption] ? "currentColor" : "none"
@@ -150,10 +149,13 @@ function PhotoGallery() {
 				className: "animate-letter-open relative w-full max-w-4xl",
 				onClick: (e) => e.stopPropagation(),
 				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
-						src: active.image,
-						alt: active.caption,
-						className: "max-h-[72vh] w-full rounded-3xl object-contain mx-auto"
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "relative max-h-[72vh] w-full flex items-center justify-center overflow-hidden rounded-3xl bg-black/40",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+							src: active.image,
+							alt: active.caption,
+							className: "max-h-[72vh] max-w-full w-auto h-auto rounded-3xl object-contain mx-auto"
+						})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "mt-4 text-center",

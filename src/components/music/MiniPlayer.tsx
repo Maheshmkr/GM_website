@@ -22,12 +22,14 @@ export function MiniPlayer() {
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 px-3 pb-3 sm:px-5 sm:pb-5">
       <div className="glass mx-auto flex max-w-3xl items-center gap-3 rounded-2xl p-2.5 sm:gap-4 sm:p-3">
-        <img
-          src={current.cover}
-          alt=""
-          loading="lazy"
-          className="size-11 shrink-0 rounded-xl object-cover sm:size-12"
-        />
+        <div className="size-11 shrink-0 overflow-hidden rounded-xl bg-black/20 sm:size-12">
+          <img
+            src={current.cover}
+            alt=""
+            loading="lazy"
+            className="size-full object-cover object-center"
+          />
+        </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold">{current.title}</p>
           <p className="truncate text-xs text-muted-foreground">{current.artist}</p>

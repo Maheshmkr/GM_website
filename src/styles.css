@@ -112,6 +112,12 @@
     font-family: var(--font-display);
     letter-spacing: -0.02em;
   }
+
+  img,
+  video {
+    max-width: 100%;
+    display: block;
+  }
 }
 
 @utility glass {

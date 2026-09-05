@@ -5,7 +5,7 @@ import { a as require_react, i as useQueryClient, n as useQuery, o as require_js
 import { A as Link, B as Camera, I as Clock, L as CircleCheck, M as Heart, N as Film, P as ExternalLink, S as Music4, V as Calendar, a as Upload, c as Sparkles, g as Play, h as Plus, j as Image, k as LoaderCircle, o as Trash2, r as Users, t as X, v as Pen, w as MapPin, x as Music } from "../_libs/lucide-react.mjs";
 import { t as SectionHeading } from "./SectionHeading-BVG9eVYl.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/admin-BR4-nR0-.js
+//#region node_modules/.nitro/vite/services/ssr/assets/admin-p5vyf-dy.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function AdminPage() {
@@ -325,10 +325,13 @@ function PhotosManager({ photos, isLoading, queryClient }) {
 				children: photos.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "bg-surface/30 border border-border rounded-2xl p-4 flex gap-4 items-start relative group",
 					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
-							src: `/api/media/${p.fileId}`,
-							alt: p.title,
-							className: "size-16 rounded-xl object-cover border border-border"
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "size-16 shrink-0 rounded-xl overflow-hidden border border-border bg-black/20",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+								src: `/api/media/${p.fileId}`,
+								alt: p.title,
+								className: "size-full object-cover object-center"
+							})
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "min-w-0 flex-1",
@@ -1011,10 +1014,13 @@ function SongsManager({ songs, isLoading, queryClient }) {
 					return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "bg-surface/30 border border-border rounded-2xl p-4 flex gap-4 items-start relative group",
 						children: [
-							s.coverFileId ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
-								src: `/api/media/${s.coverFileId}`,
-								alt: s.title,
-								className: "size-16 rounded-xl object-cover border border-border shrink-0"
+							s.coverFileId ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "size-16 shrink-0 rounded-xl overflow-hidden border border-border bg-black/20",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+									src: `/api/media/${s.coverFileId}`,
+									alt: s.title,
+									className: "size-full object-cover object-center"
+								})
 							}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 								className: "size-16 rounded-xl bg-secondary border border-border flex items-center justify-center shrink-0",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Music4, { className: "size-6 text-primary" })

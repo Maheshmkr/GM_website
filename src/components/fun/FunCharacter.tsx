@@ -107,12 +107,14 @@ export function FunCharacter({
             getAnimationClass()
           )}
         >
-          {/* Character Photo */}
-          <img
-            src={imageSrc}
-            alt={characterName}
-            className="w-full h-full object-cover object-center select-none pointer-events-none transition-all duration-300"
-          />
+          {/* Character Photo Frame */}
+          <div className="relative w-full h-full rounded-2xl overflow-hidden bg-black/40 flex items-center justify-center">
+            <img
+              src={imageSrc}
+              alt={characterName}
+              className="w-full h-full object-cover object-center select-none pointer-events-none transition-all duration-300"
+            />
+          </div>
 
           {/* Vignette & Soft Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20 pointer-events-none" />

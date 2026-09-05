@@ -91,15 +91,17 @@ export function MusicPlayer() {
       {/* Player Section */}
       <div className="glass rounded-3xl p-6 sm:p-8">
         <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
-          <img
-            src={current.cover}
-            alt={`${current.title} cover`}
-            loading="lazy"
-            className={cn(
-              "size-40 shrink-0 rounded-2xl object-cover shadow-[var(--shadow-glow)] transition-transform duration-700",
-              playing && "scale-[1.02]",
-            )}
-          />
+          <div className="size-40 shrink-0 overflow-hidden rounded-2xl bg-black/20 shadow-[var(--shadow-glow)]">
+            <img
+              src={current.cover}
+              alt={`${current.title} cover`}
+              loading="lazy"
+              className={cn(
+                "size-full object-cover object-center transition-transform duration-700",
+                playing && "scale-[1.02]",
+              )}
+            />
+          </div>
           <div className="min-w-0 flex-1 text-center sm:text-left">
             <h3 className="truncate text-xl font-semibold">{current.title}</h3>
             <p className="mt-1 text-sm text-muted-foreground">{current.artist}</p>
@@ -269,12 +271,14 @@ export function MusicPlayer() {
                   i === index && "bg-secondary",
                 )}
               >
-                <img
-                  src={s.cover}
-                  alt=""
-                  loading="lazy"
-                  className="size-11 rounded-xl object-cover"
-                />
+                <div className="size-11 shrink-0 overflow-hidden rounded-xl bg-black/20">
+                  <img
+                    src={s.cover}
+                    alt=""
+                    loading="lazy"
+                    className="size-full object-cover object-center"
+                  />
+                </div>
                 <span className="min-w-0">
                   <span
                     className={cn(
