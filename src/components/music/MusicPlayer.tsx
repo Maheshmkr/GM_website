@@ -11,6 +11,7 @@ import {
   X,
   Edit3,
   Save,
+  ExternalLink,
 } from "lucide-react";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -158,19 +159,48 @@ export function MusicPlayer() {
             : null;
           const spotifyTrackId = spotifyMatch ? spotifyMatch[1] : null;
 
-          if (isSpotify && spotifyTrackId) {
+          if (isSpotify) {
             return (
-              <div className="mt-6 rounded-2xl overflow-hidden border border-emerald-500/30 bg-black/40 shadow-lg">
-                <iframe
-                  src={`https://open.spotify.com/embed/track/${spotifyTrackId}?utm_source=generator&theme=0`}
-                  width="100%"
-                  height="152"
-                  frameBorder="0"
-                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                  loading="lazy"
-                  title={current.title}
-                  className="w-full rounded-2xl"
-                />
+              <div className="mt-6 space-y-3">
+                {spotifyTrackId && (
+                  <div className="rounded-2xl overflow-hidden border border-emerald-500/30 bg-black/40 shadow-lg">
+                    <iframe
+                      src={`https://open.spotify.com/embed/track/${spotifyTrackId}?utm_source=generator&theme=0`}
+                      width="100%"
+                      height="152"
+                      frameBorder="0"
+                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                      loading="lazy"
+                      title={current.title}
+                      className="w-full rounded-2xl"
+                    />
+                  </div>
+                )}
+
+                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2 text-xs">
+                  <div className="space-y-0.5 text-muted-foreground">
+                    <p className="font-medium text-emerald-400 flex items-center gap-1.5">
+                      <span>♫ {current.title}</span>
+                    </p>
+                    <p className="text-[11px]">
+                      Starts at: <span className="text-foreground font-semibold">{current.startTime || "0:00"}</span>
+                      {current.endTime && (
+                        <> • Ends at: <span className="text-foreground font-semibold">{current.endTime}</span></>
+                      )}
+                    </p>
+                  </div>
+
+                  {current.url && (
+                    <a
+                      href={current.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-600/90 hover:bg-emerald-500 text-white font-medium text-xs transition-colors shadow-sm cursor-pointer shrink-0"
+                    >
+                      Open in Spotify <ExternalLink className="size-3" />
+                    </a>
+                  )}
+                </div>
               </div>
             );
           }

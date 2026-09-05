@@ -92,6 +92,10 @@ const MediaItemSchema = new Schema(
     description: { type: String }, // For description
     duration: { type: String }, // For songs/videos duration
     coverFileId: { type: Schema.Types.ObjectId }, // GridFS cover image file ID (optional)
+    startTime: { type: String }, // Starting playback timestamp e.g. "4:28"
+    startSeconds: { type: Number }, // Starting playback in seconds e.g. 268
+    endTime: { type: String }, // Ending playback timestamp e.g. "5:49"
+    endSeconds: { type: Number }, // Ending playback in seconds e.g. 349
   },
   { timestamps: true },
 );

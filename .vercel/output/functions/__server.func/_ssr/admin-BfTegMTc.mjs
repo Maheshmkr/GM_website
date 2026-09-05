@@ -5,7 +5,7 @@ import { a as require_react, i as useQueryClient, n as useQuery, o as require_js
 import { A as Lock, C as Music, D as Mail, E as MapPin, F as Heart, G as Camera, H as CircleCheck, I as Film, K as Calendar, L as Eye, M as Link, N as KeyRound, P as Image, R as EyeOff, V as Clock, _ as Plus, a as Upload, b as Pen, c as Sparkles, f as Shield, j as LoaderCircle, o as Trash2, p as ShieldCheck, r as Users, t as X, v as Play, w as Music4, z as ExternalLink } from "../_libs/lucide-react.mjs";
 import { t as SectionHeading } from "./SectionHeading-BVG9eVYl.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/admin-BMaWnh1R.js
+//#region node_modules/.nitro/vite/services/ssr/assets/admin-BfTegMTc.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 function AdminPage() {
@@ -634,11 +634,15 @@ function SongsManager({ songs, isLoading, queryClient }) {
 	const [uploadDuration, setUploadDuration] = (0, import_react.useState)("3:30");
 	const [uploadDate, setUploadDate] = (0, import_react.useState)((/* @__PURE__ */ new Date()).toISOString().split("T")[0]);
 	const [uploading, setUploading] = (0, import_react.useState)(false);
+	const [isSpotifyModalOpen, setIsSpotifyModalOpen] = (0, import_react.useState)(false);
+	const [editingSpotifyId, setEditingSpotifyId] = (0, import_react.useState)(null);
 	const [spotifyUrl, setSpotifyUrl] = (0, import_react.useState)("");
 	const [spotifyTitle, setSpotifyTitle] = (0, import_react.useState)("");
 	const [spotifyArtist, setSpotifyArtist] = (0, import_react.useState)("");
+	const [spotifyStartTime, setSpotifyStartTime] = (0, import_react.useState)("0:00");
+	const [spotifyEndTime, setSpotifyEndTime] = (0, import_react.useState)("");
 	const [spotifyDate, setSpotifyDate] = (0, import_react.useState)((/* @__PURE__ */ new Date()).toISOString().split("T")[0]);
-	const [addingSpotify, setAddingSpotify] = (0, import_react.useState)(false);
+	const [savingSpotify, setSavingSpotify] = (0, import_react.useState)(false);
 	const [driveUrl, setDriveUrl] = (0, import_react.useState)("");
 	const [driveTitle, setDriveTitle] = (0, import_react.useState)("");
 	const [driveArtist, setDriveArtist] = (0, import_react.useState)("");
@@ -704,6 +708,26 @@ function SongsManager({ songs, isLoading, queryClient }) {
 			setUploading(false);
 		}
 	};
+	const handleOpenAddSpotify = () => {
+		setEditingSpotifyId(null);
+		setSpotifyUrl("");
+		setSpotifyTitle("");
+		setSpotifyArtist("");
+		setSpotifyStartTime("0:00");
+		setSpotifyEndTime("");
+		setSpotifyDate((/* @__PURE__ */ new Date()).toISOString().split("T")[0]);
+		setIsSpotifyModalOpen(true);
+	};
+	const handleOpenEditSpotify = (song) => {
+		setEditingSpotifyId(song._id);
+		setSpotifyUrl(song.url || "");
+		setSpotifyTitle(song.title || "");
+		setSpotifyArtist(song.artist || "");
+		setSpotifyStartTime(song.startTime || "0:00");
+		setSpotifyEndTime(song.endTime || "");
+		setSpotifyDate(song.memoryDate || (/* @__PURE__ */ new Date()).toISOString().split("T")[0]);
+		setIsSpotifyModalOpen(true);
+	};
 	const handleSpotifyUrlChange = async (urlVal) => {
 		setSpotifyUrl(urlVal);
 		if (urlVal.includes("spotify.com/track/") || urlVal.startsWith("spotify:track:")) try {
@@ -716,7 +740,7 @@ function SongsManager({ songs, isLoading, queryClient }) {
 			}
 		} catch (_) {}
 	};
-	const handleAddSpotify = async (e) => {
+	const handleSaveSpotify = async (e) => {
 		e.preventDefault();
 		if (!spotifyUrl.trim()) {
 			toast.error("Please paste a Spotify URL");
@@ -726,33 +750,60 @@ function SongsManager({ songs, isLoading, queryClient }) {
 			toast.error("Song Title and Artist are required");
 			return;
 		}
-		setAddingSpotify(true);
+		if (!spotifyStartTime.trim()) {
+			toast.error("Start playing time is required (e.g. 0:00 or 4:28)");
+			return;
+		}
+		setSavingSpotify(true);
 		try {
-			const res = await fetch("/api/media/url", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					type: "song",
-					sourceType: "spotify",
-					url: spotifyUrl,
-					title: spotifyTitle,
-					artist: spotifyArtist,
-					memoryDate: spotifyDate
-				})
-			});
-			const data = await res.json();
-			if (!res.ok) throw new Error(data.error || "Failed to add Spotify song");
-			toast.success("Spotify song added successfully!");
+			if (editingSpotifyId) {
+				const res = await fetch(`/api/media/edit/${editingSpotifyId}`, {
+					method: "PUT",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						url: spotifyUrl,
+						title: spotifyTitle,
+						artist: spotifyArtist,
+						memoryDate: spotifyDate,
+						startTime: spotifyStartTime,
+						endTime: spotifyEndTime || void 0
+					})
+				});
+				const data = await res.json();
+				if (!res.ok) throw new Error(data.error || "Failed to update Spotify song");
+				toast.success("Spotify song updated successfully!");
+			} else {
+				const res = await fetch("/api/media/url", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						type: "song",
+						sourceType: "spotify",
+						url: spotifyUrl,
+						title: spotifyTitle,
+						artist: spotifyArtist,
+						memoryDate: spotifyDate,
+						startTime: spotifyStartTime,
+						endTime: spotifyEndTime || void 0
+					})
+				});
+				const data = await res.json();
+				if (!res.ok) throw new Error(data.error || "Failed to add Spotify song");
+				toast.success("Spotify song added successfully!");
+			}
+			setIsSpotifyModalOpen(false);
+			setEditingSpotifyId(null);
 			setSpotifyUrl("");
 			setSpotifyTitle("");
 			setSpotifyArtist("");
-			setSpotifyDate((/* @__PURE__ */ new Date()).toISOString().split("T")[0]);
+			setSpotifyStartTime("0:00");
+			setSpotifyEndTime("");
 			queryClient.invalidateQueries({ queryKey: ["songs"] });
 		} catch (err) {
 			console.error(err);
-			toast.error(err.message);
+			toast.error(err.message || "Failed to save Spotify song");
 		} finally {
-			setAddingSpotify(false);
+			setSavingSpotify(false);
 		}
 	};
 	const handleAddDrive = async (e) => {
@@ -796,306 +847,440 @@ function SongsManager({ songs, isLoading, queryClient }) {
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "grid gap-8 lg:grid-cols-[1fr_1.5fr]",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "space-y-8",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
-					className: "text-lg font-semibold flex items-center gap-2 mb-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "size-5 text-primary" }), " ADD SONG"]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-					className: "text-xs text-muted-foreground mb-6",
-					children: "Upload from computer or add external Spotify / Google Drive tracks."
-				})] }),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "border border-border/60 bg-surface/20 rounded-2xl p-5 space-y-4",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h4", {
-						className: "text-sm font-semibold text-foreground flex items-center gap-2 border-b border-border/40 pb-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Music, { className: "size-4 text-primary" }), " Upload from Computer"]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
-						onSubmit: handleUpload,
-						className: "space-y-4",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "space-y-8",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+						className: "text-lg font-semibold flex items-center gap-2 mb-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "size-5 text-primary" }), " ADD SONG"]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-xs text-muted-foreground mb-6",
+						children: "Upload from computer or add external Spotify / Google Drive tracks."
+					})] }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "border border-emerald-500/30 bg-emerald-500/5 rounded-3xl p-6 relative overflow-hidden backdrop-blur-md",
 						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-								className: "block text-xs font-semibold text-muted-foreground mb-1",
-								children: "Choose Song File (MP3, WAV, OGG, WEBM)"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-								id: "song-file",
-								type: "file",
-								accept: "audio/*",
-								onChange: (e) => setFile(e.target.files?.[0] || null),
-								className: "w-full text-xs text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-secondary file:text-foreground hover:file:bg-secondary/80 bg-surface/50 border border-border rounded-xl p-2"
-							})] }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-								className: "block text-xs font-semibold text-muted-foreground mb-1",
-								children: "Album Art / Cover (JPEG, PNG, optional)"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-								id: "cover-file",
-								type: "file",
-								accept: "image/*",
-								onChange: (e) => setCoverFile(e.target.files?.[0] || null),
-								className: "w-full text-xs text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-secondary file:text-foreground hover:file:bg-secondary/80 bg-surface/50 border border-border rounded-xl p-2"
-							})] }),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "grid grid-cols-2 gap-3",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-									className: "block text-xs font-semibold text-muted-foreground mb-1",
-									children: "Song Title"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-									type: "text",
-									placeholder: "e.g. Perfect",
-									value: uploadTitle,
-									onChange: (e) => setUploadTitle(e.target.value),
-									className: "w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-								})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-									className: "block text-xs font-semibold text-muted-foreground mb-1",
-									children: "Artist"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-									type: "text",
-									placeholder: "e.g. Ed Sheeran",
-									value: uploadArtist,
-									onChange: (e) => setUploadArtist(e.target.value),
-									className: "w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-								})] })]
+								className: "flex items-center justify-between mb-3",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h4", {
+									className: "text-base font-semibold text-emerald-400 flex items-center gap-2",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ExternalLink, { className: "size-5" }), " Spotify Music Link"]
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30",
+									children: "Featured"
+								})]
 							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "grid grid-cols-2 gap-3",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xs text-muted-foreground mb-5 leading-relaxed",
+								children: "Link any song from Spotify with custom start and stop timestamps (e.g. 4:28)."
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+								type: "button",
+								onClick: handleOpenAddSpotify,
+								className: "w-full bg-emerald-600 hover:bg-emerald-500 text-white rounded-full py-3 text-sm font-semibold flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40 transition-all cursor-pointer active:scale-98",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Music4, { className: "size-4" }), " ♫ Add Spotify Link"]
+							})
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "border border-border/60 bg-surface/20 rounded-2xl p-5 space-y-4",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h4", {
+							className: "text-sm font-semibold text-foreground flex items-center gap-2 border-b border-border/40 pb-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Music, { className: "size-4 text-primary" }), " Upload from Computer"]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+							onSubmit: handleUpload,
+							className: "space-y-4",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+									className: "block text-xs font-semibold text-muted-foreground mb-1",
+									children: "Choose Song File (MP3, WAV, OGG, WEBM)"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									id: "song-file",
+									type: "file",
+									accept: "audio/*",
+									onChange: (e) => setFile(e.target.files?.[0] || null),
+									className: "w-full text-xs text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-secondary file:text-foreground hover:file:bg-secondary/80 bg-surface/50 border border-border rounded-xl p-2"
+								})] }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+									className: "block text-xs font-semibold text-muted-foreground mb-1",
+									children: "Album Art / Cover (JPEG, PNG, optional)"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									id: "cover-file",
+									type: "file",
+									accept: "image/*",
+									onChange: (e) => setCoverFile(e.target.files?.[0] || null),
+									className: "w-full text-xs text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-secondary file:text-foreground hover:file:bg-secondary/80 bg-surface/50 border border-border rounded-xl p-2"
+								})] }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "grid grid-cols-2 gap-3",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+										className: "block text-xs font-semibold text-muted-foreground mb-1",
+										children: "Song Title"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+										type: "text",
+										placeholder: "e.g. Perfect",
+										value: uploadTitle,
+										onChange: (e) => setUploadTitle(e.target.value),
+										className: "w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+									})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+										className: "block text-xs font-semibold text-muted-foreground mb-1",
+										children: "Artist"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+										type: "text",
+										placeholder: "e.g. Ed Sheeran",
+										value: uploadArtist,
+										onChange: (e) => setUploadArtist(e.target.value),
+										className: "w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+									})] })]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "grid grid-cols-2 gap-3",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+										className: "block text-xs font-semibold text-muted-foreground mb-1",
+										children: "Memory Date"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+										type: "date",
+										value: uploadDate,
+										onChange: (e) => setUploadDate(e.target.value),
+										className: "w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+									})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+										className: "block text-xs font-semibold text-muted-foreground mb-1",
+										children: "Duration (e.g. 4:23)"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+										type: "text",
+										placeholder: "e.g. 4:23",
+										value: uploadDuration,
+										onChange: (e) => setUploadDuration(e.target.value),
+										className: "w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+									})] })]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+									className: "block text-xs font-semibold text-muted-foreground mb-1",
+									children: "Note / Description"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", {
+									placeholder: "This song always reminds me of...",
+									value: uploadDescription,
+									onChange: (e) => setUploadDescription(e.target.value),
+									rows: 2,
+									className: "w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary resize-none"
+								})] }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									type: "submit",
+									disabled: uploading,
+									className: "w-full btn-love rounded-full py-2.5 text-xs font-semibold flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer",
+									children: uploading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-4 animate-spin" }), " Uploading..."] }) : "Upload Song"
+								})
+							]
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "border border-border/60 bg-surface/20 rounded-2xl p-5 space-y-4",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h4", {
+							className: "text-sm font-semibold text-foreground flex items-center gap-2 border-b border-border/40 pb-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Link, { className: "size-4 text-blue-400" }), " Add Google Drive Song"]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+							onSubmit: handleAddDrive,
+							className: "space-y-4",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+									className: "block text-xs font-semibold text-muted-foreground mb-1",
+									children: "Paste Google Drive Shared URL"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "text",
+									placeholder: "https://drive.google.com/file/d/FILE_ID/view?usp=sharing",
+									value: driveUrl,
+									onChange: (e) => setDriveUrl(e.target.value),
+									className: "w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+								})] }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "grid grid-cols-2 gap-3",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+										className: "block text-xs font-semibold text-muted-foreground mb-1",
+										children: "Song Title"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+										type: "text",
+										placeholder: "Song Title",
+										value: driveTitle,
+										onChange: (e) => setDriveTitle(e.target.value),
+										className: "w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+									})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+										className: "block text-xs font-semibold text-muted-foreground mb-1",
+										children: "Artist"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+										type: "text",
+										placeholder: "Artist",
+										value: driveArtist,
+										onChange: (e) => setDriveArtist(e.target.value),
+										className: "w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+									})] })]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
 									className: "block text-xs font-semibold text-muted-foreground mb-1",
 									children: "Memory Date"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 									type: "date",
-									value: uploadDate,
-									onChange: (e) => setUploadDate(e.target.value),
+									value: driveDate,
+									onChange: (e) => setDriveDate(e.target.value),
 									className: "w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-								})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-									className: "block text-xs font-semibold text-muted-foreground mb-1",
-									children: "Duration (e.g. 4:23)"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-									type: "text",
-									placeholder: "e.g. 4:23",
-									value: uploadDuration,
-									onChange: (e) => setUploadDuration(e.target.value),
-									className: "w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-								})] })]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-								className: "block text-xs font-semibold text-muted-foreground mb-1",
-								children: "Note / Description"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", {
-								placeholder: "This song always reminds me of...",
-								value: uploadDescription,
-								onChange: (e) => setUploadDescription(e.target.value),
-								rows: 2,
-								className: "w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary resize-none"
-							})] }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								type: "submit",
-								disabled: uploading,
-								className: "w-full btn-love rounded-full py-2.5 text-xs font-semibold flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer",
-								children: uploading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-4 animate-spin" }), " Uploading..."] }) : "Upload Song"
-							})
-						]
+								})] }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									type: "submit",
+									disabled: addingDrive,
+									className: "w-full bg-blue-600 hover:bg-blue-700 text-white rounded-full py-2.5 text-xs font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors cursor-pointer",
+									children: addingDrive ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-4 animate-spin" }), " Adding..."] }) : "Add Google Drive Song"
+								})
+							]
+						})]
+					})
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "border-t lg:border-t-0 lg:border-l border-border/30 pt-6 lg:pt-0 lg:pl-8",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex justify-between items-center mb-6",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+						className: "text-lg font-semibold flex items-center gap-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Music4, { className: "size-5 text-primary" }), " Saved Music & Tracks"]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-xs text-muted-foreground mt-0.5",
+						children: "All active songs stored in MongoDB database"
+					})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+						className: "text-xs font-medium text-muted-foreground bg-secondary/80 border border-border px-3 py-1 rounded-full",
+						children: [safeSongs.length, " records"]
 					})]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "border border-border/60 bg-surface/20 rounded-2xl p-5 space-y-4",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h4", {
-						className: "text-sm font-semibold text-foreground flex items-center gap-2 border-b border-border/40 pb-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ExternalLink, { className: "size-4 text-emerald-500" }), " Add Spotify Song"]
+				}), isLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center justify-center py-20 text-muted-foreground text-sm gap-2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-5 animate-spin text-primary" }), " Loading songs..."]
+				}) : safeSongs.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "text-center py-20 text-muted-foreground text-sm bg-surface/20 border border-dashed border-border rounded-2xl p-6",
+					children: "No songs found in MongoDB. Use the forms to add songs."
+				}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "grid gap-4 sm:grid-cols-2",
+					children: safeSongs.map((s) => {
+						const isSpotify = s.source === "spotify" || s.url && s.url.includes("spotify.com");
+						const isDrive = s.source === "google-drive" || s.url && s.url.includes("drive.google.com");
+						const sourceLabel = isSpotify ? "Spotify" : isDrive ? "Google Drive" : s.source === "upload" ? "Computer Upload" : "External Link";
+						const sourceBadgeColor = isSpotify ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" : isDrive ? "bg-blue-500/20 text-blue-400 border-blue-500/30" : "bg-secondary text-foreground/80 border-border/40";
+						return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: cn("border rounded-2xl p-4 flex flex-col justify-between relative group transition-all duration-200", isSpotify ? "bg-emerald-500/5 border-emerald-500/25 hover:border-emerald-500/50 shadow-sm" : "bg-surface/30 border-border hover:border-border/80"),
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex gap-3.5 items-start",
+								children: [s.coverFileId ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "size-16 shrink-0 rounded-xl overflow-hidden border border-border bg-black/20",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+										src: `/api/media/${s.coverFileId}`,
+										alt: s.title,
+										className: "size-full object-cover object-center"
+									})
+								}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: cn("size-14 rounded-xl border flex items-center justify-center shrink-0", isSpotify ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400" : "bg-secondary border-border text-primary"),
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Music4, { className: "size-6" })
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "min-w-0 flex-1",
+									children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
+											className: "font-semibold text-sm truncate text-foreground flex items-center gap-1.5",
+											children: isSpotify ? `♫ ${s.title}` : s.title
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+											className: "text-xs text-muted-foreground truncate mt-0.5",
+											children: ["by ", s.artist]
+										}),
+										isSpotify && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "mt-1 text-[11px] text-muted-foreground",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+												className: "text-emerald-400 font-medium",
+												children: ["Starts at: ", s.startTime || "0:00"]
+											}), s.endTime && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+												className: "text-emerald-400/80 font-medium",
+												children: [" • Ends at: ", s.endTime]
+											})]
+										}),
+										s.memoryDate && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+											className: "text-[10px] text-muted-foreground/80 font-medium mt-1",
+											children: ["📅 ", s.memoryDate]
+										})
+									]
+								})]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "mt-3 pt-3 border-t border-border/40 flex items-center justify-between gap-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: cn("text-[10px] px-2.5 py-0.5 rounded-full font-medium border", sourceBadgeColor),
+									children: sourceLabel
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center gap-1.5",
+									children: [
+										isSpotify && s.url && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+											href: s.url,
+											target: "_blank",
+											rel: "noopener noreferrer",
+											className: "inline-flex items-center gap-1 text-[11px] font-medium text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-full px-2.5 py-1 transition-colors",
+											title: "Open in Spotify",
+											children: ["Open in Spotify ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ExternalLink, { className: "size-3" })]
+										}),
+										isSpotify ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+											onClick: () => handleOpenEditSpotify(s),
+											className: "p-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-colors cursor-pointer",
+											title: "Edit Spotify Song",
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pen, { className: "size-3.5" })
+										}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+											href: s.source === "upload" ? `/api/media/${s.fileId}` : s.url,
+											target: "_blank",
+											rel: "noreferrer",
+											className: "p-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-colors cursor-pointer",
+											title: "Open Source",
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ExternalLink, { className: "size-3.5" })
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+											onClick: () => {
+												if (confirm(`Are you sure you want to delete "${s.title}"?`)) deleteMutation.mutate(s._id);
+											},
+											className: "p-1.5 text-destructive/80 hover:text-destructive hover:bg-destructive/10 rounded-full transition-colors cursor-pointer",
+											title: "Delete Record",
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "size-3.5" })
+										})
+									]
+								})]
+							})]
+						}, s._id);
+					})
+				})]
+			}),
+			isSpotifyModalOpen && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "w-full max-w-lg bg-surface border border-emerald-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto space-y-6",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center justify-between pb-2 border-b border-border/40",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+							className: "text-lg font-bold text-foreground flex items-center gap-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Music4, { className: "size-5 text-emerald-400" }), editingSpotifyId ? "Edit Spotify Song" : "Add Spotify Link"]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							type: "button",
+							onClick: () => setIsSpotifyModalOpen(false),
+							className: "p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-colors cursor-pointer",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "size-5" })
+						})]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
-						onSubmit: handleAddSpotify,
+						onSubmit: handleSaveSpotify,
 						className: "space-y-4",
 						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-								className: "block text-xs font-semibold text-muted-foreground mb-1",
-								children: "Paste Spotify URL"
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+								className: "block text-xs font-semibold text-muted-foreground mb-1.5",
+								children: ["Spotify URL ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-emerald-400",
+									children: "*"
+								})]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 								type: "text",
-								placeholder: "https://open.spotify.com/track/xxxxxxxxxxxxxxxx",
+								placeholder: "Paste Spotify song link (e.g. https://open.spotify.com/track/3lxEwB58zfc7BJcf0RZICP)",
 								value: spotifyUrl,
 								onChange: (e) => handleSpotifyUrlChange(e.target.value),
-								className: "w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+								className: "w-full text-xs sm:text-sm bg-surface/80 border border-border/80 rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-mono",
+								required: true
 							})] }),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "grid grid-cols-2 gap-3",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-									className: "block text-xs font-semibold text-muted-foreground mb-1",
-									children: "Song Title"
+								className: "grid grid-cols-1 sm:grid-cols-2 gap-3",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+									className: "block text-xs font-semibold text-muted-foreground mb-1.5",
+									children: ["Song Title ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "text-emerald-400",
+										children: "*"
+									})]
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 									type: "text",
-									placeholder: "Song Title",
+									placeholder: "e.g. Paal Pappali",
 									value: spotifyTitle,
 									onChange: (e) => setSpotifyTitle(e.target.value),
-									className: "w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-								})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-									className: "block text-xs font-semibold text-muted-foreground mb-1",
-									children: "Artist"
+									className: "w-full text-xs sm:text-sm bg-surface/80 border border-border/80 rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all",
+									required: true
+								})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+									className: "block text-xs font-semibold text-muted-foreground mb-1.5",
+									children: ["Artist ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "text-emerald-400",
+										children: "*"
+									})]
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 									type: "text",
-									placeholder: "Artist",
+									placeholder: "e.g. Anirudh Ravichander",
 									value: spotifyArtist,
 									onChange: (e) => setSpotifyArtist(e.target.value),
-									className: "w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+									className: "w-full text-xs sm:text-sm bg-surface/80 border border-border/80 rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all",
+									required: true
 								})] })]
 							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "grid grid-cols-1 sm:grid-cols-2 gap-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-4",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+										className: "block text-xs font-semibold text-foreground mb-1",
+										children: ["Start playing at ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-emerald-400",
+											children: "*"
+										})]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+										type: "text",
+										placeholder: "e.g. 4:28 or 0:00",
+										value: spotifyStartTime,
+										onChange: (e) => setSpotifyStartTime(e.target.value),
+										className: "w-full text-xs sm:text-sm bg-surface/90 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-mono",
+										required: true
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "text-[10px] text-muted-foreground mt-1 leading-tight",
+										children: "Example: 4:28 means the song starts at 4 minutes 28 seconds."
+									})
+								] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+										className: "block text-xs font-semibold text-foreground mb-1",
+										children: ["Stop playing at ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "text-muted-foreground font-normal",
+											children: "(optional)"
+										})]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+										type: "text",
+										placeholder: "e.g. 5:49",
+										value: spotifyEndTime,
+										onChange: (e) => setSpotifyEndTime(e.target.value),
+										className: "w-full text-xs sm:text-sm bg-surface/90 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-mono"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "text-[10px] text-muted-foreground mt-1 leading-tight",
+										children: "Leave empty to play until the song ends."
+									})
+								] })]
+							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-								className: "block text-xs font-semibold text-muted-foreground mb-1",
+								className: "block text-xs font-semibold text-muted-foreground mb-1.5",
 								children: "Memory Date"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 								type: "date",
 								value: spotifyDate,
 								onChange: (e) => setSpotifyDate(e.target.value),
-								className: "w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-							})] }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								type: "submit",
-								disabled: addingSpotify,
-								className: "w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-full py-2.5 text-xs font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors cursor-pointer",
-								children: addingSpotify ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-4 animate-spin" }), " Adding..."] }) : "Add Spotify Song"
-							})
-						]
-					})]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "border border-border/60 bg-surface/20 rounded-2xl p-5 space-y-4",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h4", {
-						className: "text-sm font-semibold text-foreground flex items-center gap-2 border-b border-border/40 pb-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Link, { className: "size-4 text-blue-400" }), " Add Google Drive Song"]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
-						onSubmit: handleAddDrive,
-						className: "space-y-4",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-								className: "block text-xs font-semibold text-muted-foreground mb-1",
-								children: "Paste Google Drive Shared URL"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-								type: "text",
-								placeholder: "https://drive.google.com/file/d/FILE_ID/view?usp=sharing",
-								value: driveUrl,
-								onChange: (e) => setDriveUrl(e.target.value),
-								className: "w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+								className: "w-full text-xs sm:text-sm bg-surface/80 border border-border/80 rounded-xl p-3 text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all"
 							})] }),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "grid grid-cols-2 gap-3",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-									className: "block text-xs font-semibold text-muted-foreground mb-1",
-									children: "Song Title"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-									type: "text",
-									placeholder: "Song Title",
-									value: driveTitle,
-									onChange: (e) => setDriveTitle(e.target.value),
-									className: "w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-								})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-									className: "block text-xs font-semibold text-muted-foreground mb-1",
-									children: "Artist"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-									type: "text",
-									placeholder: "Artist",
-									value: driveArtist,
-									onChange: (e) => setDriveArtist(e.target.value),
-									className: "w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-								})] })]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-								className: "block text-xs font-semibold text-muted-foreground mb-1",
-								children: "Memory Date"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-								type: "date",
-								value: driveDate,
-								onChange: (e) => setDriveDate(e.target.value),
-								className: "w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-							})] }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								type: "submit",
-								disabled: addingDrive,
-								className: "w-full bg-blue-600 hover:bg-blue-700 text-white rounded-full py-2.5 text-xs font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors cursor-pointer",
-								children: addingDrive ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-4 animate-spin" }), " Adding..."] }) : "Add Google Drive Song"
-							})
-						]
-					})]
-				})
-			]
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "border-l border-border/30 pl-0 lg:pl-8",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
-				className: "text-lg font-semibold mb-6 flex justify-between items-center",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Uploaded & Added Songs" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-					className: "text-xs font-normal text-muted-foreground bg-secondary/80 px-2.5 py-1 rounded-full",
-					children: [safeSongs.length, " records"]
-				})]
-			}), isLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex items-center justify-center py-20 text-muted-foreground text-sm gap-2",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-5 animate-spin" }), " Loading songs..."]
-			}) : safeSongs.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "text-center py-20 text-muted-foreground text-sm",
-				children: "No songs found in MongoDB. Use the forms to add songs."
-			}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "grid gap-4 sm:grid-cols-2",
-				children: safeSongs.map((s) => {
-					const sourceLabel = s.source === "spotify" ? "Spotify" : s.source === "google-drive" ? "Google Drive" : s.source === "upload" ? "Computer Upload" : "External Link";
-					const sourceBadgeColor = s.source === "spotify" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" : s.source === "google-drive" ? "bg-blue-500/20 text-blue-400 border-blue-500/30" : "bg-secondary text-foreground/80 border-border/40";
-					return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "bg-surface/30 border border-border rounded-2xl p-4 flex gap-4 items-start relative group",
-						children: [
-							s.coverFileId ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "size-16 shrink-0 rounded-xl overflow-hidden border border-border bg-black/20",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
-									src: `/api/media/${s.coverFileId}`,
-									alt: s.title,
-									className: "size-full object-cover object-center"
-								})
-							}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "size-16 rounded-xl bg-secondary border border-border flex items-center justify-center shrink-0",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Music4, { className: "size-6 text-primary" })
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "min-w-0 flex-1",
-								children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h4", {
-										className: "font-semibold text-sm truncate",
-										children: s.title
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-										className: "text-xs text-muted-foreground truncate mt-0.5",
-										children: ["by ", s.artist]
-									}),
-									s.memoryDate && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-										className: "text-[10px] text-muted-foreground/80 font-medium mt-1",
-										children: ["📅 ", s.memoryDate]
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "flex flex-wrap gap-1.5 mt-2",
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: cn("text-[10px] px-2 py-0.5 rounded-full font-medium border", sourceBadgeColor),
-											children: sourceLabel
-										})
-									})
-								]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-surface/90 rounded-full p-1 border border-border shadow-md",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-									href: s.source === "upload" ? `/api/media/${s.fileId}` : s.url,
-									target: "_blank",
-									rel: "noreferrer",
-									className: "p-1 hover:text-primary transition-colors",
-									title: "Open Source",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ExternalLink, { className: "size-3.5" })
+								className: "pt-2 flex flex-col sm:flex-row gap-3",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									type: "button",
+									onClick: () => setIsSpotifyModalOpen(false),
+									className: "w-full sm:w-1/3 bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-full py-3 text-sm font-semibold transition-all cursor-pointer",
+									children: "Cancel"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-									onClick: () => {
-										if (confirm("Are you sure you want to delete this song?")) deleteMutation.mutate(s._id);
-									},
-									className: "p-1 text-destructive hover:text-destructive/80 transition-colors cursor-pointer",
-									title: "Delete Record",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "size-3.5" })
+									type: "submit",
+									disabled: savingSpotify,
+									className: "w-full sm:w-2/3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full py-3 text-sm font-semibold flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40 transition-all cursor-pointer disabled:opacity-50",
+									children: savingSpotify ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "size-4 animate-spin" }), " Saving..."] }) : "Save Song"
 								})]
 							})
 						]
-					}, s._id);
+					})]
 				})
-			})]
-		})]
+			})
+		]
 	});
 }
 function TimelineManager({ timeline, isLoading, queryClient }) {

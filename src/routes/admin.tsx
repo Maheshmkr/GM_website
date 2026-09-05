@@ -718,6 +718,7 @@ function SongsManager({
   queryClient: any;
 }) {
   const safeSongs = Array.isArray(songs) ? songs : [];
+
   // Local Upload State
   const [file, setFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -728,12 +729,16 @@ function SongsManager({
   const [uploadDate, setUploadDate] = useState(new Date().toISOString().split("T")[0]);
   const [uploading, setUploading] = useState(false);
 
-  // Spotify State
+  // Spotify Modal & Form State
+  const [isSpotifyModalOpen, setIsSpotifyModalOpen] = useState(false);
+  const [editingSpotifyId, setEditingSpotifyId] = useState<string | null>(null);
   const [spotifyUrl, setSpotifyUrl] = useState("");
   const [spotifyTitle, setSpotifyTitle] = useState("");
   const [spotifyArtist, setSpotifyArtist] = useState("");
+  const [spotifyStartTime, setSpotifyStartTime] = useState("0:00");
+  const [spotifyEndTime, setSpotifyEndTime] = useState("");
   const [spotifyDate, setSpotifyDate] = useState(new Date().toISOString().split("T")[0]);
-  const [addingSpotify, setAddingSpotify] = useState(false);
+  const [savingSpotify, setSavingSpotify] = useState(false);
 
   // Google Drive State
   const [driveUrl, setDriveUrl] = useState("");
@@ -814,6 +819,30 @@ function SongsManager({
     }
   };
 
+  // Open Spotify Modal for Add
+  const handleOpenAddSpotify = () => {
+    setEditingSpotifyId(null);
+    setSpotifyUrl("");
+    setSpotifyTitle("");
+    setSpotifyArtist("");
+    setSpotifyStartTime("0:00");
+    setSpotifyEndTime("");
+    setSpotifyDate(new Date().toISOString().split("T")[0]);
+    setIsSpotifyModalOpen(true);
+  };
+
+  // Open Spotify Modal for Edit
+  const handleOpenEditSpotify = (song: any) => {
+    setEditingSpotifyId(song._id);
+    setSpotifyUrl(song.url || "");
+    setSpotifyTitle(song.title || "");
+    setSpotifyArtist(song.artist || "");
+    setSpotifyStartTime(song.startTime || "0:00");
+    setSpotifyEndTime(song.endTime || "");
+    setSpotifyDate(song.memoryDate || new Date().toISOString().split("T")[0]);
+    setIsSpotifyModalOpen(true);
+  };
+
   // Fetch Spotify metadata via oEmbed when URL changes
   const handleSpotifyUrlChange = async (urlVal: string) => {
     setSpotifyUrl(urlVal);
@@ -838,8 +867,8 @@ function SongsManager({
     }
   };
 
-  // Handle Add Spotify Song
-  const handleAddSpotify = async (e: React.FormEvent) => {
+  // Save Spotify Song (Create or Edit)
+  const handleSaveSpotify = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!spotifyUrl.trim()) {
       toast.error("Please paste a Spotify URL");
@@ -849,39 +878,72 @@ function SongsManager({
       toast.error("Song Title and Artist are required");
       return;
     }
+    if (!spotifyStartTime.trim()) {
+      toast.error("Start playing time is required (e.g. 0:00 or 4:28)");
+      return;
+    }
 
-    setAddingSpotify(true);
+    setSavingSpotify(true);
     try {
-      const res = await fetch("/api/media/url", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "song",
-          sourceType: "spotify",
-          url: spotifyUrl,
-          title: spotifyTitle,
-          artist: spotifyArtist,
-          memoryDate: spotifyDate,
-        }),
-      });
+      if (editingSpotifyId) {
+        // Edit existing Spotify song
+        const res = await fetch(`/api/media/edit/${editingSpotifyId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            url: spotifyUrl,
+            title: spotifyTitle,
+            artist: spotifyArtist,
+            memoryDate: spotifyDate,
+            startTime: spotifyStartTime,
+            endTime: spotifyEndTime || undefined,
+          }),
+        });
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to add Spotify song");
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to update Spotify song");
+        }
+
+        toast.success("Spotify song updated successfully!");
+      } else {
+        // Create new Spotify song
+        const res = await fetch("/api/media/url", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "song",
+            sourceType: "spotify",
+            url: spotifyUrl,
+            title: spotifyTitle,
+            artist: spotifyArtist,
+            memoryDate: spotifyDate,
+            startTime: spotifyStartTime,
+            endTime: spotifyEndTime || undefined,
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to add Spotify song");
+        }
+
+        toast.success("Spotify song added successfully!");
       }
 
-      toast.success("Spotify song added successfully!");
+      setIsSpotifyModalOpen(false);
+      setEditingSpotifyId(null);
       setSpotifyUrl("");
       setSpotifyTitle("");
       setSpotifyArtist("");
-      setSpotifyDate(new Date().toISOString().split("T")[0]);
-
+      setSpotifyStartTime("0:00");
+      setSpotifyEndTime("");
       queryClient.invalidateQueries({ queryKey: ["songs"] });
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message);
+      toast.error(err.message || "Failed to save Spotify song");
     } finally {
-      setAddingSpotify(false);
+      setSavingSpotify(false);
     }
   };
 
@@ -945,7 +1007,31 @@ function SongsManager({
           </p>
         </div>
 
-        {/* 1. Upload from Computer */}
+        {/* 1. Spotify Direct Action Button & Card */}
+        <div className="border border-emerald-500/30 bg-emerald-500/5 rounded-3xl p-6 relative overflow-hidden backdrop-blur-md">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-base font-semibold text-emerald-400 flex items-center gap-2">
+              <ExternalLink className="size-5" /> Spotify Music Link
+            </h4>
+            <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              Featured
+            </span>
+          </div>
+
+          <p className="text-xs text-muted-foreground mb-5 leading-relaxed">
+            Link any song from Spotify with custom start and stop timestamps (e.g. 4:28).
+          </p>
+
+          <button
+            type="button"
+            onClick={handleOpenAddSpotify}
+            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white rounded-full py-3 text-sm font-semibold flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40 transition-all cursor-pointer active:scale-98"
+          >
+            <Music4 className="size-4" /> ♫ Add Spotify Link
+          </button>
+        </div>
+
+        {/* 2. Upload from Computer */}
         <div className="border border-border/60 bg-surface/20 rounded-2xl p-5 space-y-4">
           <h4 className="text-sm font-semibold text-foreground flex items-center gap-2 border-b border-border/40 pb-2">
             <Music className="size-4 text-primary" /> Upload from Computer
@@ -1055,78 +1141,6 @@ function SongsManager({
           </form>
         </div>
 
-        {/* 2. Add Spotify Song */}
-        <div className="border border-border/60 bg-surface/20 rounded-2xl p-5 space-y-4">
-          <h4 className="text-sm font-semibold text-foreground flex items-center gap-2 border-b border-border/40 pb-2">
-            <ExternalLink className="size-4 text-emerald-500" /> Add Spotify Song
-          </h4>
-          <form onSubmit={handleAddSpotify} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-muted-foreground mb-1">
-                Paste Spotify URL
-              </label>
-              <input
-                type="text"
-                placeholder="https://open.spotify.com/track/xxxxxxxxxxxxxxxx"
-                value={spotifyUrl}
-                onChange={(e) => handleSpotifyUrlChange(e.target.value)}
-                className="w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">
-                  Song Title
-                </label>
-                <input
-                  type="text"
-                  placeholder="Song Title"
-                  value={spotifyTitle}
-                  onChange={(e) => setSpotifyTitle(e.target.value)}
-                  className="w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">
-                  Artist
-                </label>
-                <input
-                  type="text"
-                  placeholder="Artist"
-                  value={spotifyArtist}
-                  onChange={(e) => setSpotifyArtist(e.target.value)}
-                  className="w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-muted-foreground mb-1">
-                Memory Date
-              </label>
-              <input
-                type="date"
-                value={spotifyDate}
-                onChange={(e) => setSpotifyDate(e.target.value)}
-                className="w-full text-xs bg-surface/50 border border-border rounded-xl p-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={addingSpotify}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-full py-2.5 text-xs font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors cursor-pointer"
-            >
-              {addingSpotify ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" /> Adding...
-                </>
-              ) : (
-                "Add Spotify Song"
-              )}
-            </button>
-          </form>
-        </div>
-
         {/* 3. Add Google Drive Song */}
         <div className="border border-border/60 bg-surface/20 rounded-2xl p-5 space-y-4">
           <h4 className="text-sm font-semibold text-foreground flex items-center gap-2 border-b border-border/40 pb-2">
@@ -1201,100 +1215,154 @@ function SongsManager({
       </div>
 
       {/* Record Grid */}
-      <div className="border-l border-border/30 pl-0 lg:pl-8">
-        <h3 className="text-lg font-semibold mb-6 flex justify-between items-center">
-          <span>Uploaded & Added Songs</span>
-          <span className="text-xs font-normal text-muted-foreground bg-secondary/80 px-2.5 py-1 rounded-full">
+      <div className="border-t lg:border-t-0 lg:border-l border-border/30 pt-6 lg:pt-0 lg:pl-8">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <Music4 className="size-5 text-primary" /> Saved Music & Tracks
+            </h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              All active songs stored in MongoDB database
+            </p>
+          </div>
+          <span className="text-xs font-medium text-muted-foreground bg-secondary/80 border border-border px-3 py-1 rounded-full">
             {safeSongs.length} records
           </span>
-        </h3>
+        </div>
 
         {isLoading ? (
           <div className="flex items-center justify-center py-20 text-muted-foreground text-sm gap-2">
-            <Loader2 className="size-5 animate-spin" /> Loading songs...
+            <Loader2 className="size-5 animate-spin text-primary" /> Loading songs...
           </div>
         ) : safeSongs.length === 0 ? (
-          <div className="text-center py-20 text-muted-foreground text-sm">
+          <div className="text-center py-20 text-muted-foreground text-sm bg-surface/20 border border-dashed border-border rounded-2xl p-6">
             No songs found in MongoDB. Use the forms to add songs.
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
             {safeSongs.map((s) => {
-              const sourceLabel =
-                s.source === "spotify"
-                  ? "Spotify"
-                  : s.source === "google-drive"
-                    ? "Google Drive"
-                    : s.source === "upload"
-                      ? "Computer Upload"
-                      : "External Link";
+              const isSpotify = s.source === "spotify" || (s.url && s.url.includes("spotify.com"));
+              const isDrive = s.source === "google-drive" || (s.url && s.url.includes("drive.google.com"));
 
-              const sourceBadgeColor =
-                s.source === "spotify"
-                  ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
-                  : s.source === "google-drive"
-                    ? "bg-blue-500/20 text-blue-400 border-blue-500/30"
-                    : "bg-secondary text-foreground/80 border-border/40";
+              const sourceLabel = isSpotify
+                ? "Spotify"
+                : isDrive
+                  ? "Google Drive"
+                  : s.source === "upload"
+                    ? "Computer Upload"
+                    : "External Link";
+
+              const sourceBadgeColor = isSpotify
+                ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                : isDrive
+                  ? "bg-blue-500/20 text-blue-400 border-blue-500/30"
+                  : "bg-secondary text-foreground/80 border-border/40";
 
               return (
                 <div
                   key={s._id}
-                  className="bg-surface/30 border border-border rounded-2xl p-4 flex gap-4 items-start relative group"
-                >
-                  {s.coverFileId ? (
-                    <div className="size-16 shrink-0 rounded-xl overflow-hidden border border-border bg-black/20">
-                      <img
-                        src={`/api/media/${s.coverFileId}`}
-                        alt={s.title}
-                        className="size-full object-cover object-center"
-                      />
-                    </div>
-                  ) : (
-                    <div className="size-16 rounded-xl bg-secondary border border-border flex items-center justify-center shrink-0">
-                      <Music4 className="size-6 text-primary" />
-                    </div>
+                  className={cn(
+                    "border rounded-2xl p-4 flex flex-col justify-between relative group transition-all duration-200",
+                    isSpotify
+                      ? "bg-emerald-500/5 border-emerald-500/25 hover:border-emerald-500/50 shadow-sm"
+                      : "bg-surface/30 border-border hover:border-border/80"
                   )}
-                  <div className="min-w-0 flex-1">
-                    <h4 className="font-semibold text-sm truncate">{s.title}</h4>
-                    <p className="text-xs text-muted-foreground truncate mt-0.5">by {s.artist}</p>
-                    {s.memoryDate && (
-                      <p className="text-[10px] text-muted-foreground/80 font-medium mt-1">
-                        📅 {s.memoryDate}
-                      </p>
-                    )}
-                    <div className="flex flex-wrap gap-1.5 mt-2">
-                      <span
+                >
+                  <div className="flex gap-3.5 items-start">
+                    {s.coverFileId ? (
+                      <div className="size-16 shrink-0 rounded-xl overflow-hidden border border-border bg-black/20">
+                        <img
+                          src={`/api/media/${s.coverFileId}`}
+                          alt={s.title}
+                          className="size-full object-cover object-center"
+                        />
+                      </div>
+                    ) : (
+                      <div
                         className={cn(
-                          "text-[10px] px-2 py-0.5 rounded-full font-medium border",
-                          sourceBadgeColor,
+                          "size-14 rounded-xl border flex items-center justify-center shrink-0",
+                          isSpotify
+                            ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400"
+                            : "bg-secondary border-border text-primary"
                         )}
                       >
-                        {sourceLabel}
-                      </span>
+                        <Music4 className="size-6" />
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-semibold text-sm truncate text-foreground flex items-center gap-1.5">
+                        {isSpotify ? `♫ ${s.title}` : s.title}
+                      </h4>
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">by {s.artist}</p>
+
+                      {isSpotify && (
+                        <div className="mt-1 text-[11px] text-muted-foreground">
+                          <span className="text-emerald-400 font-medium">Starts at: {s.startTime || "0:00"}</span>
+                          {s.endTime && (
+                            <span className="text-emerald-400/80 font-medium"> • Ends at: {s.endTime}</span>
+                          )}
+                        </div>
+                      )}
+
+                      {s.memoryDate && (
+                        <p className="text-[10px] text-muted-foreground/80 font-medium mt-1">
+                          📅 {s.memoryDate}
+                        </p>
+                      )}
                     </div>
                   </div>
 
-                  <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-surface/90 rounded-full p-1 border border-border shadow-md">
-                    <a
-                      href={s.source === "upload" ? `/api/media/${s.fileId}` : s.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="p-1 hover:text-primary transition-colors"
-                      title="Open Source"
-                    >
-                      <ExternalLink className="size-3.5" />
-                    </a>
-                    <button
-                      onClick={() => {
-                        if (confirm("Are you sure you want to delete this song?")) {
-                          deleteMutation.mutate(s._id);
-                        }
-                      }}
-                      className="p-1 text-destructive hover:text-destructive/80 transition-colors cursor-pointer"
-                      title="Delete Record"
-                    >
-                      <Trash2 className="size-3.5" />
-                    </button>
+                  {/* Actions Bar */}
+                  <div className="mt-3 pt-3 border-t border-border/40 flex items-center justify-between gap-2">
+                    <span className={cn("text-[10px] px-2.5 py-0.5 rounded-full font-medium border", sourceBadgeColor)}>
+                      {sourceLabel}
+                    </span>
+
+                    <div className="flex items-center gap-1.5">
+                      {isSpotify && s.url && (
+                        <a
+                          href={s.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-full px-2.5 py-1 transition-colors"
+                          title="Open in Spotify"
+                        >
+                          Open in Spotify <ExternalLink className="size-3" />
+                        </a>
+                      )}
+
+                      {isSpotify ? (
+                        <button
+                          onClick={() => handleOpenEditSpotify(s)}
+                          className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-colors cursor-pointer"
+                          title="Edit Spotify Song"
+                        >
+                          <Edit2 className="size-3.5" />
+                        </button>
+                      ) : (
+                        <a
+                          href={s.source === "upload" ? `/api/media/${s.fileId}` : s.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-colors cursor-pointer"
+                          title="Open Source"
+                        >
+                          <ExternalLink className="size-3.5" />
+                        </a>
+                      )}
+
+                      <button
+                        onClick={() => {
+                          if (confirm(`Are you sure you want to delete "${s.title}"?`)) {
+                            deleteMutation.mutate(s._id);
+                          }
+                        }}
+                        className="p-1.5 text-destructive/80 hover:text-destructive hover:bg-destructive/10 rounded-full transition-colors cursor-pointer"
+                        title="Delete Record"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -1302,6 +1370,143 @@ function SongsManager({
           </div>
         )}
       </div>
+
+      {/* Spotify Add / Edit Modal */}
+      {isSpotifyModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="w-full max-w-lg bg-surface border border-emerald-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto space-y-6">
+            <div className="flex items-center justify-between pb-2 border-b border-border/40">
+              <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                <Music4 className="size-5 text-emerald-400" />
+                {editingSpotifyId ? "Edit Spotify Song" : "Add Spotify Link"}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsSpotifyModalOpen(false)}
+                className="p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-colors cursor-pointer"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveSpotify} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+                  Spotify URL <span className="text-emerald-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Paste Spotify song link (e.g. https://open.spotify.com/track/3lxEwB58zfc7BJcf0RZICP)"
+                  value={spotifyUrl}
+                  onChange={(e) => handleSpotifyUrlChange(e.target.value)}
+                  className="w-full text-xs sm:text-sm bg-surface/80 border border-border/80 rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-mono"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+                    Song Title <span className="text-emerald-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Paal Pappali"
+                    value={spotifyTitle}
+                    onChange={(e) => setSpotifyTitle(e.target.value)}
+                    className="w-full text-xs sm:text-sm bg-surface/80 border border-border/80 rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+                    Artist <span className="text-emerald-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Anirudh Ravichander"
+                    value={spotifyArtist}
+                    onChange={(e) => setSpotifyArtist(e.target.value)}
+                    className="w-full text-xs sm:text-sm bg-surface/80 border border-border/80 rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Timestamp Controls */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-4">
+                <div>
+                  <label className="block text-xs font-semibold text-foreground mb-1">
+                    Start playing at <span className="text-emerald-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 4:28 or 0:00"
+                    value={spotifyStartTime}
+                    onChange={(e) => setSpotifyStartTime(e.target.value)}
+                    className="w-full text-xs sm:text-sm bg-surface/90 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-mono"
+                    required
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1 leading-tight">
+                    Example: 4:28 means the song starts at 4 minutes 28 seconds.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-foreground mb-1">
+                    Stop playing at <span className="text-muted-foreground font-normal">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 5:49"
+                    value={spotifyEndTime}
+                    onChange={(e) => setSpotifyEndTime(e.target.value)}
+                    className="w-full text-xs sm:text-sm bg-surface/90 border border-border rounded-xl p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-mono"
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1 leading-tight">
+                    Leave empty to play until the song ends.
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+                  Memory Date
+                </label>
+                <input
+                  type="date"
+                  value={spotifyDate}
+                  onChange={(e) => setSpotifyDate(e.target.value)}
+                  className="w-full text-xs sm:text-sm bg-surface/80 border border-border/80 rounded-xl p-3 text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all"
+                />
+              </div>
+
+              <div className="pt-2 flex flex-col sm:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsSpotifyModalOpen(false)}
+                  className="w-full sm:w-1/3 bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-full py-3 text-sm font-semibold transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingSpotify}
+                  className="w-full sm:w-2/3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full py-3 text-sm font-semibold flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40 transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {savingSpotify ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" /> Saving...
+                    </>
+                  ) : (
+                    "Save Song"
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

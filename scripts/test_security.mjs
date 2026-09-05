@@ -291,6 +291,100 @@ const testDerived = crypto.scryptSync(newPass, parts[1], 64);
 const testBuf = Buffer.from(parts[2], "hex");
 assert(crypto.timingSafeEqual(testDerived, testBuf), "New admin password securely hashed and verified with Scrypt");
 
+// -------------------------------------------------------------
+// 9. Spotify URL & Timestamp Validation Tests
+// -------------------------------------------------------------
+console.log("\n--- [9] SPOTIFY URL & TIMESTAMP VALIDATION TESTS ---");
+
+function parseTimeString(timeStr) {
+  if (timeStr === undefined || timeStr === null || timeStr.trim() === "") {
+    return { valid: true, seconds: null, formatted: null };
+  }
+  const clean = timeStr.trim();
+  const hmsMatch = clean.match(/^(\d{1,3}):([0-5]\d):([0-5]\d)$/);
+  if (hmsMatch) {
+    const hours = parseInt(hmsMatch[1], 10);
+    const mins = parseInt(hmsMatch[2], 10);
+    const secs = parseInt(hmsMatch[3], 10);
+    const totalSeconds = hours * 3600 + mins * 60 + secs;
+    return {
+      valid: true,
+      seconds: totalSeconds,
+      formatted: `${hours}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`,
+    };
+  }
+  const msMatch = clean.match(/^(\d{1,4}):([0-5]\d)$/);
+  if (msMatch) {
+    const mins = parseInt(msMatch[1], 10);
+    const secs = parseInt(msMatch[2], 10);
+    const totalSeconds = mins * 60 + secs;
+    return {
+      valid: true,
+      seconds: totalSeconds,
+      formatted: `${mins}:${secs.toString().padStart(2, "0")}`,
+    };
+  }
+  if (/^\d+$/.test(clean)) {
+    const totalSeconds = parseInt(clean, 10);
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return {
+      valid: true,
+      seconds: totalSeconds,
+      formatted: `${mins}:${secs.toString().padStart(2, "0")}`,
+    };
+  }
+  return { valid: false, seconds: null, formatted: null, error: "Invalid time format" };
+}
+
+function extractAndNormalizeSpotifyTrackUrl(url) {
+  if (!url || typeof url !== "string") {
+    return { valid: false, trackId: null, normalizedUrl: null };
+  }
+  const trimmed = url.trim();
+  const match = trimmed.match(
+    /(?:open\.spotify\.com\/(?:intl-[a-z]{2}\/)?track\/|spotify:track:)([a-zA-Z0-9]+)/i
+  );
+  if (!match || !match[1]) {
+    return { valid: false, trackId: null, normalizedUrl: null };
+  }
+  const trackId = match[1];
+  return {
+    valid: true,
+    trackId,
+    normalizedUrl: `https://open.spotify.com/track/${trackId}`,
+  };
+}
+
+// Test A: Time Parsing
+assert(parseTimeString("0:00").seconds === 0, "0:00 converts to 0 seconds");
+assert(parseTimeString("1:30").seconds === 90, "1:30 converts to 90 seconds");
+assert(parseTimeString("4:28").seconds === 268, "4:28 converts to 268 seconds");
+assert(parseTimeString("5:49").seconds === 349, "5:49 converts to 349 seconds");
+assert(parseTimeString("2:15:30").seconds === 8130, "2:15:30 converts to 8130 seconds");
+assert(parseTimeString("").seconds === null, "Empty time string is allowed (returns null seconds)");
+assert(parseTimeString("   ").seconds === null, "Whitespace-only time string returns null seconds");
+assert(!parseTimeString("4:60").valid, "Invalid seconds (>=60) is rejected");
+assert(!parseTimeString("invalid-time").valid, "Arbitrary non-time string is rejected");
+
+// Test B: Spotify URL Validation & Normalization
+const validSpotifyUrl = "https://open.spotify.com/track/3lxEwB58zfc7BJcf0RZICP";
+const normalized = extractAndNormalizeSpotifyTrackUrl(validSpotifyUrl);
+assert(normalized.valid && normalized.normalizedUrl === "https://open.spotify.com/track/3lxEwB58zfc7BJcf0RZICP", "Valid Spotify track URL normalized correctly");
+
+const spotifyWithParams = "https://open.spotify.com/track/3lxEwB58zfc7BJcf0RZICP?si=d1b5853b8ffb4e18&context=spotify%3Aplaylist";
+const normalizedParams = extractAndNormalizeSpotifyTrackUrl(spotifyWithParams);
+assert(normalizedParams.valid && normalizedParams.normalizedUrl === "https://open.spotify.com/track/3lxEwB58zfc7BJcf0RZICP", "Spotify URL with ?si= tracking query parameters normalized correctly");
+
+const spotifyIntl = "https://open.spotify.com/intl-fr/track/3lxEwB58zfc7BJcf0RZICP";
+assert(extractAndNormalizeSpotifyTrackUrl(spotifyIntl).valid, "Spotify intl localized URL accepted and normalized");
+
+const invalidUrl1 = "https://example.com/track/3lxEwB58zfc7BJcf0RZICP";
+assert(!extractAndNormalizeSpotifyTrackUrl(invalidUrl1).valid, "Non-Spotify URL is rejected");
+
+const invalidUrl2 = "https://open.spotify.com/album/3lxEwB58zfc7BJcf0RZICP";
+assert(!extractAndNormalizeSpotifyTrackUrl(invalidUrl2).valid, "Spotify album (non-track) URL is rejected");
+
 console.log("\n=================================================");
-console.log(`  ALL ${passedTests}/${totalTests} SECURITY TESTS PASSED SUCCESSFULLY!`);
+console.log(`  ALL ${passedTests}/${totalTests} SECURITY & FUNCTIONAL TESTS PASSED!`);
 console.log("=================================================\n");

@@ -690,3 +690,107 @@ export function handleCors(request: Request): { isPreflight: boolean; headers: R
     headers,
   };
 }
+
+// ============================================================================
+// 12. SPOTIFY & TIMESTAMP VALIDATION HELPERS
+// ============================================================================
+
+/**
+ * Validates and converts time strings (e.g. "0:00", "1:30", "4:28", "2:15:30") to total seconds.
+ */
+export function parseTimeString(timeStr?: string | null): {
+  valid: boolean;
+  seconds: number | null;
+  formatted: string | null;
+  error?: string;
+} {
+  if (timeStr === undefined || timeStr === null || timeStr.trim() === "") {
+    return { valid: true, seconds: null, formatted: null };
+  }
+
+  const clean = timeStr.trim();
+
+  // Format 1: H:MM:SS or HH:MM:SS (e.g. 2:15:30, 02:15:30)
+  const hmsMatch = clean.match(/^(\d{1,3}):([0-5]\d):([0-5]\d)$/);
+  if (hmsMatch) {
+    const hours = parseInt(hmsMatch[1], 10);
+    const mins = parseInt(hmsMatch[2], 10);
+    const secs = parseInt(hmsMatch[3], 10);
+    const totalSeconds = hours * 3600 + mins * 60 + secs;
+    return {
+      valid: true,
+      seconds: totalSeconds,
+      formatted: `${hours}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`,
+    };
+  }
+
+  // Format 2: M:SS or MM:SS (e.g. 0:00, 1:30, 4:28, 12:45)
+  const msMatch = clean.match(/^(\d{1,4}):([0-5]\d)$/);
+  if (msMatch) {
+    const mins = parseInt(msMatch[1], 10);
+    const secs = parseInt(msMatch[2], 10);
+    const totalSeconds = mins * 60 + secs;
+    return {
+      valid: true,
+      seconds: totalSeconds,
+      formatted: `${mins}:${secs.toString().padStart(2, "0")}`,
+    };
+  }
+
+  // Format 3: Raw integer seconds (e.g. "268")
+  if (/^\d+$/.test(clean)) {
+    const totalSeconds = parseInt(clean, 10);
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return {
+      valid: true,
+      seconds: totalSeconds,
+      formatted: `${mins}:${secs.toString().padStart(2, "0")}`,
+    };
+  }
+
+  return {
+    valid: false,
+    seconds: null,
+    formatted: null,
+    error: "Invalid time format. Please use M:SS (e.g. 4:28) or H:MM:SS (e.g. 2:15:30).",
+  };
+}
+
+/**
+ * Validates and normalizes Spotify track URLs, stripping query parameters.
+ */
+export function extractAndNormalizeSpotifyTrackUrl(url: string): {
+  valid: boolean;
+  trackId: string | null;
+  normalizedUrl: string | null;
+  error?: string;
+} {
+  if (!url || typeof url !== "string") {
+    return { valid: false, trackId: null, normalizedUrl: null, error: "Spotify URL is required" };
+  }
+
+  const trimmed = url.trim();
+  // Match https://open.spotify.com/track/TRACK_ID, with optional /intl-xx/ and query params ?si=...
+  // or spotify:track:TRACK_ID
+  const match = trimmed.match(
+    /(?:open\.spotify\.com\/(?:intl-[a-z]{2}\/)?track\/|spotify:track:)([a-zA-Z0-9]+)/i
+  );
+
+  if (!match || !match[1]) {
+    return {
+      valid: false,
+      trackId: null,
+      normalizedUrl: null,
+      error: "Invalid Spotify song URL. Please provide a link like https://open.spotify.com/track/...",
+    };
+  }
+
+  const trackId = match[1];
+  return {
+    valid: true,
+    trackId,
+    normalizedUrl: `https://open.spotify.com/track/${trackId}`,
+  };
+}
+

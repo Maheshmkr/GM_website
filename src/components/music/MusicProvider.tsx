@@ -92,6 +92,10 @@ export function MusicProvider({ children }: { children: ReactNode }) {
           note: s.description || "",
           source: s.source || (s.fileId ? "upload" : "url"),
           url: s.url,
+          startTime: s.startTime,
+          startSeconds: s.startSeconds,
+          endTime: s.endTime,
+          endSeconds: s.endSeconds,
           rawDate: displayDate.split("T")[0],
           date: displayDate
             ? new Date(displayDate).toLocaleDateString("en-GB", {

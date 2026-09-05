@@ -180,6 +180,10 @@ export type Song = {
   rawDate?: string;
   source?: "upload" | "url" | "spotify" | "google-drive";
   url?: string;
+  startTime?: string;
+  startSeconds?: number;
+  endTime?: string;
+  endSeconds?: number;
 };
 
 export const songs: Song[] = [

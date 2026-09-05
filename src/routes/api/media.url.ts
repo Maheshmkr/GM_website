@@ -10,24 +10,21 @@ import {
   createRateLimitResponse,
   sanitizeMongoInput,
   sanitizePlainText,
+  parseTimeString,
+  extractAndNormalizeSpotifyTrackUrl,
 } from "@/lib/security";
 
 const MediaUrlSchema = z.object({
   title: z.string().min(1, "Title is required").max(150),
-  url: z.string().url("Valid URL is required").max(2000),
+  url: z.string().min(1, "Valid URL is required").max(2000),
   type: z.enum(["image", "video", "song"]),
   artist: z.string().max(100).optional(),
   category: z.string().max(50).optional(),
   memoryDate: z.string().max(20).optional(),
   sourceType: z.enum(["url", "spotify", "google-drive"]).optional(),
+  startTime: z.string().max(20).optional(),
+  endTime: z.string().max(20).optional(),
 });
-
-function extractSpotifyTrackId(url: string): string | null {
-  const match = url.match(
-    /(?:open\.spotify\.com\/(?:intl-[a-z]{2}\/)?track\/|spotify:track:)([a-zA-Z0-9]{22})/i
-  );
-  return match ? match[1] : null;
-}
 
 function extractGoogleDriveFileId(url: string): string | null {
   const match = url.match(/(?:\/file\/d\/|[?&]id=)([a-zA-Z0-9_-]{20,})/i);
@@ -95,19 +92,27 @@ export const Route = createFileRoute("/api/media/url")({
             );
           }
 
-          const { title, url, type, artist, category, memoryDate, sourceType } = parsed.data;
-
-          if (!validateUrlProtocolAndHost(url)) {
-            return new Response(
-              JSON.stringify({ error: "Invalid or unsupported URL protocol/host" }),
-              { status: 400, headers: { "Content-Type": "application/json" } }
-            );
-          }
+          const {
+            title,
+            url,
+            type,
+            artist,
+            category,
+            memoryDate,
+            sourceType,
+            startTime: rawStartTime,
+            endTime: rawEndTime,
+          } = parsed.data;
 
           const trimmedUrl = url.trim();
           const lowerUrl = trimmedUrl.toLowerCase();
           let determinedSource: "url" | "spotify" | "google-drive" = "url";
           let canonicalUrl = trimmedUrl;
+
+          let validatedStartTime: string | undefined;
+          let validatedStartSeconds: number | undefined;
+          let validatedEndTime: string | undefined;
+          let validatedEndSeconds: number | undefined;
 
           if (type === "song") {
             const isSpotify =
@@ -121,16 +126,57 @@ export const Route = createFileRoute("/api/media/url")({
               lowerUrl.includes("docs.google.com");
 
             if (isSpotify) {
-              const trackId = extractSpotifyTrackId(trimmedUrl);
-              if (!trackId) {
-                return new Response(JSON.stringify({ error: "Invalid Spotify song URL" }), {
-                  status: 400,
-                  headers: { "Content-Type": "application/json" },
-                });
+              const spotifyResult = extractAndNormalizeSpotifyTrackUrl(trimmedUrl);
+              if (!spotifyResult.valid || !spotifyResult.normalizedUrl) {
+                return new Response(
+                  JSON.stringify({ error: spotifyResult.error || "Invalid Spotify song URL" }),
+                  { status: 400, headers: { "Content-Type": "application/json" } }
+                );
               }
               determinedSource = "spotify";
-              canonicalUrl = `https://open.spotify.com/track/${trackId}`;
+              canonicalUrl = spotifyResult.normalizedUrl;
+
+              // Validate Start Time
+              const startParsed = parseTimeString(rawStartTime || "0:00");
+              if (!startParsed.valid) {
+                return new Response(
+                  JSON.stringify({ error: startParsed.error || "Invalid start time format" }),
+                  { status: 400, headers: { "Content-Type": "application/json" } }
+                );
+              }
+              validatedStartTime = startParsed.formatted || "0:00";
+              validatedStartSeconds = startParsed.seconds !== null ? startParsed.seconds : 0;
+
+              // Validate Optional End Time
+              if (rawEndTime && rawEndTime.trim()) {
+                const endParsed = parseTimeString(rawEndTime);
+                if (!endParsed.valid) {
+                  return new Response(
+                    JSON.stringify({ error: endParsed.error || "Invalid stop time format" }),
+                    { status: 400, headers: { "Content-Type": "application/json" } }
+                  );
+                }
+                validatedEndTime = endParsed.formatted || undefined;
+                validatedEndSeconds = endParsed.seconds !== null ? endParsed.seconds : undefined;
+
+                if (
+                  validatedEndSeconds !== undefined &&
+                  validatedStartSeconds !== undefined &&
+                  validatedEndSeconds <= validatedStartSeconds
+                ) {
+                  return new Response(
+                    JSON.stringify({ error: "Stop time must be greater than start time" }),
+                    { status: 400, headers: { "Content-Type": "application/json" } }
+                  );
+                }
+              }
             } else if (isGoogleDrive) {
+              if (!validateUrlProtocolAndHost(trimmedUrl)) {
+                return new Response(
+                  JSON.stringify({ error: "Invalid or unsupported URL protocol/host" }),
+                  { status: 400, headers: { "Content-Type": "application/json" } }
+                );
+              }
               const fileId = extractGoogleDriveFileId(trimmedUrl);
               if (!fileId) {
                 return new Response(JSON.stringify({ error: "Invalid Google Drive URL" }), {
@@ -140,6 +186,20 @@ export const Route = createFileRoute("/api/media/url")({
               }
               determinedSource = "google-drive";
               canonicalUrl = `https://drive.google.com/file/d/${fileId}/view?usp=sharing`;
+            } else {
+              if (!validateUrlProtocolAndHost(trimmedUrl)) {
+                return new Response(
+                  JSON.stringify({ error: "Invalid or unsupported URL protocol/host" }),
+                  { status: 400, headers: { "Content-Type": "application/json" } }
+                );
+              }
+            }
+          } else {
+            if (!validateUrlProtocolAndHost(trimmedUrl)) {
+              return new Response(
+                JSON.stringify({ error: "Invalid or unsupported URL protocol/host" }),
+                { status: 400, headers: { "Content-Type": "application/json" } }
+              );
             }
           }
 
@@ -160,6 +220,10 @@ export const Route = createFileRoute("/api/media/url")({
             url: canonicalUrl,
             memoryDate: sanitizePlainText(memoryDate, 20) || new Date().toISOString().split("T")[0],
             category: sanitizePlainText(category || "Favorites", 50),
+            startTime: validatedStartTime,
+            startSeconds: validatedStartSeconds,
+            endTime: validatedEndTime,
+            endSeconds: validatedEndSeconds,
           });
           await mediaItem.save();
 

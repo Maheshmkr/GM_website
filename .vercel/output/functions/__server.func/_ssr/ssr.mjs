@@ -537,10 +537,80 @@ function handleCors(request) {
 		headers
 	};
 }
+/**
+* Validates and converts time strings (e.g. "0:00", "1:30", "4:28", "2:15:30") to total seconds.
+*/
+function parseTimeString(timeStr) {
+	if (timeStr === void 0 || timeStr === null || timeStr.trim() === "") return {
+		valid: true,
+		seconds: null,
+		formatted: null
+	};
+	const clean = timeStr.trim();
+	const hmsMatch = clean.match(/^(\d{1,3}):([0-5]\d):([0-5]\d)$/);
+	if (hmsMatch) {
+		const hours = parseInt(hmsMatch[1], 10);
+		const mins = parseInt(hmsMatch[2], 10);
+		const secs = parseInt(hmsMatch[3], 10);
+		return {
+			valid: true,
+			seconds: hours * 3600 + mins * 60 + secs,
+			formatted: `${hours}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
+		};
+	}
+	const msMatch = clean.match(/^(\d{1,4}):([0-5]\d)$/);
+	if (msMatch) {
+		const mins = parseInt(msMatch[1], 10);
+		const secs = parseInt(msMatch[2], 10);
+		return {
+			valid: true,
+			seconds: mins * 60 + secs,
+			formatted: `${mins}:${secs.toString().padStart(2, "0")}`
+		};
+	}
+	if (/^\d+$/.test(clean)) {
+		const totalSeconds = parseInt(clean, 10);
+		return {
+			valid: true,
+			seconds: totalSeconds,
+			formatted: `${Math.floor(totalSeconds / 60)}:${(totalSeconds % 60).toString().padStart(2, "0")}`
+		};
+	}
+	return {
+		valid: false,
+		seconds: null,
+		formatted: null,
+		error: "Invalid time format. Please use M:SS (e.g. 4:28) or H:MM:SS (e.g. 2:15:30)."
+	};
+}
+/**
+* Validates and normalizes Spotify track URLs, stripping query parameters.
+*/
+function extractAndNormalizeSpotifyTrackUrl(url) {
+	if (!url || typeof url !== "string") return {
+		valid: false,
+		trackId: null,
+		normalizedUrl: null,
+		error: "Spotify URL is required"
+	};
+	const match = url.trim().match(/(?:open\.spotify\.com\/(?:intl-[a-z]{2}\/)?track\/|spotify:track:)([a-zA-Z0-9]+)/i);
+	if (!match || !match[1]) return {
+		valid: false,
+		trackId: null,
+		normalizedUrl: null,
+		error: "Invalid Spotify song URL. Please provide a link like https://open.spotify.com/track/..."
+	};
+	const trackId = match[1];
+	return {
+		valid: true,
+		trackId,
+		normalizedUrl: `https://open.spotify.com/track/${trackId}`
+	};
+}
 import_main.default.config();
 var serverEntryPromise;
 async function getServerEntry() {
-	if (!serverEntryPromise) serverEntryPromise = import("./server-Q_kNQ7xw.mjs").then((m) => m.default ?? m);
+	if (!serverEntryPromise) serverEntryPromise = import("./server-DfxCH1z1.mjs").then((m) => m.default ?? m);
 	return serverEntryPromise;
 }
 async function normalizeCatastrophicSsrResponse(response) {
@@ -592,4 +662,4 @@ var server_default = { async fetch(request, env, ctx) {
 	}
 } };
 //#endregion
-export { verifySessionToken as _, createSessionCookie as a, hashPassword as c, requireAdmin as d, server_default as default, sanitizeMongoInput as f, verifyPassword as g, validateMediaUpload as h, createRateLimitResponse as i, isValidObjectId as l, uploadRateLimiter as m, checkRateLimit as n, createSessionToken as o, sanitizePlainText as p, createClearSessionCookie as r, getAuthSession as s, authRateLimiter as t, mutationRateLimiter as u, dbConnect as v, renderErrorPage as y };
+export { validateMediaUpload as _, createSessionCookie as a, dbConnect as b, getAuthSession as c, mutationRateLimiter as d, server_default as default, parseTimeString as f, uploadRateLimiter as g, sanitizePlainText as h, createRateLimitResponse as i, hashPassword as l, sanitizeMongoInput as m, checkRateLimit as n, createSessionToken as o, requireAdmin as p, createClearSessionCookie as r, extractAndNormalizeSpotifyTrackUrl as s, authRateLimiter as t, isValidObjectId as u, verifyPassword as v, renderErrorPage as x, verifySessionToken as y };

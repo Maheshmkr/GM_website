@@ -5,17 +5,17 @@ import { F as Heart, O as LogOut, S as Pause, T as Menu, c as Sparkles, k as Log
 import { t as QueryClient } from "../_libs/tanstack__query-core.mjs";
 import { _ as useLoaderData, c as HeadContent, d as createRouter, f as Outlet, g as Link, h as createRootRouteWithContext, j as redirect, l as useLocation, m as createFileRoute, p as lazyRouteComponent, s as Scripts, v as useRouter } from "../_libs/@tanstack/react-router+[...].mjs";
 import { t as require_mongoose } from "../_libs/mongoose+mpath+mquery+ms+sift.mjs";
-import { a as createSessionCookie, c as hashPassword, d as requireAdmin, f as sanitizeMongoInput, g as verifyPassword, h as validateMediaUpload, i as createRateLimitResponse, l as isValidObjectId, m as uploadRateLimiter, n as checkRateLimit, o as createSessionToken, p as sanitizePlainText, r as createClearSessionCookie, s as getAuthSession, t as authRateLimiter, u as mutationRateLimiter, v as dbConnect } from "./ssr.mjs";
+import { _ as validateMediaUpload, a as createSessionCookie, b as dbConnect, c as getAuthSession, d as mutationRateLimiter, f as parseTimeString, g as uploadRateLimiter, h as sanitizePlainText, i as createRateLimitResponse, l as hashPassword, m as sanitizeMongoInput, n as checkRateLimit, o as createSessionToken, p as requireAdmin, r as createClearSessionCookie, s as extractAndNormalizeSpotifyTrackUrl, t as authRateLimiter, u as isValidObjectId, v as verifyPassword } from "./ssr.mjs";
 import { c as createServerFn, i as TSS_SERVER_FUNCTION } from "./createServerFn-CIHAFgYl.mjs";
 import { i as letters, n as girlfriend } from "./site-_zOoiwhn.mjs";
-import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-BxbOTlVT.mjs";
-import { n as formatTime, r as useMusic, t as MusicProvider } from "./MusicProvider-CexXRw5f.mjs";
+import { t as getServerFnById } from "../__23tanstack-start-server-fn-resolver-CzM9Wt4H.mjs";
+import { n as formatTime, r as useMusic, t as MusicProvider } from "./MusicProvider-BUUOaqNr.mjs";
 import { a as stringType, i as objectType, n as enumType, r as literalType, t as booleanType } from "../_libs/zod.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-iKROojVA.js
+//#region node_modules/.nitro/vite/services/ssr/assets/router-CkYDYPac.js
 var import_mongoose = /* @__PURE__ */ __toESM(require_mongoose());
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
-var styles_default = "/assets/styles-pzQAf11U.css";
+var styles_default = "/assets/styles-DI1cigqD.css";
 function reportLovableError(error, context = {}) {
 	if (typeof window === "undefined") return;
 	window.__lovableEvents?.captureException?.(error, {
@@ -504,7 +504,7 @@ function RootComponent() {
 		] })
 	});
 }
-var $$splitComponentImporter$8 = () => import("./routes-CKmu2OzX.mjs");
+var $$splitComponentImporter$8 = () => import("./routes-3PVDolgL.mjs");
 var title$6 = "For You — A Little World Made Just For Us";
 var description$6 = "A private collection of our photos, videos, songs, letters and the timeline of our story — made with all my love.";
 var Route$31 = createFileRoute("/")({
@@ -525,7 +525,7 @@ var Route$31 = createFileRoute("/")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$8, "component")
 });
-var $$splitComponentImporter$7 = () => import("./admin-BMaWnh1R.mjs");
+var $$splitComponentImporter$7 = () => import("./admin-BfTegMTc.mjs");
 var Route$30 = createFileRoute("/admin")({ component: lazyRouteComponent($$splitComponentImporter$7, "component") });
 var $$splitComponentImporter$6 = () => import("./fun-wkuS3tR7.mjs");
 var title$5 = "Fun Zone ❤️ — Interactive Character Game";
@@ -600,7 +600,7 @@ var Route$26 = createFileRoute("/photos")({
 	] }),
 	component: lazyRouteComponent($$splitComponentImporter$3, "component")
 });
-var $$splitComponentImporter$2 = () => import("./songs-DnoZ_WkY.mjs");
+var $$splitComponentImporter$2 = () => import("./songs-Dd3jvSVJ.mjs");
 var title$2 = "Songs That Remind Me of You";
 var description$2 = "Our playlist — the melodies that speak your name, from the first song we danced to onwards.";
 var Route$25 = createFileRoute("/songs")({
@@ -832,7 +832,11 @@ var MediaItemSchema = new import_mongoose.Schema({
 	memoryDate: { type: String },
 	description: { type: String },
 	duration: { type: String },
-	coverFileId: { type: import_mongoose.Schema.Types.ObjectId }
+	coverFileId: { type: import_mongoose.Schema.Types.ObjectId },
+	startTime: { type: String },
+	startSeconds: { type: Number },
+	endTime: { type: String },
+	endSeconds: { type: Number }
 }, { timestamps: true });
 var MediaItem = import_mongoose.default.models.MediaItem || import_mongoose.default.model("MediaItem", MediaItemSchema, "mediaItems");
 var UploadChunkSchema = new import_mongoose.Schema({
@@ -2254,7 +2258,7 @@ var Route$8 = createFileRoute("/api/media/upload")({ server: { handlers: { POST:
 } } } });
 var MediaUrlSchema = objectType({
 	title: stringType().min(1, "Title is required").max(150),
-	url: stringType().url("Valid URL is required").max(2e3),
+	url: stringType().min(1, "Valid URL is required").max(2e3),
 	type: enumType([
 		"image",
 		"video",
@@ -2267,12 +2271,10 @@ var MediaUrlSchema = objectType({
 		"url",
 		"spotify",
 		"google-drive"
-	]).optional()
+	]).optional(),
+	startTime: stringType().max(20).optional(),
+	endTime: stringType().max(20).optional()
 });
-function extractSpotifyTrackId(url) {
-	const match = url.match(/(?:open\.spotify\.com\/(?:intl-[a-z]{2}\/)?track\/|spotify:track:)([a-zA-Z0-9]{22})/i);
-	return match ? match[1] : null;
-}
 function extractGoogleDriveFileId(url) {
 	const match = url.match(/(?:\/file\/d\/|[?&]id=)([a-zA-Z0-9_-]{20,})/i);
 	return match ? match[1] : null;
@@ -2305,27 +2307,51 @@ var Route$7 = createFileRoute("/api/media/url")({ server: { handlers: { POST: as
 			status: 400,
 			headers: { "Content-Type": "application/json" }
 		});
-		const { title, url, type, artist, category, memoryDate, sourceType } = parsed.data;
-		if (!validateUrlProtocolAndHost(url)) return new Response(JSON.stringify({ error: "Invalid or unsupported URL protocol/host" }), {
-			status: 400,
-			headers: { "Content-Type": "application/json" }
-		});
+		const { title, url, type, artist, category, memoryDate, sourceType, startTime: rawStartTime, endTime: rawEndTime } = parsed.data;
 		const trimmedUrl = url.trim();
 		const lowerUrl = trimmedUrl.toLowerCase();
 		let determinedSource = "url";
 		let canonicalUrl = trimmedUrl;
+		let validatedStartTime;
+		let validatedStartSeconds;
+		let validatedEndTime;
+		let validatedEndSeconds;
 		if (type === "song") {
 			const isSpotify = sourceType === "spotify" || lowerUrl.includes("spotify.com") || lowerUrl.startsWith("spotify:track:");
 			const isGoogleDrive = sourceType === "google-drive" || lowerUrl.includes("drive.google.com") || lowerUrl.includes("docs.google.com");
 			if (isSpotify) {
-				const trackId = extractSpotifyTrackId(trimmedUrl);
-				if (!trackId) return new Response(JSON.stringify({ error: "Invalid Spotify song URL" }), {
+				const spotifyResult = extractAndNormalizeSpotifyTrackUrl(trimmedUrl);
+				if (!spotifyResult.valid || !spotifyResult.normalizedUrl) return new Response(JSON.stringify({ error: spotifyResult.error || "Invalid Spotify song URL" }), {
 					status: 400,
 					headers: { "Content-Type": "application/json" }
 				});
 				determinedSource = "spotify";
-				canonicalUrl = `https://open.spotify.com/track/${trackId}`;
+				canonicalUrl = spotifyResult.normalizedUrl;
+				const startParsed = parseTimeString(rawStartTime || "0:00");
+				if (!startParsed.valid) return new Response(JSON.stringify({ error: startParsed.error || "Invalid start time format" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" }
+				});
+				validatedStartTime = startParsed.formatted || "0:00";
+				validatedStartSeconds = startParsed.seconds !== null ? startParsed.seconds : 0;
+				if (rawEndTime && rawEndTime.trim()) {
+					const endParsed = parseTimeString(rawEndTime);
+					if (!endParsed.valid) return new Response(JSON.stringify({ error: endParsed.error || "Invalid stop time format" }), {
+						status: 400,
+						headers: { "Content-Type": "application/json" }
+					});
+					validatedEndTime = endParsed.formatted || void 0;
+					validatedEndSeconds = endParsed.seconds !== null ? endParsed.seconds : void 0;
+					if (validatedEndSeconds !== void 0 && validatedStartSeconds !== void 0 && validatedEndSeconds <= validatedStartSeconds) return new Response(JSON.stringify({ error: "Stop time must be greater than start time" }), {
+						status: 400,
+						headers: { "Content-Type": "application/json" }
+					});
+				}
 			} else if (isGoogleDrive) {
+				if (!validateUrlProtocolAndHost(trimmedUrl)) return new Response(JSON.stringify({ error: "Invalid or unsupported URL protocol/host" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" }
+				});
 				const fileId = extractGoogleDriveFileId(trimmedUrl);
 				if (!fileId) return new Response(JSON.stringify({ error: "Invalid Google Drive URL" }), {
 					status: 400,
@@ -2333,8 +2359,14 @@ var Route$7 = createFileRoute("/api/media/url")({ server: { handlers: { POST: as
 				});
 				determinedSource = "google-drive";
 				canonicalUrl = `https://drive.google.com/file/d/${fileId}/view?usp=sharing`;
-			}
-		}
+			} else if (!validateUrlProtocolAndHost(trimmedUrl)) return new Response(JSON.stringify({ error: "Invalid or unsupported URL protocol/host" }), {
+				status: 400,
+				headers: { "Content-Type": "application/json" }
+			});
+		} else if (!validateUrlProtocolAndHost(trimmedUrl)) return new Response(JSON.stringify({ error: "Invalid or unsupported URL protocol/host" }), {
+			status: 400,
+			headers: { "Content-Type": "application/json" }
+		});
 		if (await MediaItem.findOne({
 			type,
 			url: canonicalUrl
@@ -2349,7 +2381,11 @@ var Route$7 = createFileRoute("/api/media/url")({ server: { handlers: { POST: as
 			artist: type === "song" ? sanitizePlainText(artist || "Unknown Artist", 100) : void 0,
 			url: canonicalUrl,
 			memoryDate: sanitizePlainText(memoryDate, 20) || (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
-			category: sanitizePlainText(category || "Favorites", 50)
+			category: sanitizePlainText(category || "Favorites", 50),
+			startTime: validatedStartTime,
+			startSeconds: validatedStartSeconds,
+			endTime: validatedEndTime,
+			endSeconds: validatedEndSeconds
 		});
 		await mediaItem.save();
 		return new Response(JSON.stringify(mediaItem), {
@@ -2667,9 +2703,12 @@ var Route$2 = createFileRoute("/api/videos/$id")({ server: { handlers: { DELETE:
 var EditMediaSchema = objectType({
 	title: stringType().min(1).max(150).optional(),
 	artist: stringType().max(100).optional(),
+	url: stringType().max(2e3).optional(),
 	memoryDate: stringType().max(20).optional(),
 	category: stringType().max(50).optional(),
-	favorite: booleanType().optional()
+	favorite: booleanType().optional(),
+	startTime: stringType().max(20).optional(),
+	endTime: stringType().max(20).optional()
 });
 var Route$1 = createFileRoute("/api/media/edit/$id")({ server: { handlers: { PUT: async ({ params, request }) => {
 	const auth = requireAdmin(request);
@@ -2679,6 +2718,11 @@ var Route$1 = createFileRoute("/api/media/edit/$id")({ server: { handlers: { PUT
 		const { id } = params;
 		if (!isValidObjectId(id)) return new Response(JSON.stringify({ error: "Invalid document ID format" }), {
 			status: 400,
+			headers: { "Content-Type": "application/json" }
+		});
+		const existingItem = await MediaItem.findById(id);
+		if (!existingItem) return new Response(JSON.stringify({ error: "Media item not found" }), {
+			status: 404,
 			headers: { "Content-Type": "application/json" }
 		});
 		const rawBody = await request.json().catch(() => null);
@@ -2697,11 +2741,46 @@ var Route$1 = createFileRoute("/api/media/edit/$id")({ server: { handlers: { PUT
 		if (parsed.data.memoryDate !== void 0) updateData.memoryDate = sanitizePlainText(parsed.data.memoryDate, 20);
 		if (parsed.data.category !== void 0) updateData.category = sanitizePlainText(parsed.data.category, 50);
 		if (parsed.data.favorite !== void 0) updateData.favorite = parsed.data.favorite;
+		if (parsed.data.url !== void 0) {
+			const trimmedUrl = parsed.data.url.trim();
+			if (existingItem.source === "spotify" || trimmedUrl.includes("spotify.com")) {
+				const spotifyResult = extractAndNormalizeSpotifyTrackUrl(trimmedUrl);
+				if (!spotifyResult.valid || !spotifyResult.normalizedUrl) return new Response(JSON.stringify({ error: spotifyResult.error || "Invalid Spotify song URL" }), {
+					status: 400,
+					headers: { "Content-Type": "application/json" }
+				});
+				updateData.url = spotifyResult.normalizedUrl;
+				updateData.source = "spotify";
+			} else updateData.url = trimmedUrl;
+		}
+		let startSecs = existingItem.startSeconds ?? 0;
+		if (parsed.data.startTime !== void 0) {
+			const startParsed = parseTimeString(parsed.data.startTime);
+			if (!startParsed.valid) return new Response(JSON.stringify({ error: startParsed.error || "Invalid start time format" }), {
+				status: 400,
+				headers: { "Content-Type": "application/json" }
+			});
+			updateData.startTime = startParsed.formatted || "0:00";
+			updateData.startSeconds = startParsed.seconds !== null ? startParsed.seconds : 0;
+			startSecs = updateData.startSeconds;
+		}
+		if (parsed.data.endTime !== void 0) if (!parsed.data.endTime || !parsed.data.endTime.trim()) {
+			updateData.endTime = void 0;
+			updateData.endSeconds = void 0;
+		} else {
+			const endParsed = parseTimeString(parsed.data.endTime);
+			if (!endParsed.valid) return new Response(JSON.stringify({ error: endParsed.error || "Invalid stop time format" }), {
+				status: 400,
+				headers: { "Content-Type": "application/json" }
+			});
+			updateData.endTime = endParsed.formatted || void 0;
+			updateData.endSeconds = endParsed.seconds !== null ? endParsed.seconds : void 0;
+			if (updateData.endSeconds !== void 0 && updateData.endSeconds <= startSecs) return new Response(JSON.stringify({ error: "Stop time must be greater than start time" }), {
+				status: 400,
+				headers: { "Content-Type": "application/json" }
+			});
+		}
 		const updatedItem = await MediaItem.findByIdAndUpdate(id, { $set: updateData }, { new: true });
-		if (!updatedItem) return new Response(JSON.stringify({ error: "Media item not found" }), {
-			status: 404,
-			headers: { "Content-Type": "application/json" }
-		});
 		return new Response(JSON.stringify(updatedItem), { headers: { "Content-Type": "application/json" } });
 	} catch (error) {
 		console.error("Error updating media item:", error);

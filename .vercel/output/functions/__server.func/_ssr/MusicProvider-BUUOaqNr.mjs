@@ -2,7 +2,7 @@ import { o as __toESM } from "../_runtime.mjs";
 import { t as readJsonResponse } from "./api-BUT7_u4b.mjs";
 import { a as require_react, n as useQuery, o as require_jsx_runtime } from "../_libs/react+tanstack__react-query.mjs";
 import { s as songs } from "./site-_zOoiwhn.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/MusicProvider-CexXRw5f.js
+//#region node_modules/.nitro/vite/services/ssr/assets/MusicProvider-BUUOaqNr.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var MusicContext = (0, import_react.createContext)(null);
@@ -52,6 +52,10 @@ function MusicProvider({ children }) {
 				note: s.description || "",
 				source: s.source || (s.fileId ? "upload" : "url"),
 				url: s.url,
+				startTime: s.startTime,
+				startSeconds: s.startSeconds,
+				endTime: s.endTime,
+				endSeconds: s.endSeconds,
 				rawDate: displayDate.split("T")[0],
 				date: displayDate ? new Date(displayDate).toLocaleDateString("en-GB", {
 					day: "2-digit",
