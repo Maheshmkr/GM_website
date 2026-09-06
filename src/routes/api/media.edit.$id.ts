@@ -15,6 +15,7 @@ import {
 const EditMediaSchema = z.object({
   title: z.string().min(1).max(150).optional(),
   artist: z.string().max(100).optional(),
+  description: z.string().max(1000).optional(),
   url: z.string().max(2000).optional(),
   memoryDate: z.string().max(20).optional(),
   category: z.string().max(50).optional(),
@@ -71,6 +72,7 @@ export const Route = createFileRoute("/api/media/edit/$id")({
           const updateData: any = {};
           if (parsed.data.title !== undefined) updateData.title = sanitizePlainText(parsed.data.title, 150);
           if (parsed.data.artist !== undefined) updateData.artist = sanitizePlainText(parsed.data.artist, 100);
+          if (parsed.data.description !== undefined) updateData.description = sanitizePlainText(parsed.data.description, 1000);
           if (parsed.data.memoryDate !== undefined) updateData.memoryDate = sanitizePlainText(parsed.data.memoryDate, 20);
           if (parsed.data.category !== undefined) updateData.category = sanitizePlainText(parsed.data.category, 50);
           if (parsed.data.favorite !== undefined) updateData.favorite = parsed.data.favorite;

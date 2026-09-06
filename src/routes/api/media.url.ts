@@ -16,6 +16,7 @@ import {
 
 const MediaUrlSchema = z.object({
   title: z.string().min(1, "Title is required").max(150),
+  description: z.string().max(1000).optional(),
   url: z.string().min(1, "Valid URL is required").max(2000),
   type: z.enum(["image", "video", "song"]),
   artist: z.string().max(100).optional(),
@@ -94,6 +95,7 @@ export const Route = createFileRoute("/api/media/url")({
 
           const {
             title,
+            description,
             url,
             type,
             artist,
@@ -216,6 +218,7 @@ export const Route = createFileRoute("/api/media/url")({
             type,
             source: determinedSource,
             title: sanitizePlainText(title, 150),
+            description: sanitizePlainText(description || "", 1000),
             artist: type === "song" ? sanitizePlainText(artist || "Unknown Artist", 100) : undefined,
             url: canonicalUrl,
             memoryDate: sanitizePlainText(memoryDate, 20) || new Date().toISOString().split("T")[0],

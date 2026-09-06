@@ -225,6 +225,8 @@ function PhotosManager({
   const [favorite, setFavorite] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [editingPhoto, setEditingPhoto] = useState<any | null>(null);
+  const [savingEdit, setSavingEdit] = useState(false);
 
   // Setup preview URL when file changes
   useEffect(() => {
@@ -548,6 +550,23 @@ function PhotosManager({
                 </div>
 
                 <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-surface/90 rounded-full p-1 border border-border shadow-md">
+                  <button
+                    onClick={() =>
+                      setEditingPhoto({
+                        _id: p._id,
+                        title: p.title || "",
+                        description: p.description || "",
+                        category: p.category || "Favorites",
+                        memoryDate: p.memoryDate ? p.memoryDate.split("T")[0] : new Date().toISOString().split("T")[0],
+                        favorite: p.favorite || false,
+                        fileId: p.fileId,
+                      })
+                    }
+                    className="p-1 hover:text-primary transition-colors"
+                    title="Edit Photo"
+                  >
+                    <Edit2 className="size-3.5" />
+                  </button>
                   <a
                     href={`/api/media/${p.fileId}`}
                     target="_blank"
@@ -574,6 +593,168 @@ function PhotosManager({
           </div>
         )}
       </div>
+
+      {/* Edit Photo Modal */}
+      {editingPhoto && (
+        <div
+          className="fixed inset-0 z-50 grid place-items-center bg-background/80 backdrop-blur-sm p-4 overflow-y-auto"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="glass max-w-lg w-full rounded-3xl p-6 border border-border/80 shadow-2xl relative animate-in fade-in-50 zoom-in-95 my-8">
+            <button
+              onClick={() => setEditingPhoto(null)}
+              className="absolute top-4 right-4 p-2 rounded-full hover:bg-surface text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="size-4" />
+            </button>
+
+            <h3 className="text-lg font-bold flex items-center gap-2 mb-4 text-foreground">
+              <Edit2 className="size-5 text-primary" /> Edit Photo
+            </h3>
+
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!editingPhoto) return;
+                setSavingEdit(true);
+                try {
+                  const res = await fetch(`/api/media/edit/${editingPhoto._id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      title: editingPhoto.title,
+                      description: editingPhoto.description,
+                      category: editingPhoto.category,
+                      memoryDate: editingPhoto.memoryDate,
+                      favorite: editingPhoto.favorite,
+                    }),
+                  });
+                  const data = await res.json();
+                  if (!res.ok) throw new Error(data.error || "Failed to update photo");
+                  toast.success("Photo updated successfully!");
+                  setEditingPhoto(null);
+                  queryClient.invalidateQueries({ queryKey: ["photos"] });
+                } catch (err: any) {
+                  toast.error(`Update failed: ${err.message}`);
+                } finally {
+                  setSavingEdit(false);
+                }
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Title
+                </label>
+                <input
+                  type="text"
+                  value={editingPhoto.title}
+                  onChange={(e) =>
+                    setEditingPhoto({ ...editingPhoto, title: e.target.value })
+                  }
+                  required
+                  className="w-full text-sm bg-surface/50 border border-border rounded-xl p-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Description / Caption
+                </label>
+                <textarea
+                  value={editingPhoto.description}
+                  onChange={(e) =>
+                    setEditingPhoto({ ...editingPhoto, description: e.target.value })
+                  }
+                  rows={3}
+                  className="w-full text-sm bg-surface/50 border border-border rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary resize-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                    Category
+                  </label>
+                  <select
+                    value={editingPhoto.category}
+                    onChange={(e) =>
+                      setEditingPhoto({ ...editingPhoto, category: e.target.value })
+                    }
+                    className="w-full text-sm bg-surface/50 border border-border rounded-xl p-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                  >
+                    <option value="Favorites">Favorites</option>
+                    <option value="Trips">Trips</option>
+                    <option value="Dates">Dates</option>
+                    <option value="Candid">Candid</option>
+                    <option value="Special">Special</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                    Memory Date
+                  </label>
+                  <input
+                    type="date"
+                    value={editingPhoto.memoryDate}
+                    onChange={(e) =>
+                      setEditingPhoto({ ...editingPhoto, memoryDate: e.target.value })
+                    }
+                    className="w-full text-sm bg-surface/50 border border-border rounded-xl p-3 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 border border-border bg-surface/30 rounded-xl px-3 py-2.5">
+                <input
+                  type="checkbox"
+                  id="edit-photo-fav"
+                  checked={editingPhoto.favorite}
+                  onChange={(e) =>
+                    setEditingPhoto({ ...editingPhoto, favorite: e.target.checked })
+                  }
+                  className="rounded accent-primary size-4"
+                />
+                <label
+                  htmlFor="edit-photo-fav"
+                  className="text-xs font-semibold text-muted-foreground select-none cursor-pointer flex items-center gap-1"
+                >
+                  <Heart
+                    className="size-3.5 text-primary"
+                    fill={editingPhoto.favorite ? "currentColor" : "none"}
+                  />{" "}
+                  Mark as Favorite
+                </label>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingPhoto(null)}
+                  className="w-1/2 py-2.5 rounded-xl border border-border text-sm font-semibold hover:bg-surface transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingEdit}
+                  className="w-1/2 btn-love rounded-xl py-2.5 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {savingEdit ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" /> Saving...
+                    </>
+                  ) : (
+                    "Save Changes"
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

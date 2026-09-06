@@ -68,7 +68,9 @@ export function PhotoGallery() {
         _id: p._id,
         image: p.source === "url" ? p.url : `/api/media/file/${p.fileId}`,
         category: p.category || "Special",
-        caption: p.title || p.description || "",
+        title: p.title || "",
+        description: p.description || "",
+        caption: p.title || p.description || "Memory",
         date: displayDate
           ? new Date(displayDate).toLocaleDateString("en-GB", {
               day: "2-digit",
@@ -87,8 +89,9 @@ export function PhotoGallery() {
       setFavorites((prev) => {
         const nextFavs = { ...prev };
         mappedPhotos.forEach((p) => {
-          if (p.favorite && nextFavs[p.caption] === undefined) {
-            nextFavs[p.caption] = true;
+          const key = p._id || p.caption;
+          if (p.favorite && nextFavs[key] === undefined) {
+            nextFavs[key] = true;
           }
         });
         return nextFavs;
@@ -98,7 +101,7 @@ export function PhotoGallery() {
 
   const list = useMemo<any[]>(() => {
     if (filter === "All") return mappedPhotos;
-    if (filter === "Favorites") return mappedPhotos.filter((p) => favorites[p.caption]);
+    if (filter === "Favorites") return mappedPhotos.filter((p) => favorites[p._id || p.caption]);
     return mappedPhotos.filter((p) => p.category === filter);
   }, [filter, mappedPhotos, favorites]);
 
@@ -260,38 +263,60 @@ export function PhotoGallery() {
       <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {list.map((p, i) => (
           <Reveal key={p._id + i} delay={(i % 6) * 70}>
-            <figure className="group relative overflow-hidden rounded-3xl border border-border bg-surface/30 flex flex-col">
+            <figure className="group relative overflow-hidden rounded-3xl border border-border bg-surface/30 flex flex-col justify-between h-full shadow-sm hover:shadow-md transition-all">
               <button
                 onClick={() => setOpenIndex(i)}
                 className="block w-full text-left"
-                aria-label={`Open ${p.caption}`}
+                aria-label={`Open ${p.title || p.description || p.caption}`}
               >
                 <div className="relative w-full aspect-[4/3] overflow-hidden bg-black/30">
                   <img
                     src={p.image}
-                    alt={p.caption}
+                    alt={p.title || p.description || p.caption}
                     loading="lazy"
                     className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-[1.06]"
                   />
                   <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent opacity-80 transition-opacity group-hover:opacity-100" />
                 </div>
 
-                <figcaption className="p-4 pr-14">
-                  <p className="text-sm font-semibold truncate">{p.caption}</p>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <p className="text-xs text-muted-foreground">{p.date}</p>
+                <figcaption className="p-4 pr-14 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold truncate text-foreground">
+                      {p.title || p.caption}
+                    </h3>
+                    {p.description ? (
+                      <p className="text-xs text-muted-foreground line-clamp-2 mt-1 leading-relaxed">
+                        {p.description}
+                      </p>
+                    ) : null}
+                  </div>
+                  <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/10">
+                    <p className="text-[11px] text-muted-foreground font-medium">{p.date}</p>
+                    {p.category && (
+                      <span className="text-[10px] bg-secondary/80 text-foreground/70 px-2 py-0.5 rounded-full font-medium">
+                        {p.category}
+                      </span>
+                    )}
                   </div>
                 </figcaption>
               </button>
 
               <button
-                onClick={() => setFavorites((f) => ({ ...f, [p.caption]: !f[p.caption] }))}
+                onClick={() =>
+                  setFavorites((f) => ({
+                    ...f,
+                    [p._id || p.caption]: !(f[p._id || p.caption] ?? p.favorite),
+                  }))
+                }
                 aria-label="Favorite photo"
                 className="glass absolute right-3 top-3 grid size-9 place-items-center rounded-full pointer-events-auto"
               >
                 <Heart
-                  className={cn("size-4", favorites[p.caption] && "text-primary")}
-                  fill={favorites[p.caption] ? "currentColor" : "none"}
+                  className={cn(
+                    "size-4",
+                    (favorites[p._id || p.caption] ?? p.favorite) && "text-primary"
+                  )}
+                  fill={(favorites[p._id || p.caption] ?? p.favorite) ? "currentColor" : "none"}
                 />
               </button>
             </figure>
@@ -320,16 +345,30 @@ export function PhotoGallery() {
             className="animate-letter-open relative w-full max-w-4xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="relative max-h-[72vh] w-full flex items-center justify-center overflow-hidden rounded-3xl bg-black/40">
+            <div className="relative max-h-[72vh] w-full flex items-center justify-center overflow-hidden rounded-3xl bg-black/40 shadow-2xl">
               <img
                 src={active.image}
-                alt={active.caption}
+                alt={active.title || active.description || active.caption}
                 className="max-h-[72vh] max-w-full w-auto h-auto rounded-3xl object-contain mx-auto"
               />
             </div>
-            <div className="mt-4 text-center">
-              <p className="text-base font-semibold">{active.caption}</p>
-              <p className="text-sm text-muted-foreground">{active.date}</p>
+            <div className="mt-4 text-center max-w-2xl mx-auto px-4">
+              <h3 className="text-lg font-semibold text-foreground">
+                {active.title || active.caption}
+              </h3>
+              {active.description && (
+                <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                  {active.description}
+                </p>
+              )}
+              <div className="flex items-center justify-center gap-2.5 mt-2.5">
+                <p className="text-xs text-muted-foreground">{active.date}</p>
+                {active.category && (
+                  <span className="text-[11px] bg-secondary/80 text-foreground/80 px-2.5 py-0.5 rounded-full font-medium">
+                    {active.category}
+                  </span>
+                )}
+              </div>
             </div>
             <button
               onClick={() => setOpenIndex(null)}
