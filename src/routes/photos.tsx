@@ -22,7 +22,7 @@ function PhotosPage() {
   return (
     <section className="section-shell py-10 lg:py-16">
       <SectionHeading
-        title="Our Beautiful Memories"
+        title="Your Beautiful Photos"
         subtitle="Every picture holds a special moment with you."
       />
       <PhotoGallery />
