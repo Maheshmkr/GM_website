@@ -67,6 +67,16 @@ export const Route = createFileRoute("/api/media/upload")({
           const description = sanitizePlainText(rawDescription, 1000);
           const category = sanitizePlainText(rawCategory, 50) || "Favorites";
           const memoryDate = sanitizePlainText(rawMemoryDate, 20) || new Date().toISOString().split("T")[0];
+          const rawDuration = formData.get("duration") as string | null;
+          const duration = sanitizePlainText(rawDuration, 30);
+          const rawCoverFileId = formData.get("coverFileId") as string | null;
+          const coverFileId = rawCoverFileId && mongoose.Types.ObjectId.isValid(rawCoverFileId)
+            ? new mongoose.Types.ObjectId(rawCoverFileId)
+            : undefined;
+          const rawStartTime = formData.get("startTime") as string | null;
+          const startTime = sanitizePlainText(rawStartTime, 20);
+          const rawEndTime = formData.get("endTime") as string | null;
+          const endTime = sanitizePlainText(rawEndTime, 20);
 
           // 3. Chunk validation & security checks
           const uploadIdRaw = formData.get("uploadId") as string;
@@ -170,10 +180,14 @@ export const Route = createFileRoute("/api/media/upload")({
             title,
             artist: type === "song" ? artist || "Unknown Artist" : undefined,
             description,
+            duration: duration || (type === "video" ? "0:30" : type === "song" ? "3:00" : undefined),
             filename: validation.safeFilename,
             mimeType: validation.detectedMimeType || mimeType,
             fileSize: finalBuffer.length,
             fileId,
+            coverFileId,
+            startTime,
+            endTime,
             category,
             favorite,
             memoryDate,

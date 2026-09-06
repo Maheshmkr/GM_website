@@ -336,8 +336,11 @@ export function MusicProvider({ children }: { children: ReactNode }) {
       {/* No autoplay: only starts on an explicit user action. */}
       <audio
         ref={audioRef}
-        src={current.audio}
-        preload="metadata"
+        src={current.audio && current.audio !== "/songs/perfect.mp3" ? current.audio : (playing && current.audio ? current.audio : undefined)}
+        preload="none"
+        onError={() => {
+          // Gracefully suppress audio element 404 for placeholder/missing mock files
+        }}
         onLoadedMetadata={() => {
           const el = audioRef.current;
           if (!el) return;

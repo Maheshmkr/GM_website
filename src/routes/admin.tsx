@@ -36,7 +36,12 @@ import {
 import { SectionHeading } from "@/components/SectionHeading";
 import { Reveal } from "@/components/Reveal";
 import { parseDuration } from "@/components/music/MusicProvider";
-import { readJsonResponse } from "@/lib/api";
+import {
+  readJsonResponse,
+  compressImage,
+  uploadMediaInChunks,
+  formatUploadError,
+} from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin")({
@@ -212,11 +217,51 @@ function PhotosManager({
   queryClient: any;
 }) {
   const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("Favorites");
   const [favorite, setFavorite] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+
+  // Setup preview URL when file changes
+  useEffect(() => {
+    if (!file) {
+      setPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
+  // Global Clipboard Paste Listener (Ctrl+V)
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      if (!e.clipboardData) return;
+      const items = e.clipboardData.items;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith("image/")) {
+          const pastedFile = items[i].getAsFile();
+          if (pastedFile) {
+            e.preventDefault();
+            setFile(pastedFile);
+            if (!title) {
+              const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+              setTitle(`Pasted Photo (${timeStr})`);
+            }
+            toast.success("Image pasted from clipboard!");
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, [title]);
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -236,7 +281,7 @@ function PhotosManager({
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
-      toast.error("Please select an image file");
+      toast.error("Please select or paste an image file");
       return;
     }
     if (!title.trim()) {
@@ -245,23 +290,23 @@ function PhotosManager({
     }
 
     setUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("category", category);
-    formData.append("favorite", String(favorite));
+    setUploadProgress(10);
 
     try {
-      const res = await fetch("/api/photos", {
-        method: "POST",
-        body: formData,
-      });
+      // 1. Compress image client-side to prevent 413 Content Too Large
+      const processedFile = await compressImage(file);
+      setUploadProgress(30);
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Upload failed");
-      }
+      // 2. Upload in safe chunks
+      await uploadMediaInChunks({
+        file: processedFile,
+        type: "image",
+        title: title.trim(),
+        description: description.trim(),
+        category,
+        favorite,
+        onProgress: (pct) => setUploadProgress(30 + Math.round(pct * 0.7)),
+      });
 
       toast.success("Photo uploaded successfully!");
       // Reset form
@@ -270,16 +315,33 @@ function PhotosManager({
       setDescription("");
       setCategory("Favorites");
       setFavorite(false);
-      // Reset HTML input element
       const fileInput = document.getElementById("photo-file") as HTMLInputElement;
       if (fileInput) fileInput.value = "";
 
       queryClient.invalidateQueries({ queryKey: ["photos"] });
     } catch (err: any) {
       console.error(err);
-      toast.error(`Upload error: ${err.message}`);
+      toast.error(formatUploadError(err.message, "Upload failed"));
     } finally {
       setUploading(false);
+      setUploadProgress(null);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const droppedFile = e.dataTransfer.files[0];
+      if (droppedFile.type.startsWith("image/")) {
+        setFile(droppedFile);
+        if (!title) {
+          setTitle(droppedFile.name.replace(/\.[^/.]+$/, ""));
+        }
+        toast.success("Image dropped!");
+      } else {
+        toast.error("Please drop an image file (JPEG, PNG, WEBP, GIF)");
+      }
     }
   };
 
@@ -291,17 +353,76 @@ function PhotosManager({
           <Plus className="size-5 text-primary" /> Add Photo
         </h3>
         <form onSubmit={handleUpload} className="space-y-4">
+          {/* Drag, Drop, Paste & Select Area */}
           <div>
             <label className="block text-xs font-semibold text-muted-foreground mb-1">
-              Select File (JPEG, PNG, WEBP, GIF)
+              Image File (Select, Drag & Drop, or Paste Ctrl+V)
             </label>
-            <input
-              id="photo-file"
-              type="file"
-              accept="image/*"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-              className="w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-secondary file:text-foreground hover:file:bg-secondary/80 bg-surface/50 border border-border rounded-xl p-2.5"
-            />
+            <div
+              onDragOver={(e) => {
+                e.preventDefault();
+                setIsDragging(true);
+              }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={handleDrop}
+              className={cn(
+                "relative border-2 border-dashed rounded-2xl p-4 text-center transition-all bg-surface/30",
+                isDragging ? "border-primary bg-primary/10" : "border-border hover:border-primary/50",
+                previewUrl ? "p-3" : "py-6"
+              )}
+            >
+              {previewUrl ? (
+                <div className="flex items-center gap-3">
+                  <div className="size-20 shrink-0 rounded-xl overflow-hidden border border-border bg-black/20 relative">
+                    <img src={previewUrl} alt="Preview" className="size-full object-cover" />
+                  </div>
+                  <div className="min-w-0 flex-1 text-left">
+                    <p className="text-xs font-semibold truncate text-foreground">{file?.name || "Pasted Image"}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      {file ? `${(file.size / 1024).toFixed(0)} KB` : ""}
+                    </p>
+                    <p className="text-[10px] text-primary/80 mt-1 flex items-center gap-1">
+                      <Sparkles className="size-3" /> Auto-optimizes on upload
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFile(null);
+                      const fileInput = document.getElementById("photo-file") as HTMLInputElement;
+                      if (fileInput) fileInput.value = "";
+                    }}
+                    className="p-1.5 rounded-full hover:bg-surface text-muted-foreground hover:text-foreground transition-colors"
+                    title="Remove Image"
+                  >
+                    <X className="size-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center gap-1.5 cursor-pointer" onClick={() => document.getElementById("photo-file")?.click()}>
+                  <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-1">
+                    <Upload className="size-5" />
+                  </div>
+                  <p className="text-xs font-semibold text-foreground">Click to browse or Drag & Drop</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Tip: You can also copy any image and press <span className="font-mono bg-secondary/80 px-1 py-0.5 rounded text-foreground">Ctrl+V</span> to paste
+                  </p>
+                </div>
+              )}
+              <input
+                id="photo-file"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const selected = e.target.files?.[0] || null;
+                  setFile(selected);
+                  if (selected && !title) {
+                    setTitle(selected.name.replace(/\.[^/.]+$/, ""));
+                  }
+                }}
+                className="hidden"
+              />
+            </div>
           </div>
           <div>
             <label className="block text-xs font-semibold text-muted-foreground mb-1">Title</label>
@@ -367,7 +488,8 @@ function PhotosManager({
           >
             {uploading ? (
               <>
-                <Loader2 className="size-4 animate-spin" /> Uploading...
+                <Loader2 className="size-4 animate-spin" />
+                {uploadProgress !== null ? `Uploading (${uploadProgress}%)...` : "Uploading..."}
               </>
             ) : (
               "Upload Photo"
@@ -502,23 +624,15 @@ function VideosManager({
     }
 
     setUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("duration", duration);
-    formData.append("favorite", String(favorite));
-
     try {
-      const res = await fetch("/api/videos", {
-        method: "POST",
-        body: formData,
+      await uploadMediaInChunks({
+        file,
+        type: "video",
+        title: title.trim(),
+        description: description.trim(),
+        duration: duration.trim() || "0:30",
+        favorite,
       });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Upload failed");
-      }
 
       toast.success("Video uploaded successfully!");
       setFile(null);
@@ -532,7 +646,7 @@ function VideosManager({
       queryClient.invalidateQueries({ queryKey: ["videos"] });
     } catch (err: any) {
       console.error(err);
-      toast.error(`Upload error: ${err.message}`);
+      toast.error(formatUploadError(err.message, "Upload error"));
     } finally {
       setUploading(false);
     }
@@ -777,28 +891,32 @@ function SongsManager({
     }
 
     setUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    if (coverFile) {
-      formData.append("coverFile", coverFile);
-    }
-    formData.append("title", uploadTitle);
-    formData.append("artist", uploadArtist);
-    formData.append("description", uploadDescription);
-    formData.append("duration", uploadDuration);
-    formData.append("startTime", "0:00");
-    formData.append("memoryDate", uploadDate);
-
     try {
-      const res = await fetch("/api/songs", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Upload failed");
+      let coverFileId: string | undefined;
+      if (coverFile) {
+        const compressedCover = await compressImage(coverFile);
+        const coverRes = await uploadMediaInChunks({
+          file: compressedCover,
+          type: "image",
+          title: `${uploadTitle} Cover`,
+          category: "Covers",
+        });
+        if (coverRes && coverRes.fileId) {
+          coverFileId = coverRes.fileId;
+        }
       }
+
+      await uploadMediaInChunks({
+        file,
+        type: "song",
+        title: uploadTitle.trim(),
+        artist: uploadArtist.trim(),
+        description: uploadDescription.trim(),
+        duration: uploadDuration.trim() || "3:30",
+        memoryDate: uploadDate,
+        startTime: "0:00",
+        coverFileId,
+      });
 
       toast.success("Song uploaded successfully!");
       setFile(null);
@@ -816,7 +934,7 @@ function SongsManager({
       queryClient.invalidateQueries({ queryKey: ["songs"] });
     } catch (err: any) {
       console.error(err);
-      toast.error(`Upload error: ${err.message}`);
+      toast.error(formatUploadError(err.message, "Upload failed"));
     } finally {
       setUploading(false);
     }
@@ -1594,25 +1712,28 @@ function TimelineManager({
     }
 
     setUploading(true);
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("date", date);
-    formData.append("location", location);
-    formData.append("icon", icon);
-    formData.append("highlight", String(highlight));
-    if (imageFile) formData.append("imageFile", imageFile);
-    if (videoFile) formData.append("videoFile", videoFile);
-
     try {
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("description", description);
+      formData.append("date", date);
+      formData.append("location", location);
+      formData.append("icon", icon);
+      formData.append("highlight", String(highlight));
+      if (imageFile) {
+        const compressedImg = await compressImage(imageFile);
+        formData.append("imageFile", compressedImg);
+      }
+      if (videoFile) formData.append("videoFile", videoFile);
+
       const res = await fetch("/api/timeline", {
         method: "POST",
         body: formData,
       });
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Creation failed");
+      const payload = await readJsonResponse(res);
+      if (!payload.ok) {
+        throw new Error(payload.error || "Creation failed");
       }
 
       toast.success("Timeline milestone added!");
@@ -1634,7 +1755,7 @@ function TimelineManager({
       queryClient.invalidateQueries({ queryKey: ["timeline"] });
     } catch (err: any) {
       console.error(err);
-      toast.error(`Error: ${err.message}`);
+      toast.error(formatUploadError(err.message, "Creation failed"));
     } finally {
       setUploading(false);
     }
@@ -1645,28 +1766,31 @@ function TimelineManager({
     if (!editingItem) return;
 
     setUploading(true);
-    const formData = new FormData();
-    formData.append("title", editingItem.title);
-    formData.append("description", editingItem.description);
-    formData.append("date", editingItem.date);
-    formData.append("location", editingItem.location || "");
-    formData.append("icon", editingItem.icon);
-    formData.append("highlight", String(editingItem.highlight));
-
-    if (editImageFile) formData.append("imageFile", editImageFile);
-    if (editVideoFile) formData.append("videoFile", editVideoFile);
-    if (deleteOldImage) formData.append("deleteImage", "true");
-    if (deleteOldVideo) formData.append("deleteVideo", "true");
-
     try {
+      const formData = new FormData();
+      formData.append("title", editingItem.title);
+      formData.append("description", editingItem.description);
+      formData.append("date", editingItem.date);
+      formData.append("location", editingItem.location || "");
+      formData.append("icon", editingItem.icon);
+      formData.append("highlight", String(editingItem.highlight));
+
+      if (editImageFile) {
+        const compressedEditImg = await compressImage(editImageFile);
+        formData.append("imageFile", compressedEditImg);
+      }
+      if (editVideoFile) formData.append("videoFile", editVideoFile);
+      if (deleteOldImage) formData.append("deleteImage", "true");
+      if (deleteOldVideo) formData.append("deleteVideo", "true");
+
       const res = await fetch(`/api/timeline/${editingItem._id}`, {
         method: "PUT",
         body: formData,
       });
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Update failed");
+      const payload = await readJsonResponse(res);
+      if (!payload.ok) {
+        throw new Error(payload.error || "Update failed");
       }
 
       toast.success("Timeline milestone updated!");
@@ -1679,7 +1803,7 @@ function TimelineManager({
       queryClient.invalidateQueries({ queryKey: ["timeline"] });
     } catch (err: any) {
       console.error(err);
-      toast.error(`Update error: ${err.message}`);
+      toast.error(formatUploadError(err.message, "Update failed"));
     } finally {
       setUploading(false);
     }
@@ -2569,32 +2693,29 @@ function FunZoneManager({ queryClient }: { queryClient: any }) {
       toast.error("Please upload a valid image (JPEG, PNG, WebP, GIF).");
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Image file size must be under 10MB.");
-      return;
-    }
 
     setUploadingStage(stageNum);
-    const formData = new FormData();
-    formData.append("stage", String(stageNum));
-    formData.append("file", file);
-
     try {
+      const processedImg = await compressImage(file);
+      const formData = new FormData();
+      formData.append("stage", String(stageNum));
+      formData.append("file", processedImg);
+
       const res = await fetch("/api/fun/stages", {
         method: "POST",
         body: formData,
       });
-      const data = await res.json();
+      const payload = await readJsonResponse(res);
 
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to upload stage image");
+      if (!payload.ok) {
+        throw new Error(payload.error || "Failed to upload stage image");
       }
 
       toast.success(`Stage ${stageNum} image updated successfully!`);
       queryClient.invalidateQueries({ queryKey: ["fun-stages"] });
     } catch (err: any) {
       console.error(err);
-      toast.error(`Upload error: ${err.message}`);
+      toast.error(formatUploadError(err.message, "Upload error"));
     } finally {
       setUploadingStage(null);
       // Reset input value so same file can be re-selected if needed
