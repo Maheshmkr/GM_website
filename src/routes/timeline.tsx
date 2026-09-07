@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SectionHeading } from "@/components/SectionHeading";
 import { Timeline } from "@/components/Timeline";
-import { Surprise } from "@/components/Surprise";
 
 const title = "Our Journey Timeline";
 const description =
@@ -21,16 +20,13 @@ export const Route = createFileRoute("/timeline")({
 
 function TimelinePage() {
   return (
-    <>
-      <section className="section-shell py-10 lg:py-16">
-        <SectionHeading
-          title="Our Journey Timeline"
-          subtitle="A timeline of our beautiful journey together."
-        />
-        <Timeline />
-        <p className="mt-14 text-center text-sm text-muted-foreground">More memories to come...</p>
-      </section>
-      <Surprise />
-    </>
+    <section className="section-shell py-10 lg:py-16">
+      <SectionHeading
+        title="Our Journey Timeline"
+        subtitle="A timeline of our beautiful journey together."
+      />
+      <Timeline />
+      <p className="mt-14 text-center text-sm text-muted-foreground">More memories to come...</p>
+    </section>
   );
 }

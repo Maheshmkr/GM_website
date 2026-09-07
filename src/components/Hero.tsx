@@ -1,21 +1,124 @@
-import { useEffect, useState } from "react";
-import { Heart, Play } from "lucide-react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { Heart, Play, ChevronLeft, ChevronRight, Shuffle, Sparkles } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { girlfriend, heroSlides } from "@/data/site";
 import { useMusic } from "@/components/music/MusicProvider";
+import { readJsonResponse } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 type Burst = { id: number; left: number; dx: number; delay: number };
+
+type SlideItem = {
+  id?: string;
+  image: string;
+  alt: string;
+  title?: string;
+  description?: string;
+  category?: string;
+};
+
+function shuffleList<T>(array: T[]): T[] {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 
 export function Hero() {
   const [slide, setSlide] = useState(0);
   const [bursts, setBursts] = useState<Burst[]>([]);
   const [message, setMessage] = useState(false);
+  const [shuffleSeed, setShuffleSeed] = useState(0);
   const { play } = useMusic();
 
+  // Fetch photos from MongoDB
+  const { data: serverPhotos = [] } = useQuery({
+    queryKey: ["photos"],
+    queryFn: async () => {
+      try {
+        const res = await fetch("/api/media?type=image");
+        const payload = await readJsonResponse(res);
+        if (!payload.ok) return [];
+        return payload.data ?? [];
+      } catch {
+        return [];
+      }
+    },
+  });
+
+  // Filter for Favorites category and shuffle
+  const slides = useMemo<SlideItem[]>(() => {
+    const favoritePhotos = (serverPhotos || []).filter(
+      (p: any) => p.category === "Favorites" || p.favorite === true,
+    );
+
+    if (favoritePhotos.length > 0) {
+      const mapped = favoritePhotos.map((p: any) => ({
+        id: p._id || p.fileId,
+        image: p.source === "url" ? p.url : `/api/media/file/${p.fileId}`,
+        alt: p.title || p.description || "Our Favorite Memory",
+        title: p.title || "",
+        description: p.description || "",
+        category: p.category || "Favorites",
+      }));
+      return shuffleList(mapped);
+    }
+
+    // Fallback if all photos exist but none explicitly favorite
+    if (serverPhotos.length > 0) {
+      const mapped = serverPhotos.map((p: any) => ({
+        id: p._id || p.fileId,
+        image: p.source === "url" ? p.url : `/api/media/file/${p.fileId}`,
+        alt: p.title || p.description || "Our Memory",
+        title: p.title || "",
+        description: p.description || "",
+        category: p.category || "Special",
+      }));
+      return shuffleList(mapped);
+    }
+
+    // Fallback to static hero slides if no DB photos yet
+    return shuffleList(
+      heroSlides.map((s) => ({
+        image: s.image,
+        alt: s.alt,
+        title: "Our Special Moment",
+        description: "",
+      })),
+    );
+  }, [serverPhotos, shuffleSeed]);
+
+  // Keep active slide in range
   useEffect(() => {
-    const id = window.setInterval(() => setSlide((s) => (s + 1) % heroSlides.length), 6500);
+    if (slide >= slides.length && slides.length > 0) {
+      setSlide(0);
+    }
+  }, [slides.length, slide]);
+
+  // Autoplay slideshow
+  useEffect(() => {
+    if (slides.length <= 1) return;
+    const id = window.setInterval(() => {
+      setSlide((s) => (s + 1) % slides.length);
+    }, 5500);
     return () => window.clearInterval(id);
-  }, []);
+  }, [slides.length]);
+
+  const handleNext = useCallback(() => {
+    setSlide((s) => (s + 1) % slides.length);
+  }, [slides.length]);
+
+  const handlePrev = useCallback(() => {
+    setSlide((s) => (s - 1 + slides.length) % slides.length);
+  }, [slides.length]);
+
+  const handleManualShuffle = () => {
+    setShuffleSeed((s) => s + 1);
+    setSlide(0);
+  };
 
   const loveClick = () => {
     const base = Date.now();
@@ -31,6 +134,8 @@ export function Hero() {
     window.setTimeout(() => setBursts([]), 2200);
     window.setTimeout(() => setMessage(false), 5000);
   };
+
+  const currentSlide = slides[slide] || slides[0];
 
   return (
     <section className="section-shell grid items-center gap-10 py-8 lg:grid-cols-2 lg:gap-14 lg:py-16">
@@ -98,9 +203,9 @@ export function Hero() {
 
       <div>
         <div className="group relative aspect-[16/10] overflow-hidden rounded-[2rem] border border-border bg-black/20 shadow-[var(--shadow-glow)]">
-          {heroSlides.map((s, i) => (
+          {slides.map((s, i) => (
             <img
-              key={s.image}
+              key={s.id || s.image || i}
               src={s.image}
               alt={s.alt}
               width={1600}
@@ -108,25 +213,93 @@ export function Hero() {
               loading={i === 0 ? "eager" : "lazy"}
               className={cn(
                 "absolute inset-0 size-full object-cover object-center transition-all duration-[1200ms] ease-out group-hover:scale-105",
-                i === slide ? "opacity-100" : "opacity-0",
+                i === slide ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none",
               )}
             />
           ))}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-background/20" />
-        </div>
-        <div className="mt-5 flex items-center justify-center gap-2">
-          {heroSlides.map((s, i) => (
+          
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
+
+          {/* Top Badge: Favorite Memories */}
+          <div className="absolute top-4 left-4 flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-black/40 backdrop-blur-md px-3 py-1 text-xs font-medium text-white/90 border border-white/10 shadow-sm">
+              <Sparkles className="size-3 text-primary animate-pulse" />
+              Favorite Memories
+            </span>
+          </div>
+
+          {/* Shuffle button top right */}
+          <div className="absolute top-4 right-4 z-10">
             <button
-              key={s.image}
-              onClick={() => setSlide(i)}
-              aria-label={`Show photo ${i + 1}`}
-              className={cn(
-                "h-2 rounded-full transition-all duration-300",
-                i === slide ? "w-6 bg-primary" : "w-2 bg-muted",
-              )}
-            />
-          ))}
+              onClick={handleManualShuffle}
+              title="Shuffle favorite photos"
+              aria-label="Shuffle favorite photos"
+              className="grid size-8 place-items-center rounded-full bg-black/40 backdrop-blur-md text-white/80 border border-white/10 shadow-sm transition hover:bg-black/60 hover:text-white hover:scale-105 active:scale-95"
+            >
+              <Shuffle className="size-3.5" />
+            </button>
+          </div>
+
+          {/* Left / Right arrows on hover */}
+          {slides.length > 1 && (
+            <>
+              <button
+                onClick={handlePrev}
+                aria-label="Previous photo"
+                className="absolute left-3 top-1/2 -translate-y-1/2 grid size-9 place-items-center rounded-full bg-black/40 backdrop-blur-md text-white border border-white/15 opacity-0 group-hover:opacity-100 transition duration-300 hover:bg-black/70 hover:scale-110"
+              >
+                <ChevronLeft className="size-5" />
+              </button>
+              <button
+                onClick={handleNext}
+                aria-label="Next photo"
+                className="absolute right-3 top-1/2 -translate-y-1/2 grid size-9 place-items-center rounded-full bg-black/40 backdrop-blur-md text-white border border-white/15 opacity-0 group-hover:opacity-100 transition duration-300 hover:bg-black/70 hover:scale-110"
+              >
+                <ChevronRight className="size-5" />
+              </button>
+            </>
+          )}
+
+          {/* Bottom title & description caption */}
+          {currentSlide && (currentSlide.title || currentSlide.description) && (
+            <div className="absolute bottom-4 inset-x-4 pointer-events-none">
+              <div className="inline-block max-w-full rounded-2xl bg-black/40 backdrop-blur-md px-4 py-2 text-left border border-white/10 shadow-sm">
+                {currentSlide.title && (
+                  <p className="text-sm font-semibold text-white drop-shadow-sm truncate">
+                    {currentSlide.title}
+                  </p>
+                )}
+                {currentSlide.description && (
+                  <p className="text-xs text-white/80 line-clamp-2 mt-0.5">
+                    {currentSlide.description}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Indicators at the bottom */}
+        {slides.length > 1 && (
+          <div className="mt-5 flex items-center justify-center gap-1.5 flex-wrap max-w-xs mx-auto">
+            {slides.slice(0, 16).map((s, i) => (
+              <button
+                key={s.id || s.image || i}
+                onClick={() => setSlide(i)}
+                aria-label={`Show photo ${i + 1}`}
+                className={cn(
+                  "h-2 rounded-full transition-all duration-300",
+                  i === slide ? "w-6 bg-primary" : "w-2 bg-muted hover:bg-muted-foreground/50",
+                )}
+              />
+            ))}
+            {slides.length > 16 && (
+              <span className="text-[10px] text-muted-foreground font-mono ml-1">
+                +{slides.length - 16}
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -5,7 +5,6 @@ import { SectionHeading } from "@/components/SectionHeading";
 import { VideoGallery } from "@/components/VideoGallery";
 import { Letters } from "@/components/Letters";
 import { Timeline } from "@/components/Timeline";
-import { Surprise } from "@/components/Surprise";
 
 const title = "For You — A Little World Made Just For Us";
 const description =
@@ -62,8 +61,6 @@ function Index() {
         />
         <Timeline />
       </section>
-
-      <Surprise />
     </>
   );
 }
