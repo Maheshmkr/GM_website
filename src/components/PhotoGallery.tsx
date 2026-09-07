@@ -240,9 +240,14 @@ export function PhotoGallery() {
     if (!photo._id) return;
     const newStatus = !photo.showInHero;
     try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
       const res = await fetch(`/api/media/edit/${photo._id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        credentials: "include",
         body: JSON.stringify({ showInHero: newStatus }),
       });
       if (!res.ok) throw new Error("Failed to update home status");

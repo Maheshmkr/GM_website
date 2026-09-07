@@ -652,9 +652,14 @@ function PhotosManager({
                 if (!editingPhoto) return;
                 setSavingEdit(true);
                 try {
+                  const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
                   const res = await fetch(`/api/media/edit/${editingPhoto._id}`, {
                     method: "PUT",
-                    headers: { "Content-Type": "application/json" },
+                    headers: {
+                      "Content-Type": "application/json",
+                      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                    },
+                    credentials: "include",
                     body: JSON.stringify({
                       title: editingPhoto.title,
                       description: editingPhoto.description,

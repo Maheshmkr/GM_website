@@ -41,6 +41,9 @@ function LoginComponent() {
       const data = await res.json();
 
       if (res.ok && data.success) {
+        if (data.token) {
+          localStorage.setItem("auth_token", data.token);
+        }
         toast.success("Welcome back 💖");
         router.invalidate(); // Refetch root loader to update session state
         

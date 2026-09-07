@@ -111,6 +111,7 @@ export const Route = createFileRoute("/api/auth/login")({
                 success: true,
                 role: matchedRole,
                 username: matchedUsername,
+                token,
               }),
               {
                 status: 200,
