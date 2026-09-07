@@ -28,13 +28,28 @@ export const Route = createFileRoute("/api/letters")({
       GET: async () => {
         try {
           await dbConnect();
-          const dbLetters = await Letter.find().select("-__v").sort({ createdAt: -1 });
+          let dbLetters = await Letter.find().select("-__v").sort({ createdAt: -1 });
 
-          // If no letters in DB yet, fallback to static letters for initial view
-          if (dbLetters.length === 0) {
-            return new Response(JSON.stringify(staticLetters), {
-              headers: { "Content-Type": "application/json" },
-            });
+          // If no letters in DB yet, seed initial letters into MongoDB so they are editable & deletable
+          if (dbLetters.length === 0 && staticLetters.length > 0) {
+            try {
+              const seeded = await Letter.insertMany(
+                staticLetters.map((l, i) => ({
+                  title: l.title,
+                  preview: l.preview,
+                  body: l.body,
+                  date: l.date,
+                  category: "Love",
+                  favorite: i === 0,
+                }))
+              );
+              dbLetters = seeded;
+            } catch (seedErr) {
+              console.warn("Could not seed initial letters:", seedErr);
+              return new Response(JSON.stringify(staticLetters), {
+                headers: { "Content-Type": "application/json" },
+              });
+            }
           }
 
           return new Response(JSON.stringify(dbLetters), {

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -32,6 +32,7 @@ import {
   Eye,
   EyeOff,
   Shield,
+  AlertTriangle,
 } from "lucide-react";
 import { SectionHeading } from "@/components/SectionHeading";
 import { Reveal } from "@/components/Reveal";
@@ -42,9 +43,17 @@ import {
   uploadMediaInChunks,
   formatUploadError,
 } from "@/lib/api";
+import { getSession } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin")({
+  loader: async () => {
+    const { role } = await getSession();
+    if (role !== "admin") {
+      throw redirect({ to: "/login" });
+    }
+    return { role };
+  },
   component: AdminPage,
 });
 
@@ -3246,7 +3255,21 @@ function LettersManager({
       queryClient.invalidateQueries({ queryKey: ["letters"] });
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || "Something went wrong saving the letter.");
+      const isAuthErr =
+        err.message?.toLowerCase().includes("admin") ||
+        err.message?.toLowerCase().includes("auth") ||
+        err.message?.toLowerCase().includes("forbidden");
+
+      if (isAuthErr) {
+        toast.error("Admin authorization required. Please re-login with admin credentials.", {
+          action: {
+            label: "Login",
+            onClick: () => (window.location.href = "/login"),
+          },
+        });
+      } else {
+        toast.error(err.message || "Something went wrong saving the letter.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -3254,7 +3277,7 @@ function LettersManager({
 
   const handleDeleteLetter = async (letter: LetterItem) => {
     if (!letter._id) {
-      toast.info("Static sample letters are preserved in site data.");
+      toast.info("Please refresh the page to sync letters with the database.");
       return;
     }
 
@@ -3273,7 +3296,21 @@ function LettersManager({
       queryClient.invalidateQueries({ queryKey: ["letters"] });
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || "Failed to delete letter.");
+      const isAuthErr =
+        err.message?.toLowerCase().includes("admin") ||
+        err.message?.toLowerCase().includes("auth") ||
+        err.message?.toLowerCase().includes("forbidden");
+
+      if (isAuthErr) {
+        toast.error("Admin authorization required. Please re-login with admin credentials.", {
+          action: {
+            label: "Login",
+            onClick: () => (window.location.href = "/login"),
+          },
+        });
+      } else {
+        toast.error(err.message || "Failed to delete letter.");
+      }
     } finally {
       setDeletingId(null);
     }

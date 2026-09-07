@@ -58,36 +58,35 @@ export const Route = createFileRoute("/api/auth/login")({
           let matchedUsername: string = cleanUsername || "visitor";
           let matchedUserId: string | undefined;
 
-          // 3. DB User Account Validation (Prioritized for dynamic admin & user accounts)
-          if (cleanUsername) {
+          // 3. Admin credentials check (Environment variables: hash or plaintext password)
+          const isAdminEnvMatch = adminPassHash
+            ? verifyPassword(password, adminPassHash)
+            : password === adminPass;
+
+          if (isAdminEnvMatch && (!cleanUsername || cleanUsername.toLowerCase() === "admin")) {
+            matchedRole = "admin";
+            matchedUsername = "admin";
+          }
+
+          // 4. DB User Account Validation (for dynamic admin & user accounts)
+          if (!matchedRole && cleanUsername) {
             await dbConnect();
             const user = await User.findOne({
               username: { $regex: new RegExp(`^${cleanUsername.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i") },
             });
             if (user && user.password) {
               if (verifyPassword(password, user.password)) {
-                matchedRole = (user.role as "admin" | "user") || "user";
+                const isAdmin = user.role === "admin" || cleanUsername.toLowerCase() === "admin";
+                matchedRole = isAdmin ? "admin" : "user";
                 matchedUsername = user.username;
                 matchedUserId = user._id.toString();
               }
             }
           }
 
-          // 4. Admin Account Validation Fallback (via env credentials)
-          if (!matchedRole && cleanUsername.toLowerCase() === "admin") {
-            const isMatch = adminPassHash
-              ? verifyPassword(password, adminPassHash)
-              : password === adminPass;
-
-            if (isMatch) {
-              matchedRole = "admin";
-              matchedUsername = "admin";
-            }
-          }
-
-          // 5. Fallback Password Validation (Without username or legacy pass)
+          // 5. Fallback Password Validation (Without username or fallback user pass)
           if (!matchedRole) {
-            if (password === adminPass) {
+            if (isAdminEnvMatch) {
               matchedRole = "admin";
               matchedUsername = "admin";
             } else if (password === userPass) {

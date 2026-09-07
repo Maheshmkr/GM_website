@@ -18,11 +18,38 @@ export const Route = createFileRoute("/api/timeline")({
       GET: async () => {
         try {
           await dbConnect();
-          const milestones = await Timeline.find()
-            .select("-__v")
-            .sort({ memoryDate: 1, date: 1, createdAt: 1 });
+          const milestones = await Timeline.find().select("-__v");
 
-          return new Response(JSON.stringify(milestones), {
+          const sortedMilestones = [...milestones].sort((a: any, b: any) => {
+            const getTimestamp = (item: any) => {
+              const memoryDate = item.memoryDate ? String(item.memoryDate).trim() : "";
+              if (memoryDate) {
+                const t = Date.parse(memoryDate);
+                if (!isNaN(t)) return t;
+              }
+              const dateStr = item.date ? String(item.date).trim() : "";
+              if (dateStr) {
+                if (
+                  dateStr.toLowerCase() === "forever" ||
+                  dateStr.toLowerCase().includes("future") ||
+                  dateStr.toLowerCase().includes("many more")
+                ) {
+                  return 9999999999999;
+                }
+                const t = Date.parse(dateStr);
+                if (!isNaN(t)) return t;
+              }
+              if (item.createdAt) {
+                const t = new Date(item.createdAt).getTime();
+                if (!isNaN(t)) return t;
+              }
+              return 0;
+            };
+
+            return getTimestamp(a) - getTimestamp(b);
+          });
+
+          return new Response(JSON.stringify(sortedMilestones), {
             headers: { "Content-Type": "application/json" },
           });
         } catch (error: any) {
