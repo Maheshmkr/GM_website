@@ -42,27 +42,52 @@ export function Hero() {
         const res = await fetch("/api/media?type=image");
         const payload = await readJsonResponse(res);
         if (!payload.ok) return [];
-        return payload.data ?? [];
+        return Array.isArray(payload.data) ? payload.data : [];
       } catch {
         return [];
       }
     },
+    refetchOnWindowFocus: true,
   });
+
+  const getMediaUrl = useCallback((p: any) => {
+    if (!p) return "";
+    if (p.url && (p.source === "url" || !p.fileId)) return p.url;
+    if (p.fileId) return `/api/media/${p.fileId}`;
+    if (p.url) return p.url;
+    if (p._id) return `/api/media/${p._id}`;
+    return "";
+  }, []);
 
   // Filter ONLY for photos marked "Show in Home Screen" (p.showInHero === true) and shuffle them
   const slides = useMemo<SlideItem[]>(() => {
-    const homePhotos = (serverPhotos || []).filter((p: any) => p.showInHero === true);
+    const homePhotos = (serverPhotos || []).filter(
+      (p: any) =>
+        p.showInHero === true ||
+        p.showInHero === "true" ||
+        p.showInHome === true ||
+        p.showInHome === "true",
+    );
 
     if (homePhotos.length > 0) {
-      const mapped = homePhotos.map((p: any) => ({
-        id: p._id || p.fileId,
-        image: p.source === "url" ? p.url : `/api/media/file/${p.fileId}`,
-        alt: p.title || p.description || "Our Home Memory",
-        title: p.title || "",
-        description: p.description || "",
-        category: p.category || "Special",
-      }));
-      return shuffleList(mapped);
+      const mapped = homePhotos
+        .map((p: any) => {
+          const imgUrl = getMediaUrl(p);
+          if (!imgUrl) return null;
+          return {
+            id: String(p._id || p.fileId),
+            image: imgUrl,
+            alt: p.title || p.description || "Our Home Memory",
+            title: p.title || "",
+            description: p.description || "",
+            category: p.category || "Special",
+          };
+        })
+        .filter(Boolean) as SlideItem[];
+
+      if (mapped.length > 0) {
+        return shuffleList(mapped);
+      }
     }
 
     // Default static hero slides if no photos are selected for Home Screen
@@ -72,7 +97,7 @@ export function Hero() {
       title: "Our Special Moment",
       description: "",
     }));
-  }, [serverPhotos, shuffleSeed]);
+  }, [serverPhotos, shuffleSeed, getMediaUrl]);
 
   // Keep active slide in range
   useEffect(() => {

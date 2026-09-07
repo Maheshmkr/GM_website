@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute } from "@tanstack/react-router";
 import { dbConnect } from "@/lib/db";
-import { MediaItem } from "@/lib/models";
+import { MediaItem, Photo } from "@/lib/models";
 
 export const Route = createFileRoute("/api/media")({
   server: {
@@ -17,9 +17,24 @@ export const Route = createFileRoute("/api/media")({
             filter.type = rawType;
           }
 
-          const items = await MediaItem.find(filter)
+          const items: any[] = await MediaItem.find(filter)
             .select("-__v")
-            .sort({ createdAt: -1 });
+            .sort({ createdAt: -1 })
+            .lean();
+
+          if (!rawType || rawType === "image") {
+            const legacyPhotos = await Photo.find().select("-__v").sort({ createdAt: -1 }).lean();
+            const existingIds = new Set(items.map((it: any) => String(it._id)));
+            for (const lp of legacyPhotos) {
+              if (!existingIds.has(String(lp._id))) {
+                items.push({
+                  ...lp,
+                  type: "image",
+                  source: "upload",
+                });
+              }
+            }
+          }
 
           return new Response(JSON.stringify(items), {
             headers: { "Content-Type": "application/json" },

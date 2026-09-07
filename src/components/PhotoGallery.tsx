@@ -11,6 +11,7 @@ import {
   Link as LinkIcon,
   Edit3,
   Save,
+  Sparkles,
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -235,6 +236,23 @@ export function PhotoGallery() {
     }
   };
 
+  const toggleHomeStatus = async (photo: any) => {
+    if (!photo._id) return;
+    const newStatus = !photo.showInHero;
+    try {
+      const res = await fetch(`/api/media/edit/${photo._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ showInHero: newStatus }),
+      });
+      if (!res.ok) throw new Error("Failed to update home status");
+      toast.success(newStatus ? "Photo added to Home Screen! ✨" : "Photo removed from Home Screen");
+      queryClient.invalidateQueries({ queryKey: ["photos"] });
+    } catch (err: any) {
+      toast.error(`Error: ${err.message}`);
+    }
+  };
+
   const isImgUrl = (url: string) => {
     const cleanUrl = url.toLowerCase().split(/[?#]/)[0];
     return /\.(jpeg|jpg|gif|png|webp)$/.test(cleanUrl) || cleanUrl.startsWith("http");
@@ -291,11 +309,16 @@ export function PhotoGallery() {
                       </p>
                     ) : null}
                   </div>
-                  <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/10">
+                  <div className="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-border/10">
                     <p className="text-[11px] text-muted-foreground font-medium">{p.date}</p>
                     {p.category && (
                       <span className="text-[10px] bg-secondary/80 text-foreground/70 px-2 py-0.5 rounded-full font-medium">
                         {p.category}
+                      </span>
+                    )}
+                    {p.showInHero && (
+                      <span className="text-[10px] bg-primary/20 text-primary border border-primary/30 px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+                        <Sparkles className="size-2.5" /> Home
                       </span>
                     )}
                   </div>
@@ -362,13 +385,26 @@ export function PhotoGallery() {
                   {active.description}
                 </p>
               )}
-              <div className="flex items-center justify-center gap-2.5 mt-2.5">
+              <div className="flex flex-wrap items-center justify-center gap-2.5 mt-2.5">
                 <p className="text-xs text-muted-foreground">{active.date}</p>
                 {active.category && (
                   <span className="text-[11px] bg-secondary/80 text-foreground/80 px-2.5 py-0.5 rounded-full font-medium">
                     {active.category}
                   </span>
                 )}
+                <button
+                  type="button"
+                  onClick={() => toggleHomeStatus(active)}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all border cursor-pointer",
+                    active.showInHero
+                      ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                      : "glass text-muted-foreground hover:text-foreground hover:border-primary/50"
+                  )}
+                >
+                  <Sparkles className="size-3" />
+                  {active.showInHero ? "Featured on Home Screen ✓" : "Show in Home Screen"}
+                </button>
               </div>
             </div>
             <button

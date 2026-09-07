@@ -2,7 +2,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { dbConnect } from "@/lib/db";
-import { MediaItem } from "@/lib/models";
+import { MediaItem, Photo } from "@/lib/models";
 import {
   requireAdmin,
   isValidObjectId,
@@ -46,7 +46,7 @@ export const Route = createFileRoute("/api/media/edit/$id")({
             });
           }
 
-          const existingItem = await MediaItem.findById(id);
+          const existingItem = (await MediaItem.findById(id)) || (await Photo.findById(id));
           if (!existingItem) {
             return new Response(JSON.stringify({ error: "Media item not found" }), {
               status: 404,
@@ -140,11 +140,17 @@ export const Route = createFileRoute("/api/media/edit/$id")({
             }
           }
 
-          const updatedItem = await MediaItem.findByIdAndUpdate(
-            id,
-            { $set: updateData },
-            { new: true }
-          );
+          const updatedItem =
+            (await MediaItem.findByIdAndUpdate(
+              id,
+              { $set: updateData },
+              { new: true }
+            )) ||
+            (await Photo.findByIdAndUpdate(
+              id,
+              { $set: updateData },
+              { new: true }
+            ));
 
           return new Response(JSON.stringify(updatedItem), {
             headers: { "Content-Type": "application/json" },
