@@ -215,12 +215,17 @@ export function Timeline() {
         <div
           ref={scrollRef}
           className="flex gap-6 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory py-4 px-1"
-          style={{ scrollPaddingLeft: "1rem", scrollPaddingRight: "1rem" }}
+          style={{
+            scrollPaddingLeft: "1rem",
+            scrollPaddingRight: "1rem",
+            WebkitOverflowScrolling: "touch",
+          }}
         >
           {milestones.map((m, i) => (
             <div
               key={m._id || m.title + i}
-              className="w-[300px] sm:w-[340px] md:w-[370px] shrink-0 snap-start flex flex-col group"
+              style={{ minWidth: "320px", maxWidth: "340px", width: "340px", flexShrink: 0 }}
+              className="snap-start flex flex-col group shrink-0"
             >
               {/* Node Header on Track */}
               <div className="flex items-center gap-3 mb-5 pl-2">
@@ -247,16 +252,16 @@ export function Timeline() {
               <article
                 onClick={() => setSelectedMilestone(m)}
                 className={cn(
-                  "glass glass-hover rounded-3xl p-5 flex flex-col justify-between flex-1 border transition-all duration-300 cursor-pointer shadow-sm hover:shadow-xl",
+                  "glass glass-hover rounded-3xl p-5 flex flex-col justify-between border transition-all duration-300 cursor-pointer shadow-sm hover:shadow-xl w-full h-[400px]",
                   m.highlight
                     ? "border-primary/40 bg-surface/50 hover:border-primary"
                     : "border-border/80 bg-surface/30 hover:border-border"
                 )}
               >
                 <div>
-                  {/* Fixed Media Size */}
+                  {/* Fixed Media Size (Uniform 160px height across all cards) */}
                   {m.image ? (
-                    <div className="relative h-44 w-full overflow-hidden rounded-2xl bg-black/30 mb-4 group/img">
+                    <div className="relative h-40 w-full overflow-hidden rounded-2xl bg-black/30 mb-4 group/img shrink-0">
                       <img
                         src={m.image}
                         alt={m.title}
@@ -269,7 +274,7 @@ export function Timeline() {
                       </div>
                     </div>
                   ) : m.video ? (
-                    <div className="relative h-44 w-full overflow-hidden rounded-2xl bg-black/40 mb-4 flex items-center justify-center">
+                    <div className="relative h-40 w-full overflow-hidden rounded-2xl bg-black/40 mb-4 flex items-center justify-center shrink-0">
                       <video
                         src={m.video}
                         className="size-full object-cover object-center pointer-events-none"
@@ -281,19 +286,22 @@ export function Timeline() {
                       </span>
                     </div>
                   ) : (
-                    <div className="h-2 w-full mb-2" />
+                    <div className="relative h-40 w-full overflow-hidden rounded-2xl bg-surface-2/30 border border-border/30 mb-4 flex flex-col items-center justify-center gap-1.5 shrink-0 text-muted-foreground/40">
+                      <Sparkles className="size-6 text-primary/30" />
+                      <span className="text-[11px] font-medium text-muted-foreground/60">Milestone Memory</span>
+                    </div>
                   )}
 
-                  <h3 className="text-base sm:text-lg font-bold text-foreground line-clamp-2 leading-snug group-hover:text-primary transition-colors">
+                  <h3 className="text-base font-bold text-foreground line-clamp-2 leading-snug group-hover:text-primary transition-colors">
                     {m.title}
                   </h3>
 
-                  <p className="mt-2 text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                  <p className="mt-2 text-xs text-muted-foreground leading-relaxed line-clamp-3">
                     {m.description}
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between gap-2 mt-4 pt-3 border-t border-border/20 text-xs">
+                <div className="flex items-center justify-between gap-2 mt-4 pt-3 border-t border-border/20 text-xs shrink-0">
                   {m.location ? (
                     <span className="text-muted-foreground flex items-center gap-1 font-medium truncate">
                       <MapPin className="size-3 text-primary shrink-0" />
