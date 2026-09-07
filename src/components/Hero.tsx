@@ -49,9 +49,8 @@ export function Hero() {
     },
   });
 
-  // Filter for photos marked "Show in Home Screen" (p.showInHero === true) and shuffle
+  // Filter ONLY for photos marked "Show in Home Screen" (p.showInHero === true) and shuffle them
   const slides = useMemo<SlideItem[]>(() => {
-    // 1. Photos explicitly marked with "Show in Home Screen" tickbox
     const homePhotos = (serverPhotos || []).filter((p: any) => p.showInHero === true);
 
     if (homePhotos.length > 0) {
@@ -61,37 +60,18 @@ export function Hero() {
         alt: p.title || p.description || "Our Home Memory",
         title: p.title || "",
         description: p.description || "",
-        category: p.category || "Favorites",
+        category: p.category || "Special",
       }));
       return shuffleList(mapped);
     }
 
-    // 2. Fallback if none explicitly ticked for Home Screen: use Favorites category
-    const favoritePhotos = (serverPhotos || []).filter(
-      (p: any) => p.category === "Favorites" || p.favorite === true,
-    );
-
-    if (favoritePhotos.length > 0) {
-      const mapped = favoritePhotos.map((p: any) => ({
-        id: p._id || p.fileId,
-        image: p.source === "url" ? p.url : `/api/media/file/${p.fileId}`,
-        alt: p.title || p.description || "Our Favorite Memory",
-        title: p.title || "",
-        description: p.description || "",
-        category: p.category || "Favorites",
-      }));
-      return shuffleList(mapped);
-    }
-
-    // 3. Fallback to static hero slides if no DB photos yet
-    return shuffleList(
-      heroSlides.map((s) => ({
-        image: s.image,
-        alt: s.alt,
-        title: "Our Special Moment",
-        description: "",
-      })),
-    );
+    // Default static hero slides if no photos are selected for Home Screen
+    return heroSlides.map((s) => ({
+      image: s.image,
+      alt: s.alt,
+      title: "Our Special Moment",
+      description: "",
+    }));
   }, [serverPhotos, shuffleSeed]);
 
   // Keep active slide in range
@@ -223,25 +203,27 @@ export function Hero() {
           
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
 
-          {/* Top Badge: Favorite Memories */}
+          {/* Top Badge: Home Screen */}
           <div className="absolute top-4 left-4 flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-black/40 backdrop-blur-md px-3 py-1 text-xs font-medium text-white/90 border border-white/10 shadow-sm">
               <Sparkles className="size-3 text-primary animate-pulse" />
-              Favorite Memories
+              Home Screen
             </span>
           </div>
 
           {/* Shuffle button top right */}
-          <div className="absolute top-4 right-4 z-10">
-            <button
-              onClick={handleManualShuffle}
-              title="Shuffle favorite photos"
-              aria-label="Shuffle favorite photos"
-              className="grid size-8 place-items-center rounded-full bg-black/40 backdrop-blur-md text-white/80 border border-white/10 shadow-sm transition hover:bg-black/60 hover:text-white hover:scale-105 active:scale-95"
-            >
-              <Shuffle className="size-3.5" />
-            </button>
-          </div>
+          {slides.length > 1 && (
+            <div className="absolute top-4 right-4 z-10">
+              <button
+                onClick={handleManualShuffle}
+                title="Shuffle Home Screen photos"
+                aria-label="Shuffle Home Screen photos"
+                className="grid size-8 place-items-center rounded-full bg-black/40 backdrop-blur-md text-white/80 border border-white/10 shadow-sm transition hover:bg-black/60 hover:text-white hover:scale-105 active:scale-95"
+              >
+                <Shuffle className="size-3.5" />
+              </button>
+            </div>
+          )}
 
           {/* Left / Right arrows on hover */}
           {slides.length > 1 && (
