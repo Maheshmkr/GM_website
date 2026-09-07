@@ -12,6 +12,7 @@ const PhotoSchema = new Schema(
     fileId: { type: Schema.Types.ObjectId, required: true }, // GridFS file ID
     category: { type: String, default: "Favorites" },
     favorite: { type: Boolean, default: false },
+    showInHero: { type: Boolean, default: false }, // Show on home screen hero
   },
   { timestamps: true },
 );
@@ -88,6 +89,7 @@ const MediaItemSchema = new Schema(
     url: { type: String }, // For URL-based songs
     category: { type: String, default: "Favorites" }, // For photo categories
     favorite: { type: Boolean, default: false }, // For photo/video favorite highlights
+    showInHero: { type: Boolean, default: false }, // Show on home screen hero
     memoryDate: { type: String }, // User manually selected date (YYYY-MM-DD)
     description: { type: String }, // For description
     duration: { type: String }, // For songs/videos duration

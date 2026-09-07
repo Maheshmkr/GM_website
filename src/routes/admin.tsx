@@ -232,6 +232,7 @@ function PhotosManager({
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("Favorites");
   const [favorite, setFavorite] = useState(false);
+  const [showInHero, setShowInHero] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [editingPhoto, setEditingPhoto] = useState<any | null>(null);
@@ -316,6 +317,7 @@ function PhotosManager({
         description: description.trim(),
         category,
         favorite,
+        showInHero,
         onProgress: (pct) => setUploadProgress(30 + Math.round(pct * 0.7)),
       });
 
@@ -326,6 +328,7 @@ function PhotosManager({
       setDescription("");
       setCategory("Favorites");
       setFavorite(false);
+      setShowInHero(false);
       const fileInput = document.getElementById("photo-file") as HTMLInputElement;
       if (fileInput) fileInput.value = "";
 
@@ -457,7 +460,7 @@ function PhotosManager({
               className="w-full text-sm bg-surface/50 border border-border rounded-xl p-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary resize-none"
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-semibold text-muted-foreground mb-1">
                 Category
@@ -474,7 +477,7 @@ function PhotosManager({
                 <option value="Special">Special</option>
               </select>
             </div>
-            <div className="flex items-center justify-center gap-2 border border-border bg-surface/30 rounded-xl px-3 mt-5">
+            <div className="flex items-center justify-center gap-2 border border-border bg-surface/30 rounded-xl px-3 py-3 sm:mt-5">
               <input
                 type="checkbox"
                 id="photo-fav"
@@ -488,6 +491,21 @@ function PhotosManager({
               >
                 <Heart className="size-3 text-primary" fill={favorite ? "currentColor" : "none"} />{" "}
                 Favorite
+              </label>
+            </div>
+            <div className="flex items-center justify-center gap-2 border border-border bg-surface/30 rounded-xl px-3 py-3 sm:mt-5">
+              <input
+                type="checkbox"
+                id="photo-show-hero"
+                checked={showInHero}
+                onChange={(e) => setShowInHero(e.target.checked)}
+                className="rounded accent-primary size-4"
+              />
+              <label
+                htmlFor="photo-show-hero"
+                className="text-xs font-semibold text-muted-foreground select-none cursor-pointer flex items-center gap-1"
+              >
+                <Sparkles className="size-3 text-primary" /> Show in Home Screen
               </label>
             </div>
           </div>
@@ -552,6 +570,11 @@ function PhotosManager({
                     <span className="text-[10px] bg-secondary px-2 py-0.5 rounded-full text-foreground/80 font-medium">
                       {p.category}
                     </span>
+                    {p.showInHero && (
+                      <span className="text-[10px] bg-primary/20 text-primary border border-primary/30 px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+                        <Sparkles className="size-2.5" /> Home Screen
+                      </span>
+                    )}
                     <span className="text-[10px] bg-secondary/40 px-2 py-0.5 rounded-full text-muted-foreground">
                       {(p.fileSize / 1024).toFixed(0)} KB
                     </span>
@@ -568,6 +591,7 @@ function PhotosManager({
                         category: p.category || "Favorites",
                         memoryDate: p.memoryDate ? p.memoryDate.split("T")[0] : new Date().toISOString().split("T")[0],
                         favorite: p.favorite || false,
+                        showInHero: p.showInHero || false,
                         fileId: p.fileId,
                       })
                     }
@@ -637,6 +661,7 @@ function PhotosManager({
                       category: editingPhoto.category,
                       memoryDate: editingPhoto.memoryDate,
                       favorite: editingPhoto.favorite,
+                      showInHero: editingPhoto.showInHero,
                     }),
                   });
                   const data = await res.json();
@@ -716,26 +741,47 @@ function PhotosManager({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 border border-border bg-surface/30 rounded-xl px-3 py-2.5">
-                <input
-                  type="checkbox"
-                  id="edit-photo-fav"
-                  checked={editingPhoto.favorite}
-                  onChange={(e) =>
-                    setEditingPhoto({ ...editingPhoto, favorite: e.target.checked })
-                  }
-                  className="rounded accent-primary size-4"
-                />
-                <label
-                  htmlFor="edit-photo-fav"
-                  className="text-xs font-semibold text-muted-foreground select-none cursor-pointer flex items-center gap-1"
-                >
-                  <Heart
-                    className="size-3.5 text-primary"
-                    fill={editingPhoto.favorite ? "currentColor" : "none"}
-                  />{" "}
-                  Mark as Favorite
-                </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="flex items-center gap-2 border border-border bg-surface/30 rounded-xl px-3 py-2.5">
+                  <input
+                    type="checkbox"
+                    id="edit-photo-fav"
+                    checked={editingPhoto.favorite}
+                    onChange={(e) =>
+                      setEditingPhoto({ ...editingPhoto, favorite: e.target.checked })
+                    }
+                    className="rounded accent-primary size-4"
+                  />
+                  <label
+                    htmlFor="edit-photo-fav"
+                    className="text-xs font-semibold text-muted-foreground select-none cursor-pointer flex items-center gap-1"
+                  >
+                    <Heart
+                      className="size-3.5 text-primary"
+                      fill={editingPhoto.favorite ? "currentColor" : "none"}
+                    />{" "}
+                    Mark as Favorite
+                  </label>
+                </div>
+
+                <div className="flex items-center gap-2 border border-border bg-surface/30 rounded-xl px-3 py-2.5">
+                  <input
+                    type="checkbox"
+                    id="edit-photo-show-hero"
+                    checked={editingPhoto.showInHero || false}
+                    onChange={(e) =>
+                      setEditingPhoto({ ...editingPhoto, showInHero: e.target.checked })
+                    }
+                    className="rounded accent-primary size-4"
+                  />
+                  <label
+                    htmlFor="edit-photo-show-hero"
+                    className="text-xs font-semibold text-muted-foreground select-none cursor-pointer flex items-center gap-1"
+                  >
+                    <Sparkles className="size-3.5 text-primary" />
+                    Show in Home Screen
+                  </label>
+                </div>
               </div>
 
               <div className="flex gap-2 pt-2">

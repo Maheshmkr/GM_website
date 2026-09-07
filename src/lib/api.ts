@@ -130,6 +130,7 @@ export async function uploadMediaInChunks({
   duration,
   category,
   favorite,
+  showInHero,
   memoryDate,
   startTime,
   endTime,
@@ -144,6 +145,7 @@ export async function uploadMediaInChunks({
   duration?: string;
   category?: string;
   favorite?: boolean;
+  showInHero?: boolean;
   memoryDate?: string;
   startTime?: string;
   endTime?: string;
@@ -175,6 +177,7 @@ export async function uploadMediaInChunks({
     if (duration) formData.append("duration", duration);
     if (category) formData.append("category", category);
     if (favorite !== undefined) formData.append("favorite", String(favorite));
+    if (showInHero !== undefined) formData.append("showInHero", String(showInHero));
     if (memoryDate) formData.append("memoryDate", memoryDate);
     if (startTime) formData.append("startTime", startTime);
     if (endTime) formData.append("endTime", endTime);

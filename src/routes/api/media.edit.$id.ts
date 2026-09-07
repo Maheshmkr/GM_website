@@ -20,6 +20,7 @@ const EditMediaSchema = z.object({
   memoryDate: z.string().max(20).optional(),
   category: z.string().max(50).optional(),
   favorite: z.boolean().optional(),
+  showInHero: z.boolean().optional(),
   startTime: z.string().max(20).optional(),
   endTime: z.string().max(20).optional(),
 });
@@ -76,6 +77,7 @@ export const Route = createFileRoute("/api/media/edit/$id")({
           if (parsed.data.memoryDate !== undefined) updateData.memoryDate = sanitizePlainText(parsed.data.memoryDate, 20);
           if (parsed.data.category !== undefined) updateData.category = sanitizePlainText(parsed.data.category, 50);
           if (parsed.data.favorite !== undefined) updateData.favorite = parsed.data.favorite;
+          if (parsed.data.showInHero !== undefined) updateData.showInHero = parsed.data.showInHero;
 
           // If updating Spotify URL
           if (parsed.data.url !== undefined) {

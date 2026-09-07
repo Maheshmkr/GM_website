@@ -39,6 +39,7 @@ export const Route = createFileRoute("/api/media/upload")({
           const rawDescription = formData.get("description") as string | null;
           const rawMemoryDate = formData.get("memoryDate") as string | null;
           const favorite = formData.get("favorite") === "true";
+          const showInHero = formData.get("showInHero") === "true";
 
           if (!file || !(file instanceof File)) {
             return new Response(JSON.stringify({ error: "No file uploaded" }), {
@@ -190,6 +191,7 @@ export const Route = createFileRoute("/api/media/upload")({
             endTime,
             category,
             favorite,
+            showInHero,
             memoryDate,
           });
           await mediaItem.save();

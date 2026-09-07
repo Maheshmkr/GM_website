@@ -80,6 +80,7 @@ export function PhotoGallery() {
           : "",
         rawDate: displayDate.split("T")[0],
         favorite: p.favorite || false,
+        showInHero: p.showInHero || false,
       };
     });
   }, [serverPhotos]);

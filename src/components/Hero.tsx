@@ -49,8 +49,24 @@ export function Hero() {
     },
   });
 
-  // Filter for Favorites category and shuffle
+  // Filter for photos marked "Show in Home Screen" (p.showInHero === true) and shuffle
   const slides = useMemo<SlideItem[]>(() => {
+    // 1. Photos explicitly marked with "Show in Home Screen" tickbox
+    const homePhotos = (serverPhotos || []).filter((p: any) => p.showInHero === true);
+
+    if (homePhotos.length > 0) {
+      const mapped = homePhotos.map((p: any) => ({
+        id: p._id || p.fileId,
+        image: p.source === "url" ? p.url : `/api/media/file/${p.fileId}`,
+        alt: p.title || p.description || "Our Home Memory",
+        title: p.title || "",
+        description: p.description || "",
+        category: p.category || "Favorites",
+      }));
+      return shuffleList(mapped);
+    }
+
+    // 2. Fallback if none explicitly ticked for Home Screen: use Favorites category
     const favoritePhotos = (serverPhotos || []).filter(
       (p: any) => p.category === "Favorites" || p.favorite === true,
     );
@@ -67,20 +83,7 @@ export function Hero() {
       return shuffleList(mapped);
     }
 
-    // Fallback if all photos exist but none explicitly favorite
-    if (serverPhotos.length > 0) {
-      const mapped = serverPhotos.map((p: any) => ({
-        id: p._id || p.fileId,
-        image: p.source === "url" ? p.url : `/api/media/file/${p.fileId}`,
-        alt: p.title || p.description || "Our Memory",
-        title: p.title || "",
-        description: p.description || "",
-        category: p.category || "Special",
-      }));
-      return shuffleList(mapped);
-    }
-
-    // Fallback to static hero slides if no DB photos yet
+    // 3. Fallback to static hero slides if no DB photos yet
     return shuffleList(
       heroSlides.map((s) => ({
         image: s.image,
